@@ -99,8 +99,69 @@ namespace TrailBlog.Services
 
             await _context.SaveChangesAsync();
 
-            return await CreateAuthResponse(true, user);
+            var userWithRoles = await _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Id == user.Id);
+
+            if (userWithRoles == null)
+            {
+                return new AuthResultDto
+                {
+                    Success = false,
+                    Message = "User not found after registration."
+                };
+            }
+
+            return await CreateAuthResponse(true, userWithRoles);
         }
+
+        public async Task<bool> LogoutAsync(Guid Id)
+        {
+            var user = await _context.Users.FindAsync(Id);
+
+            if (user is null)
+                return false;
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpiryTime = null;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+
+        } 
+
+        public async Task<AuthResultDto> RefreshTokenAsync(RefreshTokenRequestDto request)
+        {
+            var user = await ValidateRefreshTokenAsync(request.Id, request.RefreshToken);
+
+            if (user is null)
+            {
+                return new AuthResultDto
+                {
+                    Success = false,
+                    Message = "Invalid or expired refresh token."
+                };
+            }
+
+            var userWithRoles = await _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Id == user.Id);
+
+            if (userWithRoles is null)
+            {
+                return new AuthResultDto
+                {
+                    Success = false,
+                    Message = "User not found."
+                };
+            }
+
+            return await CreateAuthResponse(true, userWithRoles);
+        }
+
 
         public async Task<bool> AssignRoleAsync(AssignRoleDto request)
         {
@@ -130,6 +191,18 @@ namespace TrailBlog.Services
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        private async Task<User?> ValidateRefreshTokenAsync(Guid userId, string refreshToken)
+        {
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime < DateTime.UtcNow)
+            {
+                return null;
+            }
+
+            return user;
         }
 
         private async Task<AuthResultDto> CreateAuthResponse(bool status, User user)

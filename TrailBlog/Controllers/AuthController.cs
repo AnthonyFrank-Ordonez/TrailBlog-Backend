@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TrailBlog.Models;
 using TrailBlog.Services;
 
@@ -42,6 +43,35 @@ namespace TrailBlog.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<AuthResultDto>> RefreshToken(RefreshTokenRequestDto request)
+        {
+            var result = await _authService.RefreshTokenAsync(request);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> LogoutUser()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+                return Unauthorized();
+
+            var result = await _authService.LogoutAsync(Guid.Parse(userId));
+
+            if (!result)
+                return BadRequest("Logout failed");
+
+            return Ok("Logout Successfully!");
+        }
+
 
         [HttpPost("assign-role")]
         [Authorize(Roles = "Admin")]
