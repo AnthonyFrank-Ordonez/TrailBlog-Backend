@@ -10,6 +10,8 @@
         public DateTime? RefreshTokenExpiryTime { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public bool IsRevoked { get; set; } = false;
+        public DateTime? RevokedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<Post> Posts { get; set; } = new List<Post>();

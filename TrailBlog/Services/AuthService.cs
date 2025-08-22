@@ -38,6 +38,15 @@ namespace TrailBlog.Services
                 };
             }
 
+            if (user.IsRevoked)
+            {
+                return new AuthResultDto
+                {
+                    Success = false,
+                    Message = "User account is revoked."
+                };
+            }
+
             return await CreateAuthResponse(true, user);
         }
 

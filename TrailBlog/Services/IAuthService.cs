@@ -8,5 +8,6 @@ namespace TrailBlog.Services
         Task<AuthResultDto> RegisterAsync(RegisterDto request);
         Task<AuthResultDto> LoginAsync(LoginDto request);
         Task<bool> AssignRoleAsync(AssignRoleDto request);
+
     }
 }
