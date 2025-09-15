@@ -14,6 +14,7 @@
         public DateTime? RevokedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public ICollection<UserCommunity> UserCommunities { get; set; } = new List<UserCommunity>();
         public ICollection<Post> Posts { get; set; } = new List<Post>();
     }
 }

@@ -12,7 +12,9 @@ namespace TrailBlog.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<Community> Communinity { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<UserCommunity> UserCommunity { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -60,6 +62,29 @@ namespace TrailBlog.Data
                     .WithMany(e => e.Posts)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Community>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Name).IsUnique();
+                entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.Description).HasMaxLength(500);
+            });
+
+            modelBuilder.Entity<UserCommunity>(entity =>
+            {
+                entity.HasKey(uc => new { uc.UserId, uc.CommunityId });
+
+                entity.HasOne(ur => ur.User)
+                    .WithMany(u => u.UserCommunities)
+                    .HasForeignKey(ur => ur.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(cy => cy.Community)
+                    .WithMany(c => c.UserCommunities)
+                    .HasForeignKey(cy => cy.CommunityId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<Role>().HasData(
