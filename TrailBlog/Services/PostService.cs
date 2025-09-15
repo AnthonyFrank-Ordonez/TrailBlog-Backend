@@ -34,6 +34,29 @@ namespace TrailBlog.Services
                 .ToListAsync();
         }
 
+        public async Task<List<CommunityBlogsDto>> GetAllCommunityBlogsAsync()
+        {
+            var communityBlogs = await _context.Communinity
+                .Include(c => c.Posts.OrderByDescending(p => p.CreatedAt).Take(5))
+                .Select(c => new CommunityBlogsDto
+                {
+                    CommunityName = c.Name,
+                    CommunityId = c.Id,
+                    Posts = c.Posts.Select(p => new PostDto
+                    {
+                        Title = p.Title,
+                        Content = p.Content,
+                        Author = p.Author,
+                        CommunityId = c.Id,
+                        CommunityName = c.Name
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return communityBlogs;
+                
+        }
+
         public async Task<PostResponseDto?> GetPostAsync(Guid id)
         {
             var post = await _context.Posts
@@ -72,6 +95,7 @@ namespace TrailBlog.Services
             newPost.UpdatedAt = DateTime.UtcNow;
             newPost.Slug = post.Title.ToLower().Replace(" ", "-");
             newPost.UserId = userId;
+            newPost.CommunityId = post.CommunityId;
 
             _context.Posts.Add(newPost);
             await _context.SaveChangesAsync();

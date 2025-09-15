@@ -49,6 +49,20 @@ namespace TrailBlog.Controllers
             return Ok(post);
         }
 
+        [HttpGet("communities")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<CommunityBlogsDto>>> GetAllCommunityBlogs()
+        {
+            var communityBlogs = await _postService.GetAllCommunityBlogsAsync();
+
+            if (communityBlogs is null || !communityBlogs.Any())
+            {
+                return NotFound("No Community Blogs Found!");
+            }
+
+            return Ok(communityBlogs);
+        }
+
         [HttpPost]
         [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<PostResponseDto?>> CreatePost(PostDto post)
