@@ -1,4 +1,6 @@
-﻿namespace TrailBlog.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TrailBlog.Entities
 {
     public class Post
     {
@@ -17,5 +19,8 @@
         public Community Community { get; set; } = null!;
 
         public ICollection<Like> Likes { get; set; } = new List<Like>();
+
+        [NotMapped]
+        public int TotalLikes => Likes?.Count ?? 0;
     }
 }

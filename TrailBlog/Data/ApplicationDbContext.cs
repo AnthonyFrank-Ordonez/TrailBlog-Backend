@@ -65,6 +65,8 @@ namespace TrailBlog.Data
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
+            modelBuilder.Entity<Post>().Ignore(p => p.TotalLikes);
+
             modelBuilder.Entity<Community>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -87,6 +89,8 @@ namespace TrailBlog.Data
                     .HasForeignKey(cy => cy.CommunityId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+
+            
 
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "Admin", Description = "Administrator with full access" },
