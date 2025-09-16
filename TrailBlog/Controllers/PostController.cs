@@ -49,20 +49,6 @@ namespace TrailBlog.Controllers
             return Ok(post);
         }
 
-        [HttpGet("communities")]
-        [AllowAnonymous]
-        public async Task<ActionResult<List<CommunityBlogsDto>>> GetAllCommunityBlogs()
-        {
-            var communityBlogs = await _postService.GetAllCommunityBlogsAsync();
-
-            if (communityBlogs is null || !communityBlogs.Any())
-            {
-                return NotFound("No Community Blogs Found!");
-            }
-
-            return Ok(communityBlogs);
-        }
-
         [HttpPost]
         [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<PostResponseDto?>> CreatePost(PostDto post)
@@ -106,6 +92,40 @@ namespace TrailBlog.Controllers
                 return NotFound("Post not found");
             }
             return NoContent();
+        }
+
+        [HttpGet("communities")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<CommunityBlogsDto>>> GetAllCommunityBlogs()
+        {
+            var communityBlogs = await _postService.GetAllCommunityBlogsAsync();
+
+            if (communityBlogs is null || !communityBlogs.Any())
+            {
+                return NotFound("No Community Blogs Found!");
+            }
+
+            return Ok(communityBlogs);
+        }
+
+        [HttpGet("recent")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<PostResponseDto>>> GetRecentPosts([FromQuery] int page, [FromQuery] int pageSize)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                page = 1;
+                pageSize = 10;
+            }
+
+            var recentPosts = await _postService.GetRecentPostsAsync(page, pageSize);
+
+            if (recentPosts is null || !recentPosts.Any())
+            {
+                return NotFound("No Recent Posts Found!");
+            }
+
+            return Ok(recentPosts);
         }
 
         private Guid GetCurrentUserId()

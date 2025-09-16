@@ -20,6 +20,7 @@ namespace TrailBlog.Services
         {
             return await _context.Posts
                 .Include(p => p.User)
+                .Include(p => p.Community)
                 .OrderByDescending(p => p.CreatedAt)
                 .Select(p => new PostResponseDto
                 {
@@ -29,38 +30,18 @@ namespace TrailBlog.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
-                    Username = p.User.Username
+                    Username = p.User.Username,
+                    CommunityName = p.Community.Name,
+                    CommunityId = p.CommunityId,
                 })
                 .ToListAsync();
-        }
-
-        public async Task<List<CommunityBlogsDto>> GetAllCommunityBlogsAsync()
-        {
-            var communityBlogs = await _context.Communinity
-                .Include(c => c.Posts.OrderByDescending(p => p.CreatedAt).Take(5))
-                .Select(c => new CommunityBlogsDto
-                {
-                    CommunityName = c.Name,
-                    CommunityId = c.Id,
-                    Posts = c.Posts.Select(p => new PostDto
-                    {
-                        Title = p.Title,
-                        Content = p.Content,
-                        Author = p.Author,
-                        CommunityId = c.Id,
-                        CommunityName = c.Name
-                    }).ToList()
-                })
-                .ToListAsync();
-
-            return communityBlogs;
-                
         }
 
         public async Task<PostResponseDto?> GetPostAsync(Guid id)
         {
             var post = await _context.Posts
                 .Include(p => p.User)
+                .Include(p => p.Community)
                 .Select(p => new PostResponseDto
                 {
                     Id = p.Id,
@@ -69,7 +50,9 @@ namespace TrailBlog.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
-                    Username = p.User.Username
+                    Username = p.User.Username,
+                    CommunityName = p.Community.Name,
+                    CommunityId = p.CommunityId,
                 })
                 .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -111,7 +94,9 @@ namespace TrailBlog.Services
                 Author = newPost.Author,
                 Slug = newPost.Slug,
                 CreatedAt = newPost.CreatedAt,
-                Username = user?.Username ?? string.Empty
+                Username = user?.Username ?? string.Empty,
+                CommunityName = post.CommunityName,
+                CommunityId = newPost.CommunityId,
             };
         }
 
@@ -165,6 +150,54 @@ namespace TrailBlog.Services
             await _context.SaveChangesAsync();
 
             return post;
+        }
+
+        public async Task<List<CommunityBlogsDto>> GetAllCommunityBlogsAsync()
+        {
+            var communityBlogs = await _context.Communinity
+                .Include(c => c.Posts.OrderByDescending(p => p.CreatedAt).Take(5))
+                .Select(c => new CommunityBlogsDto
+                {
+                    CommunityName = c.Name,
+                    CommunityId = c.Id,
+                    Posts = c.Posts.Select(p => new PostDto
+                    {
+                        Title = p.Title,
+                        Content = p.Content,
+                        Author = p.Author,
+                        CommunityId = c.Id,
+                        CommunityName = c.Name
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return communityBlogs;
+
+        }
+
+        public async Task<List<PostResponseDto>> GetRecentPostsAsync(int page, int pageSize)
+        {
+            var posts = await _context.Posts
+                .Include(p => p.User)
+                .Include(p => p.Community)
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new PostResponseDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Author = p.Author,
+                    Slug = p.Slug,
+                    CreatedAt = p.CreatedAt,
+                    Username = p.User.Username,
+                    CommunityName = p.Community.Name,
+                    CommunityId = p.CommunityId,
+                })
+                .ToListAsync();
+
+            return posts;
         }
     }
 
