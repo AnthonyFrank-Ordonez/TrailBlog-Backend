@@ -96,7 +96,7 @@ namespace TrailBlog.Controllers
 
         [HttpGet("communities")]
         [AllowAnonymous]
-        public async Task<ActionResult<List<CommunityBlogsDto>>> GetAllCommunityBlogs()
+        public async Task<ActionResult<List<CommunityBlogsResponseDto>>> GetAllCommunityBlogs()
         {
             var communityBlogs = await _postService.GetAllCommunityBlogsAsync();
 
