@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TrailBlog.Data;
@@ -11,9 +12,11 @@ using TrailBlog.Data;
 namespace TrailBlog.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250916063608_AddLikesTable")]
+    partial class AddLikesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,7 +51,7 @@ namespace TrailBlog.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Communities");
+                    b.ToTable("Communinity");
                 });
 
             modelBuilder.Entity("TrailBlog.Entities.Like", b =>
@@ -225,7 +228,7 @@ namespace TrailBlog.Migrations
 
                     b.HasIndex("CommunityId");
 
-                    b.ToTable("UserCommunities");
+                    b.ToTable("UserCommunity");
                 });
 
             modelBuilder.Entity("TrailBlog.Entities.UserRole", b =>

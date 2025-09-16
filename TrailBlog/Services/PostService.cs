@@ -154,7 +154,7 @@ namespace TrailBlog.Services
 
         public async Task<List<CommunityBlogsDto>> GetAllCommunityBlogsAsync()
         {
-            var communityBlogs = await _context.Communinity
+            var communityBlogs = await _context.Communities
                 .Include(c => c.Posts.OrderByDescending(p => p.CreatedAt).Take(5))
                 .Select(c => new CommunityBlogsDto
                 {

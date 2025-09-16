@@ -12,10 +12,11 @@ namespace TrailBlog.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
-        public DbSet<Community> Communinity { get; set; }
+        public DbSet<Community> Communities { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
-        public DbSet<UserCommunity> UserCommunity { get; set; }
-
+        public DbSet<UserCommunity> UserCommunities { get; set; }
+        public DbSet<Like> Likes { get; set; }
+            
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

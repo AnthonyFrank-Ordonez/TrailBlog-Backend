@@ -15,5 +15,7 @@
 
         public Guid CommunityId { get; set; }
         public Community Community { get; set; } = null!;
+
+        public ICollection<Like> Likes { get; set; } = new List<Like>();
     }
 }
