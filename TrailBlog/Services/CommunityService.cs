@@ -146,6 +146,75 @@ namespace TrailBlog.Services
             };
         }
 
+        public async Task<OperationResultDto> UpdateCommunityAsync(Guid communityId, Guid userId, CommunityDto community, bool isAdmin = false)
+        {
+            var existingCommunity = await _context.Communities.FindAsync(communityId);
+
+            if (existingCommunity is null)
+            {
+                return new OperationResultDto
+                {
+                    Success = false,
+                    Message = "Community Not Found!"
+                };
+            }
+
+            if (existingCommunity.OwnerId != userId || !isAdmin)
+            {
+                return new OperationResultDto
+                {
+                    Success = false,
+                    Message = "You are not authorized to update this community."
+                };
+            }
+
+            existingCommunity.Name = string.IsNullOrEmpty(community.Name) ? existingCommunity.Name : community.Name;
+            existingCommunity.Description = string.IsNullOrEmpty(community.Name) ? existingCommunity.Description : community.Description;
+            existingCommunity.UpdatedAt = DateTime.UtcNow;
+
+            _context.Communities.Update(existingCommunity);
+            await _context.SaveChangesAsync();
+
+            return new OperationResultDto
+            {
+                Success = true,
+                Message = "Community updated successfully."
+            };
+
+        }
+
+        public async Task<OperationResultDto> DeleteCommunityAsync(Guid communityId, Guid userId, bool isAdmin = false)
+        {
+            var existingCommunity = await _context.Communities.FindAsync(communityId);
+
+            if (existingCommunity is null)
+            {
+                return new OperationResultDto
+                {
+                    Success = false,
+                    Message = "Community Not Found!"
+                };
+            }
+
+            if (existingCommunity.OwnerId != userId || !isAdmin)
+            {
+                return new OperationResultDto
+                {
+                    Success = false,
+                    Message = "You are not authorized to delete this community."
+                };
+            }
+
+            _context.Communities.Remove(existingCommunity);
+            await _context.SaveChangesAsync();
+
+            return new OperationResultDto
+            {
+                Success = true,
+                Message = "Community deleted successfully."
+            };
+        }
+
         public async Task<IEnumerable<CommunityResponseDto>> SearchCommunitiesAsync(string query)
         {
             var communities = await _context.Communities

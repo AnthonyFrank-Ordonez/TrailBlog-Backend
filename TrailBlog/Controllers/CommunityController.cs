@@ -113,6 +113,42 @@ namespace TrailBlog.Controllers
             return CreatedAtAction(nameof(GetCommunity), new { id = createdCommunity.Id }, createdCommunity);
         }
 
+        [HttpPut("id")]
+        [Authorize(Roles = "Admin, User")]
+        public async Task<ActionResult<OperationResultDto>> UpdateCommunity(Guid id, CommunityDto community)
+        {
+            var userId = GetCurrentUserId();
+            var isAdmin = User.IsInRole("Admin");
+
+            var result = await _communityService.UpdateCommunityAsync(id, userId, community, isAdmin);
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin, User")]
+        public async Task<ActionResult<OperationResultDto>> DeleteCommunity(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var isAdmin = User.IsInRole("Admin");
+
+            var result = await _communityService.DeleteCommunityAsync(id, userId, isAdmin);
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+
+
         [HttpPost("{id}/join")]
         [Authorize(Roles = "User, Admin")]
         public async Task<IActionResult> JoinCommunity(Guid id)
