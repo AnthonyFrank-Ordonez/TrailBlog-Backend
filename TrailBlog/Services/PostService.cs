@@ -100,13 +100,26 @@ namespace TrailBlog.Services
             };
         }
 
-        public async Task<Post?> UpdatePostAsync(Guid id, PostDto post, Guid userId)
+        public async Task<OperationResultDto> UpdatePostAsync(Guid id, Guid userId, PostDto post, bool isAdmin)
         {
             var existingPost = await _context.Posts.FindAsync(id);
 
-            if (existingPost is null || existingPost.UserId != userId)
+            if (existingPost is null)
             {
-                return null;
+                return new OperationResultDto
+                {
+                    Success = false,
+                    Message = "Post not found!"
+                };
+            }
+
+            if (existingPost.UserId != userId || !isAdmin)
+            {
+                return new OperationResultDto
+                {
+                    Success = false,
+                    Message = "You are not authorized to update this post."
+                };
             }
 
             existingPost.Title = string.IsNullOrEmpty(post.Title)
@@ -129,27 +142,43 @@ namespace TrailBlog.Services
             _context.Posts.Update(existingPost);
             await _context.SaveChangesAsync();
 
-            return existingPost;
+            return new OperationResultDto
+            {
+                Success = true,
+                Message = "Post updated successfully"
+            };
         }
 
-        public async Task<Post?> DeletePostAsync(Guid id, Guid userId, bool IsAdmin = false)
+        public async Task<OperationResultDto> DeletePostAsync(Guid id, Guid userId, bool isAdmin)
         {
             var post = await _context.Posts.FindAsync(id);
 
             if (post is null)
             {
-                return null;
+                return new OperationResultDto
+                {
+                    Success = false,
+                    Message = "Post not found!"
+                };
             }
 
-            if (post.UserId != userId && !IsAdmin)
+            if (post.UserId != userId && !isAdmin)
             {
-                return null; // User is not authorized to delete this post
+                return new OperationResultDto
+                {
+                    Success = false,
+                    Message = "You are not authorized to delete this post"
+                };
             }
 
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
 
-            return post;
+            return new OperationResultDto
+            {
+                Success = true,
+                Message = "Post deleted successfully"
+            };
         }
 
         public async Task<List<CommunityResponseDto>> GetAllCommunityBlogsAsync()  

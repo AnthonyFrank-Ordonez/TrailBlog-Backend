@@ -66,32 +66,33 @@ namespace TrailBlog.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,User")]
-        public async Task<IActionResult> UpdatePost(Guid id, PostDto post)
+        public async Task<ActionResult<OperationResultDto>> UpdatePost(Guid id, PostDto post)
         {
             var userId = GetCurrentUserId();
-            var updatedPost = await _postService.UpdatePostAsync(id, post, userId);
+            var isAdmin = User.IsInRole("Admin");
+            var result = await _postService.UpdatePostAsync(id, userId, post, isAdmin);
 
-            if (updatedPost is null)
+            if (!result.Success)
             {
-                return NotFound("Post not Found");
+                return BadRequest(result);
             }
 
-            return NoContent();
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin,User")]
-        public async Task<IActionResult> DeletePost(Guid id)
+        public async Task<ActionResult<OperationResultDto>> DeletePost(Guid id)
         {
             var userId = GetCurrentUserId();
             var isAdmin = User.IsInRole("Admin");
 
             var result = await _postService.DeletePostAsync(id, userId, isAdmin);
-            if (result is null)
+            if (!result.Success)
             {
-                return NotFound("Post not found");
+                return BadRequest(result);
             }
-            return NoContent();
+            return Ok(result);
         }
 
         [HttpGet("communities")]
