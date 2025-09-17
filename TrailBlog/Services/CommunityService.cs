@@ -146,7 +146,7 @@ namespace TrailBlog.Services
             };
         }
 
-        public async Task<OperationResultDto> UpdateCommunityAsync(Guid communityId, Guid userId, CommunityDto community, bool isAdmin = false)
+        public async Task<OperationResultDto> UpdateCommunityAsync(Guid communityId, Guid userId, CommunityDto community, bool isAdmin)
         {
             var existingCommunity = await _context.Communities.FindAsync(communityId);
 
@@ -183,7 +183,7 @@ namespace TrailBlog.Services
 
         }
 
-        public async Task<OperationResultDto> DeleteCommunityAsync(Guid communityId, Guid userId, bool isAdmin = false)
+        public async Task<OperationResultDto> DeleteCommunityAsync(Guid communityId, Guid userId, bool isAdmin)
         {
             var existingCommunity = await _context.Communities.FindAsync(communityId);
 
