@@ -9,8 +9,10 @@ namespace TrailBlog.Services
         Task<CommunityResponseDto?> GetCommunityAsync(Guid id);
         Task<IEnumerable<CommunityResponseDto>> GetUserCommunitiesAsync(Guid userId);
         Task<IEnumerable<UserResponseDto>> GetCommunityMembersAsync(Guid communityId); 
-        Task<CommunityResponseDto?> CreateCommunity(CommunityDto community, Guid userId);
-        Task<IEnumerable<CommunityResponseDto>> SearchCommunities(string query);
+        Task<CommunityResponseDto?> CreateCommunityAsync(CommunityDto community, Guid userId);
+        Task<IEnumerable<CommunityResponseDto>> SearchCommunitiesAsync(string query);
+        Task<OperationResultDto> JoinCommunityAsync(Guid communityId, Guid userId);
+        Task<OperationResultDto> LeaveCommunityAsync(Guid communityId, Guid userId);
     }
 }
         

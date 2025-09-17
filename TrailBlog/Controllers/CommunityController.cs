@@ -87,7 +87,7 @@ namespace TrailBlog.Controllers
                 return BadRequest("Search query cannot be empty!");
             }
 
-            var communities = await _communityService.SearchCommunities(query);
+            var communities = await _communityService.SearchCommunitiesAsync(query);
 
             if (communities is null || !communities.Any())
             {
@@ -103,7 +103,7 @@ namespace TrailBlog.Controllers
         {
             var userId = GetCurrentUserId();
 
-            var createdCommunity = await _communityService.CreateCommunity(community, userId);
+            var createdCommunity = await _communityService.CreateCommunityAsync(community, userId);
 
             if (createdCommunity is null)
             {
@@ -111,6 +111,38 @@ namespace TrailBlog.Controllers
             }
 
             return CreatedAtAction(nameof(GetCommunity), new { id = createdCommunity.Id }, createdCommunity);
+        }
+
+        [HttpPost("{id}/join")]
+        [Authorize(Roles = "User, Admin")]
+        public async Task<IActionResult> JoinCommunity(Guid id)
+        {
+            var userId = GetCurrentUserId();
+
+            var result = await _communityService.JoinCommunityAsync(id, userId);
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost("{id}/leave")]
+        [Authorize(Roles = "User, Admin")]
+        public async Task<IActionResult> LeaveCommunity(Guid id)
+        {
+            var userId = GetCurrentUserId();
+
+            var result = await _communityService.LeaveCommunityAsync(id, userId);
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
         }
 
 

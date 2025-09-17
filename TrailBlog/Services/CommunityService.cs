@@ -107,7 +107,7 @@ namespace TrailBlog.Services
             return members;
         }
 
-        public async Task<CommunityResponseDto?> CreateCommunity(CommunityDto community, Guid userId)
+        public async Task<CommunityResponseDto?> CreateCommunityAsync(CommunityDto community, Guid userId)
         {
             if (community is null)
             {
@@ -146,7 +146,7 @@ namespace TrailBlog.Services
             };
         }
 
-        public async Task<IEnumerable<CommunityResponseDto>> SearchCommunities(string query)
+        public async Task<IEnumerable<CommunityResponseDto>> SearchCommunitiesAsync(string query)
         {
             var communities = await _context.Communities
                 .Where(c => c.Name.Contains(query))
@@ -172,6 +172,83 @@ namespace TrailBlog.Services
                 .ToListAsync();
 
             return communities;
+        }
+
+        public async Task<OperationResultDto> JoinCommunityAsync(Guid communityId, Guid userId)
+        {
+            var community = await _context.Communities.FindAsync(communityId);
+            var user = await _context.Users.FindAsync(userId);
+
+            if (community is null)
+            {
+                return new OperationResultDto
+                {
+                    Success = false,
+                    Message = "Community Not Found!"
+                };
+            }
+
+            if (user is null)
+            {
+                return new OperationResultDto
+                {
+                    Success = false,
+                    Message = "User Not Found!"
+                };
+            }
+
+            var existingMember = await _context.UserCommunities
+                .FirstOrDefaultAsync(uc => uc.Community.Id == communityId && uc.UserId == userId);
+
+            if (existingMember is null)
+            {
+                return new OperationResultDto
+                {
+                    Success = false,
+                    Message = "User is already a member of this community."
+                };
+            }
+
+            var userCommunity = new UserCommunity
+            {
+                UserId = userId,
+                CommunityId = communityId,
+                JoinedDate = DateTime.UtcNow,
+            };
+
+            _context.UserCommunities.Add(userCommunity);
+            await _context.SaveChangesAsync();
+
+            return new OperationResultDto
+            {
+                Success = true,
+                Message = "User has successfully joined the community."
+            };
+        }
+
+        public async Task<OperationResultDto> LeaveCommunityAsync(Guid communityId, Guid userId)
+        {
+            var userCommunity = await _context.UserCommunities
+                .FirstOrDefaultAsync(uc => uc.CommunityId == communityId && uc.UserId == userId);
+
+            if (userCommunity is null)
+            {
+                return new OperationResultDto
+                {
+                    Success = false,
+                    Message = "User is not a member of this community."
+                };
+            }
+
+            _context.UserCommunities.Remove(userCommunity);
+            await _context.SaveChangesAsync();
+
+            return new OperationResultDto
+            {
+                Success = true,
+                Message = "User has successfully left the community"
+            };
+
         }
     }
 }
