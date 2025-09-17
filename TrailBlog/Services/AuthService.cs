@@ -212,7 +212,7 @@ namespace TrailBlog.Services
                 Success = status,
                 AccessToken = GenerateAccessToken(user),
                 RefreshToken = await GenerateAndSaveRefreshToken(user),
-                User = new UserInfoDto
+                User = new UserResponseDto
                 {
                     Id = user.Id,
                     Username = user.Username,

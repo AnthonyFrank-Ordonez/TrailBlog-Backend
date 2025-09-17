@@ -15,6 +15,7 @@
 
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<UserCommunity> UserCommunities { get; set; } = new List<UserCommunity>();
+        public ICollection<Community> Communities { get; set; } = new List<Community>();
         public ICollection<Post> Posts { get; set; } = new List<Post>();
     }
 }

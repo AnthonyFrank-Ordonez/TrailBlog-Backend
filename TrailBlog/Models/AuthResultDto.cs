@@ -8,7 +8,7 @@ namespace TrailBlog.Models
         public string Message { get; set; } = string.Empty;
         public string AccessToken { get; set; } = string.Empty;
         public string RefreshToken { get; set; } = string.Empty;
-        public UserInfoDto? User { get; set; }
+        public UserResponseDto? User { get; set; }
 
     }
 }

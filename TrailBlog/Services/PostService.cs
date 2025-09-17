@@ -152,11 +152,11 @@ namespace TrailBlog.Services
             return post;
         }
 
-        public async Task<List<CommunityBlogsResponseDto>> GetAllCommunityBlogsAsync()  
+        public async Task<List<CommunityResponseDto>> GetAllCommunityBlogsAsync()  
         {
             var communityBlogs = await _context.Communities
                 .Include(c => c.Posts.OrderByDescending(p => p.CreatedAt).Take(5))
-                .Select(c => new CommunityBlogsResponseDto
+                .Select(c => new CommunityResponseDto
                 {
                     CommunityName = c.Name,
                     Id = c.Id,
