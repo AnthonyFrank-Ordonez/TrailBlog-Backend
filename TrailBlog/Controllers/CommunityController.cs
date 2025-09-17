@@ -151,7 +151,7 @@ namespace TrailBlog.Controllers
 
         [HttpPost("{id}/join")]
         [Authorize(Roles = "User, Admin")]
-        public async Task<IActionResult> JoinCommunity(Guid id)
+        public async Task<ActionResult<OperationResultDto>> JoinCommunity(Guid id)
         {
             var userId = GetCurrentUserId();
 
@@ -167,7 +167,7 @@ namespace TrailBlog.Controllers
 
         [HttpPost("{id}/leave")]
         [Authorize(Roles = "User, Admin")]
-        public async Task<IActionResult> LeaveCommunity(Guid id)
+        public async Task<ActionResult<OperationResultDto>> LeaveCommunity(Guid id)
         {
             var userId = GetCurrentUserId();
 
