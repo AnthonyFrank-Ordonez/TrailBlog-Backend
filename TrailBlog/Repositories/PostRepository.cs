@@ -14,7 +14,7 @@ namespace TrailBlog.Repositories
                 .Include(p => p.User)
                 .Include(p => p.Community)
                 .OrderByDescending(p => p.CreatedAt)
-                .ToListAsync();
+                .ToListAsync(); 
         }
 
         public async Task<Post?> GetPostByIdAsync(Guid id)
