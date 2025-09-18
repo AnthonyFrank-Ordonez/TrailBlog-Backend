@@ -95,20 +95,6 @@ namespace TrailBlog.Controllers
             return Ok(result);
         }
 
-        [HttpGet("communities")]
-        [AllowAnonymous]
-        public async Task<ActionResult<List<CommunityResponseDto>>> GetAllCommunityBlogs()
-        {
-            var communityBlogs = await _postService.GetAllCommunityBlogsAsync();
-
-            if (communityBlogs is null || !communityBlogs.Any())
-            {
-                return NotFound("No Community Blogs Found!");
-            }
-
-            return Ok(communityBlogs);
-        }
-
         [HttpGet("recent")]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<PostResponseDto>>> GetRecentPosts([FromQuery] int page, [FromQuery] int pageSize)

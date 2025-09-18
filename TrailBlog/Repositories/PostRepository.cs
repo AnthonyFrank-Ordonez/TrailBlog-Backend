@@ -17,6 +17,14 @@ namespace TrailBlog.Repositories
                 .ToListAsync();
         }
 
+        public async Task<Post?> GetPostByIdAsync(Guid id)
+        {
+            return await _dbSet
+                .Include(p => p.User)
+                .Include(p => p.Community)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
         public async Task<IEnumerable<Post>> GetRecentPostsAsync(int take)
         {
             return await _dbSet

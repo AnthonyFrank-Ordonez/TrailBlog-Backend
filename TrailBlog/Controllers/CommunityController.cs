@@ -78,6 +78,20 @@ namespace TrailBlog.Controllers
             return Ok(members);
         }
 
+        [HttpGet("communities")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> GetAllCommunityBlogs()
+        {
+            var communityBlogs = await _communityService.GetAllCommunityPostsAsync();
+
+            if (communityBlogs is null || !communityBlogs.Any())
+            {
+                return NotFound("No Community Blogs Found!");
+            }
+
+            return Ok(communityBlogs);
+        }
+
         [HttpPost("search")]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> SearchCommunities([FromQuery] string query)

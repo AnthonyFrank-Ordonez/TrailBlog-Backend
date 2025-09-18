@@ -107,6 +107,29 @@ namespace TrailBlog.Services
             return members;
         }
 
+        public async Task<IEnumerable<CommunityResponseDto>> GetAllCommunityPostsAsync()
+        {
+            var communityBlogs = await _context.Communities
+                .Include(c => c.Posts.OrderByDescending(p => p.CreatedAt).Take(5))
+                .Select(c => new CommunityResponseDto
+                {
+                    CommunityName = c.Name,
+                    Id = c.Id,
+                    Posts = c.Posts.Select(p => new PostResponseDto
+                    {
+                        Title = p.Title,
+                        Content = p.Content,
+                        Author = p.Author,
+                        Slug = p.Slug,
+                        CreatedAt = p.CreatedAt,
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return communityBlogs;
+
+        }
+
         public async Task<CommunityResponseDto?> CreateCommunityAsync(CommunityDto community, Guid userId)
         {
             if (community is null)

@@ -11,8 +11,7 @@ namespace TrailBlog.Services
         Task<PostResponseDto?> CreatePostAsync(PostDto post, Guid userId);
         Task<OperationResultDto> UpdatePostAsync(Guid id, Guid userId, PostDto post, bool isAdmin = false);
         Task<OperationResultDto> DeletePostAsync(Guid id, Guid userId, bool isAdmin = false);
-        Task<List<CommunityResponseDto>> GetAllCommunityBlogsAsync();
-        Task<List<PostResponseDto>> GetRecentPostsAsync(int page, int pageSize);
+        Task<IEnumerable<PostResponseDto>> GetRecentPostsAsync(int page, int pageSize);
 
     }
 }
