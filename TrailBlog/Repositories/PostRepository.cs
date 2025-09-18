@@ -8,19 +8,19 @@ namespace TrailBlog.Repositories
     {
         public PostRepository(ApplicationDbContext context) : base(context) { }
 
-        public async Task<IEnumerable<Post>> GetAllPostsAsync()
+        public async Task<IEnumerable<Post>> GetAllPostsDetailsAsync()
         {
             return await _dbSet
-                .Include(p => p.User)
+                .Include(p => p.User)   
                 .Include(p => p.Community)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync(); 
         }
 
-        public async Task<Post?> GetPostByIdAsync(Guid id)
+        public async Task<Post?> GetPostDetailByIdAsync(Guid id)
         {
             return await _dbSet
-                .Include(p => p.User)
+                .Include(p => p.User)   
                 .Include(p => p.Community)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
@@ -29,20 +29,20 @@ namespace TrailBlog.Repositories
         {
             return await _dbSet
                 .Include(p => p.User)
-                .Include(p => p.Community)
+                .Include(p => p.Community)  
                 .OrderByDescending(p => p.CreatedAt)
-                .Take(take)
+                .Take(take) 
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Post>> GetRecentPostsWithPaginateAsync(int page, int pageSize)
+        public async Task<IEnumerable<Post>> GetRecentPostsPagedAsync(int page, int pageSize)
         {
             return await _dbSet
                 .Include(p => p.User)
                 .Include(p => p.Community)
                 .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
-                .Skip(pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
         }

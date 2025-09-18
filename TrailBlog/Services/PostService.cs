@@ -22,7 +22,7 @@ namespace TrailBlog.Services
 
         public async Task<IEnumerable<PostResponseDto?>> GetPostsAsync()
         {
-            var posts = await _postRepository.GetAllPostsAsync();
+            var posts = await _postRepository.GetAllPostsDetailsAsync();
 
             return posts.Select(p => new PostResponseDto
             {
@@ -40,7 +40,7 @@ namespace TrailBlog.Services
 
         public async Task<PostResponseDto?> GetPostAsync(Guid id)
         {
-            var post = await _postRepository.GetPostByIdAsync(id);
+            var post = await _postRepository.GetPostDetailByIdAsync(id);
 
             if (post is null) return null;
 
@@ -129,7 +129,7 @@ namespace TrailBlog.Services
 
         public async Task<IEnumerable<PostResponseDto>> GetRecentPostsAsync(int page, int pageSize)
         {
-            var posts = await _postRepository.GetRecentPostsWithPaginateAsync(page, pageSize);
+            var posts = await _postRepository.GetRecentPostsPagedAsync(page, pageSize);
 
             return posts.Select(p => new PostResponseDto
             {
