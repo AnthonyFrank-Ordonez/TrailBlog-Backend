@@ -1,83 +1,78 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TrailBlog.Data;
 using TrailBlog.Entities;
+using TrailBlog.Helpers;
 using TrailBlog.Models;
+using TrailBlog.Repositories;
 
 namespace TrailBlog.Services
 {
-    public class UserService : IUserService
+    public class UserService(ApplicationDbContext context, IUserRepository userRepository) : IUserService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context = context;
+        private readonly IUserRepository _userrepository = userRepository;
 
-        public UserService(ApplicationDbContext context)
+        public async Task<IEnumerable<UserResponseDto?>> GetAllUsersAsync()
         {
-            _context = context;
+            var users = await _userrepository.GetAllAsync();
+
+            return users.Select(u => new UserResponseDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                Username = u.Username,
+                CreatedAt = u.CreatedAt,
+                UpdatedAt = u.UpdatedAt,
+                IsRevoked = u.IsRevoked,
+                RevokedAt = u.RevokedAt,
+            }).ToList();
+
         }
 
-        public async Task<IEnumerable<UserResponseDto?>> GetUsersAsync()
+        public async Task<UserResponseDto?> GetUserAsync(Guid userId)
         {
-            return await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .Select(u => new UserResponseDto
-                {
-                    Id = u.Id,
-                    Email = u.Email,
-                    Username = u.Username,
-                    Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                    CreatedAt = u.CreatedAt,
-                    UpdatedAt = u.UpdatedAt,
-                    IsRevoked = u.IsRevoked,
-                    RevokedAt = u.RevokedAt
-                })
-                .ToListAsync();
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null) return null;
+
+            return new UserResponseDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Username = user.Username,
+                CreatedAt = user.CreatedAt,
+                UpdatedAt = user.UpdatedAt,
+                IsRevoked = user.IsRevoked,
+                RevokedAt = user.RevokedAt,
+            };
         }
 
-        public async Task<UserResponseDto?> GetUserAsync(Guid id)
+        public async Task<IEnumerable<UserResponseDto?>> GetAllUsersWithRolesAsync()
         {
-            var user = await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .Where(u => u.Id == id)
-                .Select(u => new UserResponseDto
-                {
-                    Id = u.Id,
-                    Email = u.Email,
-                    Username = u.Username,
-                    Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                    CreatedAt = u.CreatedAt,
-                    UpdatedAt = u.UpdatedAt,
-                    IsRevoked = u.IsRevoked,
-                    RevokedAt = u.RevokedAt
-                })
-                .FirstOrDefaultAsync();
 
-            if (user is null)
-                return null;
+            var users = await _userrepository.GetAllUsersWithRolesAsync();
 
-            return user;
+            return users.Select(u => new UserResponseDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                Username = u.Username,
+                Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                CreatedAt = u.CreatedAt,
+                UpdatedAt = u.UpdatedAt,
+                IsRevoked = u.IsRevoked,
+                RevokedAt = u.RevokedAt
+            }).ToList();
+
         }
 
-        public async Task<UserResponseDto?> RevokedUserAsync(Guid Id)
+        public async Task<UserResponseDto?> GetUserWithRolesAsync(Guid userId)
         {
-            var user = await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Id == Id);
+            var user = await _userrepository.GetUserByIdWithRolesAsync(userId);
 
-            if (user is null)
-                return null;
+            if (user is null) return null;
 
-            user.IsRevoked = true;
-            user.RevokedAt = DateTime.UtcNow;
-            user.RefreshToken = null;
-            user.RefreshTokenExpiryTime = null;
-            user.UpdatedAt = DateTime.UtcNow;
-
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-
-            var userResponse = new UserResponseDto
+            return new UserResponseDto
             {
                 Id = user.Id,
                 Email = user.Email,
@@ -88,10 +83,43 @@ namespace TrailBlog.Services
                 IsRevoked = user.IsRevoked,
                 RevokedAt = user.RevokedAt
             };
-
-            return userResponse;
         }
 
+        public async Task<IEnumerable<UserResponseDto>> GetAllAdminUsersAsync()
+        {
+            var adminUsers = await _userrepository.GetAllAdminUsersAsync();
 
+            return adminUsers.Select(u => new UserResponseDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                Username = u.Username,
+                Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                CreatedAt = u.CreatedAt,
+                UpdatedAt = u.UpdatedAt,
+                IsRevoked = u.IsRevoked,
+                RevokedAt = u.RevokedAt
+            }).ToList();
+        }
+
+        public async Task<OperationResultDto> RevokedUserAsync(Guid userId)
+        {
+            var user = await _userrepository.GetUserByIdWithRolesAsync(userId);
+
+            if (user is null)
+                return OperationResult.Failure("User not found");
+
+            user.IsRevoked = true;
+            user.RevokedAt = DateTime.UtcNow;
+            user.RefreshToken = null;
+            user.RefreshTokenExpiryTime = null;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            var revokedUser = _userrepository.UpdateAsync(userId, user);
+
+            return revokedUser != null
+                ? OperationResult.Success("Successfully revoked user")
+                : OperationResult.Failure("Failed to revoeked user");
+        }
     }
 }
