@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TrailBlog.Entities;
+using TrailBlog.Helpers;
 using TrailBlog.Models;
 using TrailBlog.Services;
 
@@ -11,15 +12,10 @@ namespace TrailBlog.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PostController : ControllerBase
+    public class PostController(IPostService postService) : ControllerBase
     {
 
-        private readonly IPostService _postService;
-
-        public PostController(IPostService postService)
-        {
-            _postService = postService;
-        }
+        private readonly IPostService _postService = postService;
 
         [HttpGet]
         [AllowAnonymous]
@@ -29,7 +25,7 @@ namespace TrailBlog.Controllers
 
             if (posts is null || !posts.Any())
             {
-                return NotFound("No posts found.");
+                return NotFound(OperationResult.Failure("No posts found"));
             }
 
             return Ok(posts);
@@ -43,7 +39,7 @@ namespace TrailBlog.Controllers
 
             if (post is null)
             {
-                return NotFound("Post not found");
+                return NotFound(OperationResult.Failure("Post not found"));
             }
 
             return Ok(post);
@@ -58,7 +54,7 @@ namespace TrailBlog.Controllers
 
             if (createdPost is null)
             {
-                return BadRequest("Invalid post data.");
+                return BadRequest(OperationResult.Failure("Invalid post data"));
             }
 
             return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
@@ -109,7 +105,7 @@ namespace TrailBlog.Controllers
 
             if (recentPosts is null || !recentPosts.Any())
             {
-                return NotFound("No Recent Posts Found!");
+                return NotFound(OperationResult.Failure("No recent posts found"));
             }
 
             return Ok(recentPosts);

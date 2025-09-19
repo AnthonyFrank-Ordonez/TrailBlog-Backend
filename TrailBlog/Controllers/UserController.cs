@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TrailBlog.Entities;
+using TrailBlog.Helpers;
 using TrailBlog.Models;
 using TrailBlog.Services;
 
@@ -21,7 +22,7 @@ namespace TrailBlog.Controllers
 
             if (users is null || !users.Any()) 
             {
-                return NotFound(new { Message = "No users found" });
+                return NotFound(OperationResult.Failure("No Users Found"));
             }
 
             return Ok(users);
@@ -35,7 +36,7 @@ namespace TrailBlog.Controllers
 
             if (user is null)
             {
-                return NotFound(new { Message = "User not found" });
+                return NotFound(OperationResult.Failure("User not found"));
             }
 
             return user;
@@ -50,7 +51,7 @@ namespace TrailBlog.Controllers
 
             if (users is null || !users.Any())
             {
-                return NotFound(new { Message = "No users found" });
+                return NotFound(OperationResult.Failure("No users found"));
             }
 
             return Ok(users);
@@ -64,7 +65,7 @@ namespace TrailBlog.Controllers
 
             if (user is null)
             {
-                return NotFound(new { Message = "User not found" });
+                return NotFound(OperationResult.Failure("User not found"));
             }
 
             return Ok(user);
@@ -78,7 +79,7 @@ namespace TrailBlog.Controllers
 
             if (adminUsers is null || !adminUsers.Any())
             {
-                return NotFound(new { Message = "User not found" });
+                return NotFound(OperationResult.Failure("User not found"));
             }
 
             return Ok(adminUsers);

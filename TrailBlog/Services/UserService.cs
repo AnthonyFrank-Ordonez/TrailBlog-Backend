@@ -7,9 +7,8 @@ using TrailBlog.Repositories;
 
 namespace TrailBlog.Services
 {
-    public class UserService(ApplicationDbContext context, IUserRepository userRepository) : IUserService
+    public class UserService(IUserRepository userRepository) : IUserService
     {
-        private readonly ApplicationDbContext _context = context;
         private readonly IUserRepository _userrepository = userRepository;
 
         public async Task<IEnumerable<UserResponseDto?>> GetAllUsersAsync()
