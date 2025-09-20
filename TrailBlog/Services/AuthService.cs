@@ -7,44 +7,31 @@ using System.Security.Cryptography;
 using System.Text;
 using TrailBlog.Data;
 using TrailBlog.Entities;
+using TrailBlog.Helpers;
 using TrailBlog.Models;
+using TrailBlog.Repositories;
 
 namespace TrailBlog.Services
 {
-    public class AuthService : IAuthService
+    public class AuthService(ApplicationDbContext context, IUserRepository userRepository, IUnitOfWork unitOfWork, IConfiguration configuration) : IAuthService
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
-
-        public AuthService(ApplicationDbContext context, IConfiguration configuration)
-        {
-            _context = context;
-            _configuration = configuration;
-        }
+        private readonly ApplicationDbContext _context = context;
+        private readonly IConfiguration _configuration = configuration;
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
         public async Task<AuthResultDto> LoginAsync(LoginDto request)
         {
-            var user = await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Username == request.Username);
+            var user = await _userRepository.GetUserByUsernameWithRolesAsync(request.Username);
 
             if (user is null || new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
             {
-                return new AuthResultDto
-                {
-                    Success = false,
-                    Message = "Invalid Credentials"
-                };
+                return AuthResult.Failure("Invalid Credentials");
             }
 
             if (user.IsRevoked)
             {
-                return new AuthResultDto
-                {
-                    Success = false,
-                    Message = "User account is revoked."
-                };
+                return AuthResult.Failure("User account is revoked");
             }
 
             return await CreateAuthResponse(true, user);
@@ -52,73 +39,61 @@ namespace TrailBlog.Services
 
         public async Task<AuthResultDto> RegisterAsync(RegisterDto request)
         {
-            if (await _context.Users.AnyAsync(u => u.Username == request.Username))
+            if (await _userRepository.UsernameExistsAsync(request.Username))
             {
-                return new AuthResultDto
-                {
-                    Success = false,
-                    Message = "Username already exists."
-                };
+                return AuthResult.Failure("Username already exists.");
             }
 
-            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
+            if (await _userRepository.EmailExistsAsync(request.Email))
             {
-                return new AuthResultDto
-                {
-                    Success = false,
-                    Message = "Email already exists."
-                };
+                return AuthResult.Failure("Email already exists.");
             }
-
-            var user = new User();
 
             var hashedPassword = new PasswordHasher<User>()
-                .HashPassword(user, request.Password);
+                .HashPassword(new User(), request.Password);
 
-            user.Username = request.Username;
-            user.Email = request.Email;
-            user.PasswordHash = hashedPassword;
-            user.CreatedAt = DateTime.UtcNow;
-            user.UpdatedAt = DateTime.UtcNow;
+            var user = new User
+            {
+                Username = request.Username,
+                Email = request.Email,
+                PasswordHash = hashedPassword,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+            };
 
-            _context.Users.Add(user);
+            await _userRepository.AddAsync(user);
 
             // Assign default user role
             var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
 
             if (userRole != null)
             {
-                var assignedUserRole = new UserRole();
-
-                assignedUserRole.UserId = user.Id;
-                assignedUserRole.RoleId = userRole.Id;
-                assignedUserRole.AssignedAt = DateTime.UtcNow;
+                var assignedUserRole = new UserRole
+                {
+                    UserId = user.Id,
+                    RoleId = userRole.Id,
+                    AssignedAt = DateTime.UtcNow,
+                    
+                };
 
                 _context.UserRoles.Add(assignedUserRole);
             }
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
-            var userWithRoles = await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Id == user.Id);
+            var userWithRoles = await _userRepository.GetUserByIdWithRolesAsync(user.Id);
 
             if (userWithRoles == null)
             {
-                return new AuthResultDto
-                {
-                    Success = false,
-                    Message = "User not found after registration."
-                };
+                return AuthResult.Failure("User not found after registration.");
             }
 
             return await CreateAuthResponse(true, userWithRoles);
         }
 
-        public async Task<bool> LogoutAsync(Guid Id)
+        public async Task<bool> LogoutAsync(Guid id)
         {
-            var user = await _context.Users.FindAsync(Id);
+            var user = await _userRepository.GetByIdAsync(id);
 
             if (user is null)
                 return false;
@@ -138,25 +113,14 @@ namespace TrailBlog.Services
 
             if (user is null)
             {
-                return new AuthResultDto
-                {
-                    Success = false,
-                    Message = "Invalid or expired refresh token."
-                };
+                return AuthResult.Failure("Invalid or expired refresh token.");
             }
 
-            var userWithRoles = await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Id == user.Id);
+            var userWithRoles = await _userRepository.GetUserByIdWithRolesAsync(user.Id);
 
             if (userWithRoles is null)
             {
-                return new AuthResultDto
-                {
-                    Success = false,
-                    Message = "User not found."
-                };
+                return AuthResult.Failure("User not found.");
             }
 
             return await CreateAuthResponse(true, userWithRoles);
@@ -165,7 +129,7 @@ namespace TrailBlog.Services
 
         public async Task<bool> AssignRoleAsync(AssignRoleDto request)
         {
-            var user = await _context.Users.FindAsync(request.UserId);
+            var user = await _userRepository.GetByIdAsync(request.UserId);
             var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == request.RoleName);
 
             if (user is null || role is null)
@@ -181,12 +145,14 @@ namespace TrailBlog.Services
                 return true; // Already has the role
             }
 
-            _context.UserRoles.Add(new UserRole
+            var assignedRole = new UserRole
             {
                 UserId = user.Id,
                 RoleId = role.Id,
                 AssignedAt = DateTime.UtcNow
-            });
+            };
+
+            _context.UserRoles.Add(assignedRole);
 
             await _context.SaveChangesAsync();
 
@@ -195,7 +161,7 @@ namespace TrailBlog.Services
 
         private async Task<User?> ValidateRefreshTokenAsync(Guid userId, string refreshToken)
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
 
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime < DateTime.UtcNow)
             {
@@ -205,35 +171,9 @@ namespace TrailBlog.Services
             return user;
         }
 
-        private async Task<AuthResultDto> CreateAuthResponse(bool status, User user)
-        {
-            return new AuthResultDto
-            {
-                Success = status,
-                AccessToken = GenerateAccessToken(user),
-                RefreshToken = await GenerateAndSaveRefreshToken(user),
-                User = new UserResponseDto
-                {
-                    Id = user.Id,
-                    Username = user.Username,
-                    Email = user.Email,
-                    Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList()
-                },
-            };
-        }
-
-        private string GenerateRefreshToken()
-        {
-            var randomNumber = new byte[32];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomNumber);
-
-            return Convert.ToBase64String(randomNumber);
-        }
-
         private async Task<string> GenerateAndSaveRefreshToken(User user)
         {
-            var refreshToken = GenerateRefreshToken();
+            var refreshToken = AuthTokenHelper.GenerateRefreshToken();
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
 
@@ -242,34 +182,21 @@ namespace TrailBlog.Services
             return refreshToken;
         }
 
-        private string GenerateAccessToken(User user)
+        private async Task<AuthResultDto> CreateAuthResponse(bool status, User user)
         {
-            var claims = new List<Claim>
+            var accessToken = AuthTokenHelper.GenerateAccessToken(user, _configuration);
+            var refreshToken = await GenerateAndSaveRefreshToken(user);
+            var userResponseDto = new UserResponseDto
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email),
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList()
             };
 
-            foreach (var userRole in user.UserRoles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
-            }
-
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration.GetValue<string>("Jwt:Secret")!));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
-
-            var tokenDescriptor = new JwtSecurityToken(
-                issuer: _configuration.GetValue<string>("Jwt:Issuer"),
-                audience: _configuration.GetValue<string>("Jwt:Audience"),
-                claims: claims,
-                expires: DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:ExpiryInDays")),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
+            return AuthResult.Success(accessToken, refreshToken, userResponseDto);
         }
+
+
     }
 }

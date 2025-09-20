@@ -9,10 +9,11 @@ using TrailBlog.Repositories;
 
 namespace TrailBlog.Services
 {
-    public class PostService(IPostRepository postRepository, IUserRepository userRepository) : IPostService
+    public class PostService(IPostRepository postRepository, IUserRepository userRepository, IUnitOfWork unitOfWork) : IPostService
     {
         private readonly IPostRepository _postRepository = postRepository;
         private readonly IUserRepository _userrepository = userRepository;
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
         public async Task<IEnumerable<PostResponseDto?>> GetPostsAsync()
         {
@@ -72,6 +73,8 @@ namespace TrailBlog.Services
             };
 
             var createdPost = await _postRepository.AddAsync(newPost);
+            await _unitOfWork.SaveChangesAsync();
+
             var user = await _userrepository.GetByIdAsync(userId);
 
 

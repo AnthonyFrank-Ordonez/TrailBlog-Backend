@@ -1,4 +1,5 @@
 ﻿using TrailBlog.Entities;
+using TrailBlog.Models;
 
 namespace TrailBlog.Repositories
 {
@@ -9,5 +10,7 @@ namespace TrailBlog.Repositories
         Task<IEnumerable<User>> GetAllNonAdminUsersAsync();
         Task<User?> GetUserByIdWithRolesAsync(Guid userId);
         Task<User?> GetUserByUsernameWithRolesAsync(string username);
+        Task<bool> UsernameExistsAsync(string username);
+        Task<bool> EmailExistsAsync(string email);
     }
 }
