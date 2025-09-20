@@ -68,8 +68,9 @@ namespace TrailBlog.Services
             var userCommunities = await _context.UserCommunities
                 .Where(uc => uc.UserId == userId)
                 .Include(uc => uc.Community)
-                .ThenInclude(uc => uc.Posts)
-                .ThenInclude(uc => uc.User)
+                    .ThenInclude(c => c.Posts)
+                .Include(uc => uc.Community)
+                    .ThenInclude(c => c.User)
                 .Select(uc => new CommunityResponseDto
                 {
                     Id = uc.Community.Id,
