@@ -1,6 +1,6 @@
-﻿using TrailBlog.Models;
+﻿using TrailBlog.Api.Models;
 
-namespace TrailBlog.Helpers
+namespace TrailBlog.Api.Helpers
 {
     public static class AuthResult
     {

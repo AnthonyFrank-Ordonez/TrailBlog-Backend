@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using TrailBlog.Entities;
-using TrailBlog.Models;
-using TrailBlog.Services;
+using TrailBlog.Api.Models;
+using TrailBlog.Api.Services;
+using TrailBlog.Api.Entities;
 
-namespace TrailBlog.Controllers
+namespace TrailBlog.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

@@ -1,7 +1,7 @@
-﻿using TrailBlog.Entities;
-using TrailBlog.Models;
+﻿using TrailBlog.Api.Entities;
+using TrailBlog.Api.Models;
 
-namespace TrailBlog.Repositories
+namespace TrailBlog.Api.Repositories
 {
     public interface IUserRepository : IRepository<User>
     {

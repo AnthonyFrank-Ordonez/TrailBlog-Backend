@@ -1,6 +1,6 @@
-﻿using TrailBlog.Entities;
+﻿using TrailBlog.Api.Entities;
 
-namespace TrailBlog.Repositories
+namespace TrailBlog.Api.Repositories
 {
     public interface IPostRepository : IRepository<Post>
     {

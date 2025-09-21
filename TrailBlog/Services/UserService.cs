@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TrailBlog.Data;
-using TrailBlog.Entities;
-using TrailBlog.Helpers;
-using TrailBlog.Models;
-using TrailBlog.Repositories;
+using TrailBlog.Api.Models;
+using TrailBlog.Api.Repositories;
+using TrailBlog.Api.Data;
+using TrailBlog.Api.Entities;
+using TrailBlog.Api.Helpers;
 
-namespace TrailBlog.Services
+namespace TrailBlog.Api.Services
 {
     public class UserService(IUserRepository userRepository) : IUserService
     {

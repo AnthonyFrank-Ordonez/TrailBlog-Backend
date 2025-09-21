@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
-using TrailBlog.Data;
-using TrailBlog.Repositories;
-using TrailBlog.Services;
+using TrailBlog.Api.Data;
+using TrailBlog.Api.Repositories;
+using TrailBlog.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

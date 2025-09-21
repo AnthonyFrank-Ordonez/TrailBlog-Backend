@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TrailBlog.Data;
-using TrailBlog.Entities;
-using TrailBlog.Helpers;
-using TrailBlog.Models;
-using TrailBlog.Repositories;
+using TrailBlog.Api.Entities;
+using TrailBlog.Api.Models;
+using TrailBlog.Api.Repositories;
+using TrailBlog.Api.Data;
+using TrailBlog.Api.Helpers;
 
-namespace TrailBlog.Services
+namespace TrailBlog.Api.Services
 {
     public class PostService(IPostRepository postRepository, IUserRepository userRepository, IUnitOfWork unitOfWork) : IPostService
     {

@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TrailBlog.Data;
-using TrailBlog.Entities;
+using TrailBlog.Api.Data;
+using TrailBlog.Api.Entities;
 
-namespace TrailBlog.Repositories
+namespace TrailBlog.Api.Repositories
 {
     public class UserRepository : Repository<User>, IUserRepository
     {

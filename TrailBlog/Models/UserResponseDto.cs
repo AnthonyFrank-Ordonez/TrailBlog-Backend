@@ -1,4 +1,4 @@
-﻿namespace TrailBlog.Models
+﻿namespace TrailBlog.Api.Models
 {
     public class UserResponseDto
     {

@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace TrailBlog.Migrations
+namespace TrailBlog.Api.Migrations
 {
     /// <inheritdoc />
     public partial class AddedIgnoredPropForLikes : Migration

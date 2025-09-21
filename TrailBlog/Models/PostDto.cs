@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TrailBlog.Models
+namespace TrailBlog.Api.Models
 {
     public class PostDto
     {

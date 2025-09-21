@@ -4,9 +4,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using TrailBlog.Entities;
+using TrailBlog.Api.Entities;
 
-namespace TrailBlog.Helpers
+namespace TrailBlog.Api.Helpers
 {
     public static class AuthTokenHelper
     {

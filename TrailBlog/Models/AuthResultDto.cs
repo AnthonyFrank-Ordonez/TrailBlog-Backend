@@ -1,6 +1,6 @@
-﻿using TrailBlog.Entities;
+﻿using TrailBlog.Api.Entities;
 
-namespace TrailBlog.Models
+namespace TrailBlog.Api.Models
 {
     public class AuthResultDto
     {

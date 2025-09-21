@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TrailBlog.Entities;
+using TrailBlog.Api.Entities;
 
-namespace TrailBlog.Data
+namespace TrailBlog.Api.Data
 {
     public class ApplicationDbContext : DbContext 
     {

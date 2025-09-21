@@ -1,4 +1,4 @@
-﻿namespace TrailBlog.Repositories
+﻿namespace TrailBlog.Api.Repositories
 {
     public interface IUnitOfWork : IDisposable
     {

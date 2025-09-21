@@ -5,11 +5,12 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TrailBlog.Data;
+using TrailBlog.Api.Data;
+
 
 #nullable disable
 
-namespace TrailBlog.Migrations
+namespace TrailBlog.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20250916132237_AddedOwnershipTable")]

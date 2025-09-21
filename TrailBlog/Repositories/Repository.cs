@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TrailBlog.Data;
+using TrailBlog.Api.Data;
 
-namespace TrailBlog.Repositories
+namespace TrailBlog.Api.Repositories
 {
     public class Repository<T> : IRepository<T> where T : class
     {

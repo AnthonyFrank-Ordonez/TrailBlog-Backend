@@ -1,7 +1,7 @@
-﻿using TrailBlog.Entities;
-using TrailBlog.Models;
+﻿using TrailBlog.Api.Models;
+using TrailBlog.Api.Entities;
 
-namespace TrailBlog.Services
+namespace TrailBlog.Api.Services
 {
     public interface ICommunityService
     {

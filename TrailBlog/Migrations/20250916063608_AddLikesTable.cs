@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TrailBlog.Migrations
+namespace TrailBlog.Api.Migrations
 {
     /// <inheritdoc />
     public partial class AddLikesTable : Migration

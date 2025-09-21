@@ -1,4 +1,4 @@
-﻿namespace TrailBlog.Entities
+﻿namespace TrailBlog.Api.Entities
 {
     public class UserRole
     {

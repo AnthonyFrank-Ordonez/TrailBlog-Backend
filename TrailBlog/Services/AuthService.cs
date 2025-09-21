@@ -5,13 +5,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using TrailBlog.Data;
-using TrailBlog.Entities;
-using TrailBlog.Helpers;
-using TrailBlog.Models;
-using TrailBlog.Repositories;
+using TrailBlog.Api.Data;
+using TrailBlog.Api.Entities;
+using TrailBlog.Api.Helpers;
+using TrailBlog.Api.Models;
+using TrailBlog.Api.Repositories;
 
-namespace TrailBlog.Services
+namespace TrailBlog.Api.Services
 {
     public class AuthService(ApplicationDbContext context, IUserRepository userRepository, IUnitOfWork unitOfWork, IConfiguration configuration) : IAuthService
     {

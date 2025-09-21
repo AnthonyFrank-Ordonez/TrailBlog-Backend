@@ -1,6 +1,6 @@
-﻿using TrailBlog.Data;
+﻿using TrailBlog.Api.Data;
 
-namespace TrailBlog.Repositories
+namespace TrailBlog.Api.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
