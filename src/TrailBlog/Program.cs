@@ -15,6 +15,7 @@ builder.Services.AddProblemDetails(configure =>
 {
     configure.CustomizeProblemDetails = context =>
     {
+        context.ProblemDetails.Instance = $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
         context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
     };
 });
