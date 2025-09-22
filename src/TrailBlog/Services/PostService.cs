@@ -6,6 +6,7 @@ using TrailBlog.Api.Models;
 using TrailBlog.Api.Repositories;
 using TrailBlog.Api.Data;
 using TrailBlog.Api.Helpers;
+using TrailBlog.Api.Exceptions;
 
 namespace TrailBlog.Api.Services
 {
@@ -18,6 +19,9 @@ namespace TrailBlog.Api.Services
         public async Task<IEnumerable<PostResponseDto?>> GetPostsAsync()
         {
             var posts = await _postRepository.GetAllPostsDetailsAsync();
+
+            if (posts is null || !posts.Any())
+                throw new NotFoundException("No posts found");
 
             return posts.Select(p => new PostResponseDto
             {
@@ -37,7 +41,8 @@ namespace TrailBlog.Api.Services
         {
             var post = await _postRepository.GetPostDetailByIdAsync(id);
 
-            if (post is null) return null;
+            if (post is null)
+                throw new NotFoundException($"No posts found with the id of {id}");
 
             return new PostResponseDto
             {
@@ -53,12 +58,13 @@ namespace TrailBlog.Api.Services
             };
         }
 
-        public async Task<PostResponseDto?> CreatePostAsync(PostDto post, Guid userId)
+        public async Task<PostResponseDto> CreatePostAsync(PostDto post, Guid userId)
         {
-            if (post is null)
-            {
-                return null;
-            }
+            // Will Change Later
+            //if (post is null)
+            //{
+            //    throw new ValidationException("Invalid post data");
+            //}
 
             var newPost = new Post
             {
@@ -96,37 +102,46 @@ namespace TrailBlog.Api.Services
         {
             var existingPost = await _postRepository.GetByIdAsync(id);
 
-            if (existingPost is null) return OperationResult.Failure("Post not found!");
+            if (existingPost is null)
+                throw new NotFoundException($"No posts found with the id of {id}");
 
-            if (existingPost.UserId != userId && !isAdmin) return OperationResult.Failure("You are not authorized to update this post.");
+            if (existingPost.UserId != userId)
+                throw new UnauthorizedException("You are not authorized to update this post.");
 
             UpdatePostFields(existingPost, post);
 
             var updatedPost = await _postRepository.UpdateAsync(existingPost.Id, existingPost);
 
-            return updatedPost is null
-                ? OperationResult.Failure("Failed to update the post.")
-                : OperationResult.Success("Post updated successfully"); 
+            if (updatedPost is null)
+                throw new ApiException("An error occurred. Post failed to update");
+
+            return OperationResult.Success("Post updated successfully");
         }
 
         public async Task<OperationResultDto> DeletePostAsync(Guid id, Guid userId, bool isAdmin)
         {
             var post = await _postRepository.GetByIdAsync(id);
 
-            if (post is null) return OperationResult.Failure("Post not found!");
+            if (post is null)
+                throw new NotFoundException($"No posts found with the id of {id}");
 
-            if (post.UserId != userId && !isAdmin) return OperationResult.Success("You are not authorized to delete this post");
+            if (post.UserId != userId && !isAdmin)
+                throw new UnauthorizedException("You are not authorized to update this post.");
 
-            var deletedPost = await _postRepository.DeleteAsync(post.Id);;
+            var deletedPost = await _postRepository.DeleteAsync(post.Id);
 
-            return !deletedPost
-                ? OperationResult.Failure("Failed to delete the post")
-                : OperationResult.Success("Post deleted successfully");
+            if (!deletedPost)
+                throw new ApiException("An error occurred. Post failed to delete");
+
+            return OperationResult.Success("Post deleted successfully");
         }
 
         public async Task<IEnumerable<PostResponseDto>> GetRecentPostsAsync(int page, int pageSize)
         {
             var posts = await _postRepository.GetRecentPostsPagedAsync(page, pageSize);
+
+            if (posts is null || !posts.Any()) 
+                throw new NotFoundException("No recent posts found");
 
             return posts.Select(p => new PostResponseDto
             {

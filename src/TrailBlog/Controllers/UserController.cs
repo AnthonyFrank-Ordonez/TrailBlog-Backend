@@ -20,11 +20,6 @@ namespace TrailBlog.Api.Controllers
         {
             var users = await _userService.GetAllUsersAsync();
 
-            if (users is null || !users.Any()) 
-            {
-                return NotFound(OperationResult.Failure("No Users Found"));
-            }
-
             return Ok(users);
         }
 
@@ -33,11 +28,6 @@ namespace TrailBlog.Api.Controllers
         public async Task<ActionResult<UserResponseDto?>> GetUser(Guid id)
         {
             var user = await _userService.GetUserAsync(id);
-
-            if (user is null)
-            {
-                return NotFound(OperationResult.Failure("User not found"));
-            }
 
             return user;
         }
@@ -49,11 +39,6 @@ namespace TrailBlog.Api.Controllers
         {
             var users = await _userService.GetAllUsersWithRolesAsync();
 
-            if (users is null || !users.Any())
-            {
-                return NotFound(OperationResult.Failure("No users found"));
-            }
-
             return Ok(users);
         }
 
@@ -62,11 +47,6 @@ namespace TrailBlog.Api.Controllers
         public async Task<ActionResult<UserResponseDto>> GetUserWithRoles(Guid id)
         {
             var user = await _userService.GetUserWithRolesAsync(id);
-
-            if (user is null)
-            {
-                return NotFound(OperationResult.Failure("User not found"));
-            }
 
             return Ok(user);
         }
@@ -77,11 +57,6 @@ namespace TrailBlog.Api.Controllers
         {
             var adminUsers = await _userService.GetAllAdminUsersAsync();
 
-            if (adminUsers is null || !adminUsers.Any())
-            {
-                return NotFound(OperationResult.Failure("User not found"));
-            }
-
             return Ok(adminUsers);
         }
 
@@ -90,11 +65,6 @@ namespace TrailBlog.Api.Controllers
         public async Task<ActionResult<OperationResultDto>> RevokeUser(Guid id)
         {
             var result = await _userService.RevokedUserAsync(id);
-
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
 
             return Ok(result);
         }

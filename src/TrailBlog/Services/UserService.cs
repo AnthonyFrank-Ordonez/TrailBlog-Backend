@@ -4,6 +4,7 @@ using TrailBlog.Api.Repositories;
 using TrailBlog.Api.Data;
 using TrailBlog.Api.Entities;
 using TrailBlog.Api.Helpers;
+using TrailBlog.Api.Exceptions;
 
 namespace TrailBlog.Api.Services
 {
@@ -14,6 +15,9 @@ namespace TrailBlog.Api.Services
         public async Task<IEnumerable<UserResponseDto?>> GetAllUsersAsync()
         {
             var users = await _userrepository.GetAllAsync();
+
+            if (users is null || !users.Any()) 
+                throw new NotFoundException("No users found");
 
             return users.Select(u => new UserResponseDto
             {
@@ -32,7 +36,8 @@ namespace TrailBlog.Api.Services
         {
             var user = await _userrepository.GetByIdAsync(userId);
 
-            if (user is null) return null;
+            if (user is null) 
+                throw new NotFoundException($"No user found with the id of {userId}");
 
             return new UserResponseDto
             {
@@ -50,6 +55,9 @@ namespace TrailBlog.Api.Services
         {
 
             var users = await _userrepository.GetAllUsersWithRolesAsync();
+
+            if (users is null || !users.Any())
+                throw new NotFoundException("No users found");
 
             return users.Select(u => new UserResponseDto
             {
@@ -69,7 +77,8 @@ namespace TrailBlog.Api.Services
         {
             var user = await _userrepository.GetUserByIdWithRolesAsync(userId);
 
-            if (user is null) return null;
+            if (user is null)
+                throw new NotFoundException($"No user found with the id of {userId}");
 
             return new UserResponseDto
             {
@@ -87,6 +96,9 @@ namespace TrailBlog.Api.Services
         public async Task<IEnumerable<UserResponseDto>> GetAllAdminUsersAsync()
         {
             var adminUsers = await _userrepository.GetAllAdminUsersAsync();
+
+            if (adminUsers is null || !adminUsers.Any())
+                throw new NotFoundException("No admin users found");
 
             return adminUsers.Select(u => new UserResponseDto
             {
@@ -106,7 +118,7 @@ namespace TrailBlog.Api.Services
             var user = await _userrepository.GetUserByIdWithRolesAsync(userId);
 
             if (user is null)
-                return OperationResult.Failure("User not found");
+                throw new NotFoundException($"No user found with the id of {userId}");
 
             user.IsRevoked = true;
             user.RevokedAt = DateTime.UtcNow;
@@ -116,9 +128,11 @@ namespace TrailBlog.Api.Services
 
             var revokedUser = _userrepository.UpdateAsync(userId, user);
 
-            return revokedUser != null
-                ? OperationResult.Success("Successfully revoked user")
-                : OperationResult.Failure("Failed to revoeked user");
+            if (revokedUser is null)
+                throw new ApiException("An error occured. Fauled to revoke user");
+
+            return OperationResult.Success("Successfully revoked user");
+                
         }
     }
 }

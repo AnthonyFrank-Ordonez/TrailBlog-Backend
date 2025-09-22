@@ -22,12 +22,6 @@ namespace TrailBlog.Api.Controllers
         public async Task<ActionResult<IEnumerable<PostResponseDto?>>> GetPosts()
         {
             var posts = await _postService.GetPostsAsync();
-
-            if (posts is null || !posts.Any())
-            {
-                return NotFound(OperationResult.Failure("No posts found"));
-            }
-
             return Ok(posts);
         }
 
@@ -36,26 +30,15 @@ namespace TrailBlog.Api.Controllers
         public async Task<ActionResult<PostResponseDto?>> GetPost(Guid id)
         {
             var post = await _postService.GetPostAsync(id);
-
-            if (post is null)
-            {
-                return NotFound(OperationResult.Failure("Post not found"));
-            }
-
             return Ok(post);
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin,User")]
-        public async Task<ActionResult<PostResponseDto?>> CreatePost(PostDto post)
+        public async Task<ActionResult<PostResponseDto>> CreatePost(PostDto post)
         {
             var userId = GetCurrentUserId();
             var createdPost = await _postService.CreatePostAsync(post, userId);
-
-            if (createdPost is null)
-            {
-                return BadRequest(OperationResult.Failure("Invalid post data"));
-            }
 
             return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
         }
@@ -68,11 +51,6 @@ namespace TrailBlog.Api.Controllers
             var isAdmin = User.IsInRole("Admin");
             var result = await _postService.UpdatePostAsync(id, userId, post, isAdmin);
 
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-
             return Ok(result);
         }
 
@@ -82,12 +60,8 @@ namespace TrailBlog.Api.Controllers
         {
             var userId = GetCurrentUserId();
             var isAdmin = User.IsInRole("Admin");
-
             var result = await _postService.DeletePostAsync(id, userId, isAdmin);
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
+
             return Ok(result);
         }
 
@@ -102,11 +76,6 @@ namespace TrailBlog.Api.Controllers
             }
 
             var recentPosts = await _postService.GetRecentPostsAsync(page, pageSize);
-
-            if (recentPosts is null || !recentPosts.Any())
-            {
-                return NotFound(OperationResult.Failure("No recent posts found"));
-            }
 
             return Ok(recentPosts);
         }
