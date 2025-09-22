@@ -17,6 +17,8 @@ namespace TrailBlog.Api.Exceptions
 
             httpContext.Response.StatusCode = exception switch
             {
+                NotFoundException => StatusCodes.Status404NotFound,
+                UnauthorizedException => StatusCodes.Status401Unauthorized,
                 ApplicationException => StatusCodes.Status400BadRequest,
                 _ => StatusCodes.Status500InternalServerError,
             };
@@ -36,3 +38,4 @@ namespace TrailBlog.Api.Exceptions
 
     }
 }
+ 
