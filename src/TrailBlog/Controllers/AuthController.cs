@@ -23,11 +23,6 @@ namespace TrailBlog.Api.Controllers
         {
             var result = await _authService.RegisterAsync(request);
 
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-
             return Ok(result);
         }
 
@@ -36,11 +31,6 @@ namespace TrailBlog.Api.Controllers
         {
             var result = await _authService.LoginAsync(request);
 
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-
             return Ok(result);
         }
 
@@ -48,10 +38,7 @@ namespace TrailBlog.Api.Controllers
         public async Task<ActionResult<AuthResultDto>> RefreshToken(RefreshTokenRequestDto request)
         {
             var result = await _authService.RefreshTokenAsync(request);
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
+            
             return Ok(result);
         }
 
@@ -64,10 +51,7 @@ namespace TrailBlog.Api.Controllers
             if (userId == null)
                 return Unauthorized();
 
-            var result = await _authService.LogoutAsync(Guid.Parse(userId));
-
-            if (!result)
-                return BadRequest("Logout failed");
+            await _authService.LogoutAsync(Guid.Parse(userId));
 
             return Ok("Logout Successfully!");
         }
@@ -78,11 +62,6 @@ namespace TrailBlog.Api.Controllers
         public async Task<IActionResult> AssignRole(AssignRoleDto request)
         {
             var success = await _authService.AssignRoleAsync(request);
-
-            if (!success)
-            {
-                return BadRequest("Failed to assign role");
-            }
 
             return Ok("Role assigned succesfully");
         }

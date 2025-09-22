@@ -7,17 +7,24 @@ using System.Security.Cryptography;
 using System.Text;
 using TrailBlog.Api.Data;
 using TrailBlog.Api.Entities;
+using TrailBlog.Api.Exceptions;
 using TrailBlog.Api.Helpers;
 using TrailBlog.Api.Models;
 using TrailBlog.Api.Repositories;
 
 namespace TrailBlog.Api.Services
 {
-    public class AuthService(ApplicationDbContext context, IUserRepository userRepository, IUnitOfWork unitOfWork, IConfiguration configuration) : IAuthService
+    public class AuthService(
+        IUserRepository userRepository,
+        IRoleRepository roleRepository,
+        IUserRoleRepository userRoleRepository,
+        IUnitOfWork unitOfWork, 
+        IConfiguration configuration) : IAuthService
     {
-        private readonly ApplicationDbContext _context = context;
         private readonly IConfiguration _configuration = configuration;
         private readonly IUserRepository _userRepository = userRepository;
+        private readonly IRoleRepository _roleRepository = roleRepository;
+        private readonly IUserRoleRepository _userRoleRepository = userRoleRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
         public async Task<AuthResultDto> LoginAsync(LoginDto request)
@@ -25,29 +32,25 @@ namespace TrailBlog.Api.Services
             var user = await _userRepository.GetUserByUsernameWithRolesAsync(request.Username);
 
             if (user is null || new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
-            {
-                return AuthResult.Failure("Invalid Credentials");
-            }
+                throw new ApplicationException("Invalid Credentials");
+            
 
             if (user.IsRevoked)
-            {
-                return AuthResult.Failure("User account is revoked");
-            }
+                throw new ApplicationException("User account is revoked");
+            
 
-            return await CreateAuthResponse(true, user);
+            return await CreateAuthResponse(user);
         }
 
         public async Task<AuthResultDto> RegisterAsync(RegisterDto request)
         {
             if (await _userRepository.UsernameExistsAsync(request.Username))
-            {
-                return AuthResult.Failure("Username already exists.");
-            }
+                throw new ApplicationException("Username already exists.");
+            
 
             if (await _userRepository.EmailExistsAsync(request.Email))
-            {
-                return AuthResult.Failure("Email already exists.");
-            }
+                throw new ApplicationException("Email already exists.");
+
 
             var hashedPassword = new PasswordHasher<User>()
                 .HashPassword(new User(), request.Password);
@@ -64,7 +67,7 @@ namespace TrailBlog.Api.Services
             await _userRepository.AddAsync(user);
 
             // Assign default user role
-            var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
+            var userRole = await _roleRepository.GetRoleByNameAsync("User");
 
             if (userRole != null)
             {
@@ -76,7 +79,7 @@ namespace TrailBlog.Api.Services
                     
                 };
 
-                _context.UserRoles.Add(assignedUserRole);
+                await _userRoleRepository.AddAsync(assignedUserRole);
             }
 
             await _unitOfWork.SaveChangesAsync();
@@ -84,11 +87,10 @@ namespace TrailBlog.Api.Services
             var userWithRoles = await _userRepository.GetUserByIdWithRolesAsync(user.Id);
 
             if (userWithRoles == null)
-            {
-                return AuthResult.Failure("User not found after registration.");
-            }
+                throw new NotFoundException("User not found after registration.");
+            
 
-            return await CreateAuthResponse(true, userWithRoles);
+            return await CreateAuthResponse(userWithRoles);
         }
 
         public async Task<bool> LogoutAsync(Guid id)
@@ -96,12 +98,12 @@ namespace TrailBlog.Api.Services
             var user = await _userRepository.GetByIdAsync(id);
 
             if (user is null)
-                return false;
+                throw new NotFoundException("User not found, failed to logout");
 
             user.RefreshToken = null;
             user.RefreshTokenExpiryTime = null;
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
 
@@ -112,37 +114,33 @@ namespace TrailBlog.Api.Services
             var user = await ValidateRefreshTokenAsync(request.Id, request.RefreshToken);
 
             if (user is null)
-            {
-                return AuthResult.Failure("Invalid or expired refresh token.");
-            }
+                throw new UnauthorizedException("Invalid or expired refresh token.");
+            
 
             var userWithRoles = await _userRepository.GetUserByIdWithRolesAsync(user.Id);
 
             if (userWithRoles is null)
-            {
-                return AuthResult.Failure("User not found.");
-            }
+                throw new NotFoundException("User not found.");
+            
 
-            return await CreateAuthResponse(true, userWithRoles);
+            return await CreateAuthResponse(userWithRoles);
         }
 
 
         public async Task<bool> AssignRoleAsync(AssignRoleDto request)
         {
             var user = await _userRepository.GetByIdAsync(request.UserId);
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == request.RoleName);
+            var role = await _roleRepository.GetRoleByNameAsync(request.RoleName);
 
             if (user is null || role is null)
-            {
-                return false;
-            }
+                throw new NotFoundException("User or Role not found");
+            
 
-            var existingUserRole = await _context.UserRoles
-                .FirstOrDefaultAsync(ur => ur.UserId == request.UserId && ur.RoleId == role.Id);
+            var existingUserRole = await _userRoleRepository.RoleExistAsync(request.UserId, role.Id);
 
             if (existingUserRole != null)
             {
-                return true; // Already has the role
+                throw new ApplicationException("Failed to assigned role. User already has the role");
             }
 
             var assignedRole = new UserRole
@@ -152,9 +150,8 @@ namespace TrailBlog.Api.Services
                 AssignedAt = DateTime.UtcNow
             };
 
-            _context.UserRoles.Add(assignedRole);
-
-            await _context.SaveChangesAsync();
+            await _userRoleRepository.AddAsync(assignedRole);
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }
@@ -177,12 +174,12 @@ namespace TrailBlog.Api.Services
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return refreshToken;
-        }
+        }   
 
-        private async Task<AuthResultDto> CreateAuthResponse(bool status, User user)
+        private async Task<AuthResultDto> CreateAuthResponse(User user)
         {
             var accessToken = AuthTokenHelper.GenerateAccessToken(user, _configuration);
             var refreshToken = await GenerateAndSaveRefreshToken(user);
