@@ -26,11 +26,6 @@ namespace TrailBlog.Api.Controllers
         {
             var communities = await _communityService.GetAllCommunitiesAsync();
 
-            if (communities is null || !communities.Any())
-            {
-                return NotFound("No Communities Found!");
-            }
-
             return Ok(communities);
         }
 
@@ -40,11 +35,6 @@ namespace TrailBlog.Api.Controllers
         {
             var community = await _communityService.GetCommunityAsync(id);
 
-            if (community is null)
-            {
-                return NotFound("Community Not Found!");
-            }
-
             return Ok(community);
         }
 
@@ -53,13 +43,7 @@ namespace TrailBlog.Api.Controllers
         public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> GetUserCommunities()
         {
             var userId = GetCurrentUserId();
-
             var userCommunities = await _communityService.GetUserCommunitiesAsync(userId);
-
-            if (userCommunities is null || !userCommunities.Any())
-            {
-                return NotFound("No Communities Found for the User!");
-            }
 
             return Ok(userCommunities);
         }
@@ -70,59 +54,33 @@ namespace TrailBlog.Api.Controllers
         {
             var members = await _communityService.GetCommunityMembersAsync(id);
 
-            if (members is null || !members.Any())
-            {
-                return NotFound("No community members found!");
-            }
-
             return Ok(members);
         }
 
         [HttpGet("communities")]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> GetAllCommunityBlogs()
+        public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> GetAllCommunityPosts()
         {
-            var communityBlogs = await _communityService.GetAllCommunityPostsAsync();
+            var communityPosts = await _communityService.GetAllCommunityPostsAsync();
 
-            if (communityBlogs is null || !communityBlogs.Any())
-            {
-                return NotFound("No Community Blogs Found!");
-            }
-
-            return Ok(communityBlogs);
+            return Ok(communityPosts);
         }
 
         [HttpPost("search")]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> SearchCommunities([FromQuery] string query)
         {
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return BadRequest("Search query cannot be empty!");
-            }
-
             var communities = await _communityService.SearchCommunitiesAsync(query);
-
-            if (communities is null || !communities.Any())
-            {
-                return NotFound("No communities found matching the query");
-            }
 
             return Ok(communities);
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin, User")]
-        public async Task<ActionResult<CommunityResponseDto?>> CreateCommunity(CommunityDto community)
+        public async Task<ActionResult<CommunityResponseDto>> CreateCommunity(CommunityDto community)
         {
             var userId = GetCurrentUserId();
-
             var createdCommunity = await _communityService.CreateCommunityAsync(community, userId);
-
-            if (createdCommunity is null)
-            {
-                return BadRequest("Failed to create community");
-            }
 
             return CreatedAtAction(nameof(GetCommunity), new { id = createdCommunity.Id }, createdCommunity);
         }
@@ -133,13 +91,8 @@ namespace TrailBlog.Api.Controllers
         {
             var userId = GetCurrentUserId();
             var isAdmin = User.IsInRole("Admin");
-
             var result = await _communityService.UpdateCommunityAsync(id, userId, community, isAdmin);
 
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
 
             return Ok(result);
         }
@@ -150,14 +103,9 @@ namespace TrailBlog.Api.Controllers
         {
             var userId = GetCurrentUserId();
             var isAdmin = User.IsInRole("Admin");
-
             var result = await _communityService.DeleteCommunityAsync(id, userId, isAdmin);
 
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-
+ 
             return Ok(result);
         }
 
@@ -168,13 +116,8 @@ namespace TrailBlog.Api.Controllers
         public async Task<ActionResult<OperationResultDto>> JoinCommunity(Guid id)
         {
             var userId = GetCurrentUserId();
-
             var result = await _communityService.JoinCommunityAsync(id, userId);
 
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
 
             return Ok(result);
         }
@@ -184,13 +127,7 @@ namespace TrailBlog.Api.Controllers
         public async Task<ActionResult<OperationResultDto>> LeaveCommunity(Guid id)
         {
             var userId = GetCurrentUserId();
-
             var result = await _communityService.LeaveCommunityAsync(id, userId);
-
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
 
             return Ok(result);
         }

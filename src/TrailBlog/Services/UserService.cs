@@ -8,9 +8,13 @@ using TrailBlog.Api.Exceptions;
 
 namespace TrailBlog.Api.Services
 {
-    public class UserService(IUserRepository userRepository) : IUserService
+    public class UserService(
+        IUserRepository userRepository, 
+        IUnitOfWork unitOfWork) : IUserService
     {
         private readonly IUserRepository _userrepository = userRepository;
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+
 
         public async Task<IEnumerable<UserResponseDto?>> GetAllUsersAsync()
         {
@@ -127,6 +131,7 @@ namespace TrailBlog.Api.Services
             user.UpdatedAt = DateTime.UtcNow;
 
             var revokedUser = _userrepository.UpdateAsync(userId, user);
+            await _unitOfWork.SaveChangesAsync();
 
             if (revokedUser is null)
                 throw new ApiException("An error occured. Fauled to revoke user");

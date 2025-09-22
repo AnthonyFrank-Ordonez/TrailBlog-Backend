@@ -111,6 +111,7 @@ namespace TrailBlog.Api.Services
             UpdatePostFields(existingPost, post);
 
             var updatedPost = await _postRepository.UpdateAsync(existingPost.Id, existingPost);
+            await _unitOfWork.SaveChangesAsync();
 
             if (updatedPost is null)
                 throw new ApiException("An error occurred. Post failed to update");
@@ -129,6 +130,7 @@ namespace TrailBlog.Api.Services
                 throw new UnauthorizedException("You are not authorized to update this post.");
 
             var deletedPost = await _postRepository.DeleteAsync(post.Id);
+            await _unitOfWork.SaveChangesAsync();
 
             if (!deletedPost)
                 throw new ApiException("An error occurred. Post failed to delete");

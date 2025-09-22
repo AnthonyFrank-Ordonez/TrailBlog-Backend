@@ -35,7 +35,6 @@ namespace TrailBlog.Api.Repositories
             if (existingEntity is null) return null;
 
             _context.Entry(existingEntity).CurrentValues.SetValues(entity);
-            await _context.SaveChangesAsync();
             return existingEntity;
         }
 
@@ -45,7 +44,6 @@ namespace TrailBlog.Api.Repositories
             if (entity is null) return false;
 
             _dbSet.Remove(entity);
-            await _context.SaveChangesAsync();
 
             return true;
 
