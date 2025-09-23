@@ -69,12 +69,6 @@ namespace TrailBlog.Api.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<PostResponseDto>>> GetRecentPosts([FromQuery] int page, [FromQuery] int pageSize)
         {
-            if (page <= 0 || pageSize <= 0)
-            {
-                page = 1;
-                pageSize = 10;
-            }
-
             var recentPosts = await _postService.GetRecentPostsAsync(page, pageSize);
 
             return Ok(recentPosts);

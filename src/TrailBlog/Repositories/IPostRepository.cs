@@ -7,6 +7,6 @@ namespace TrailBlog.Api.Repositories
         Task<IEnumerable<Post>> GetAllPostsDetailsAsync();
         Task<Post?> GetPostDetailByIdAsync(Guid id);
         Task<IEnumerable<Post>> GetRecentPostsAsync(int take = 10);
-        Task<IEnumerable<Post>> GetRecentPostsPagedAsync(int page, int pageSize);
+        Task<IEnumerable<Post>> GetRecentPostsPagedAsync(int page = 1, int pageSize = 10);
     }
 }   
