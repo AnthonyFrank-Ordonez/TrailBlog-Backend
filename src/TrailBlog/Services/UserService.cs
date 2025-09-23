@@ -16,12 +16,9 @@ namespace TrailBlog.Api.Services
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 
-        public async Task<IEnumerable<UserResponseDto?>> GetAllUsersAsync()
+        public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
         {
             var users = await _userrepository.GetAllAsync();
-
-            if (users is null || !users.Any()) 
-                throw new NotFoundException("No users found");
 
             return users.Select(u => new UserResponseDto
             {
@@ -55,13 +52,10 @@ namespace TrailBlog.Api.Services
             };
         }
 
-        public async Task<IEnumerable<UserResponseDto?>> GetAllUsersWithRolesAsync()
+        public async Task<IEnumerable<UserResponseDto>> GetAllUsersWithRolesAsync()
         {
 
             var users = await _userrepository.GetAllUsersWithRolesAsync();
-
-            if (users is null || !users.Any())
-                throw new NotFoundException("No users found");
 
             return users.Select(u => new UserResponseDto
             {
@@ -100,9 +94,6 @@ namespace TrailBlog.Api.Services
         public async Task<IEnumerable<UserResponseDto>> GetAllAdminUsersAsync()
         {
             var adminUsers = await _userrepository.GetAllAdminUsersAsync();
-
-            if (adminUsers is null || !adminUsers.Any())
-                throw new NotFoundException("No admin users found");
 
             return adminUsers.Select(u => new UserResponseDto
             {

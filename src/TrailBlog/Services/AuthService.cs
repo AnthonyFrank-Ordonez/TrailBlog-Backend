@@ -36,7 +36,7 @@ namespace TrailBlog.Api.Services
             
 
             if (user.IsRevoked)
-                throw new ApplicationException("User account is revoked");
+                throw new ApplicationException($"User account '{user.Email}' is revoked");
             
 
             return await CreateAuthResponse(user);
@@ -45,11 +45,11 @@ namespace TrailBlog.Api.Services
         public async Task<AuthResultDto> RegisterAsync(RegisterDto request)
         {
             if (await _userRepository.UsernameExistsAsync(request.Username))
-                throw new ApplicationException("Username already exists.");
+                throw new ApplicationException($"Username '{request.Username}' already exists.");
             
 
             if (await _userRepository.EmailExistsAsync(request.Email))
-                throw new ApplicationException("Email already exists.");
+                throw new ApplicationException($"Email '{request.Email}' already exists.");
 
 
             var hashedPassword = new PasswordHasher<User>()
@@ -98,7 +98,7 @@ namespace TrailBlog.Api.Services
             var user = await _userRepository.GetByIdAsync(id);
 
             if (user is null)
-                throw new NotFoundException("User not found, failed to logout");
+                throw new NotFoundException($"User with the id of {id} not found, failed to logout");
 
             user.RefreshToken = null;
             user.RefreshTokenExpiryTime = null;
@@ -120,7 +120,7 @@ namespace TrailBlog.Api.Services
             var userWithRoles = await _userRepository.GetUserByIdWithRolesAsync(user.Id);
 
             if (userWithRoles is null)
-                throw new NotFoundException("User not found.");
+                throw new NotFoundException($"User with the id of {user.Id} not found.");
             
 
             return await CreateAuthResponse(userWithRoles);
@@ -133,14 +133,14 @@ namespace TrailBlog.Api.Services
             var role = await _roleRepository.GetRoleByNameAsync(request.RoleName);
 
             if (user is null || role is null)
-                throw new NotFoundException("User or Role not found");
+                throw new NotFoundException($"User with id of {request.UserId} or Role {request.RoleName} not found");
             
 
             var existingUserRole = await _userRoleRepository.RoleExistAsync(request.UserId, role.Id);
 
             if (existingUserRole != null)
             {
-                throw new ApplicationException("Failed to assigned role. User already has the role");
+                throw new ApplicationException($"Failed to assigned role. User {user.Username} already has the role");
             }
 
             var assignedRole = new UserRole

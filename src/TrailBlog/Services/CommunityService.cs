@@ -23,9 +23,6 @@ namespace TrailBlog.Api.Services
         {
             var communities = await _communityRepository.GetAllCommunityWithUserandPostAsync();
 
-            if (communities is null || !communities.Any())
-                throw new NotFoundException("No communities found");
-
             return communities.Select(c => new CommunityResponseDto
             {
                 Id = c.Id,
@@ -112,9 +109,6 @@ namespace TrailBlog.Api.Services
         public async Task<IEnumerable<CommunityResponseDto>> GetAllCommunityPostsAsync()
         {
             var communityPosts = await _communityRepository.GetAllCommunityPostsAsync();
-
-            if (communityPosts is null || !communityPosts.Any())
-                throw new NotFoundException("No comunities found");
 
             return communityPosts.Select(c => new CommunityResponseDto
             {
@@ -231,9 +225,6 @@ namespace TrailBlog.Api.Services
 
             var communitiesResult = await _communityRepository.SearchCommunityAsync(query);
 
-            if (communitiesResult is null || !communitiesResult.Any())
-                throw new NotFoundException("No communities found");
-
             return communitiesResult.Select(cr => new CommunityResponseDto
             {
                 Id = cr.Id,
@@ -267,7 +258,7 @@ namespace TrailBlog.Api.Services
             var existingMember = await _userCommunityRepository.ExistingMemberAsync(communityId, userId);
 
             if (existingMember != null)
-                throw new ApplicationException("User is already a member of this community.");
+                throw new ApplicationException($"User: {user.Username} is already a member of this community.");
 
             var userCommunity = new UserCommunity
             {
@@ -294,7 +285,7 @@ namespace TrailBlog.Api.Services
             var userCommunity = await _userCommunityRepository.ExistingMemberAsync(communityId, userId);
 
             if (userCommunity is null)
-                throw new ApplicationException("User is not a member of this community.");
+                throw new ApplicationException($"User: {userId} is not a member of this community.");
 
             var result = await _userCommunityRepository.DeleteAsync(communityId);
             await _unitOfWork.SaveChangesAsync();

@@ -16,12 +16,9 @@ namespace TrailBlog.Api.Services
         private readonly IUserRepository _userrepository = userRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<IEnumerable<PostResponseDto?>> GetPostsAsync()
+        public async Task<IEnumerable<PostResponseDto>> GetPostsAsync()
         {
             var posts = await _postRepository.GetAllPostsDetailsAsync();
-
-            if (posts is null || !posts.Any())
-                throw new NotFoundException("No posts found");
 
             return posts.Select(p => new PostResponseDto
             {
@@ -61,10 +58,10 @@ namespace TrailBlog.Api.Services
         public async Task<PostResponseDto> CreatePostAsync(PostDto post, Guid userId)
         {
             // Will Change Later
-            //if (post is null)
-            //{
-            //    throw new ValidationException("Invalid post data");
-            //}
+            if (post is null)
+            {
+                throw new ValidationException("Invalid post data");
+            }
 
             var newPost = new Post
             {
@@ -141,9 +138,6 @@ namespace TrailBlog.Api.Services
         public async Task<IEnumerable<PostResponseDto>> GetRecentPostsAsync(int page, int pageSize)
         {
             var posts = await _postRepository.GetRecentPostsPagedAsync(page, pageSize);
-
-            if (posts is null || !posts.Any()) 
-                throw new NotFoundException("No recent posts found");
 
             return posts.Select(p => new PostResponseDto
             {
