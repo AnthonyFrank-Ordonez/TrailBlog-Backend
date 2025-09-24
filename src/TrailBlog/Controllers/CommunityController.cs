@@ -54,6 +54,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet("{id}/members")]
         [Authorize(Roles = "Admin, User")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetCommunityMembers(Guid id)
         {
             var members = await _communityService.GetCommunityMembersAsync(id);
@@ -63,6 +64,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet("communities")]
         [AllowAnonymous]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> GetAllCommunityPosts()
         {
             var communityPosts = await _communityService.GetAllCommunityPostsAsync();
@@ -72,6 +74,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpPost("search")]
         [AllowAnonymous]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> SearchCommunities([FromQuery] string query)
         {
             var communities = await _communityService.SearchCommunitiesAsync(query);
@@ -81,6 +84,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin, User")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<CommunityResponseDto>> CreateCommunity(CommunityDto community)
         {
             var userId = GetCurrentUserId();
@@ -91,6 +95,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpPut("id")]
         [Authorize(Roles = "Admin, User")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> UpdateCommunity(Guid id, CommunityDto community)
         {
             var userId = GetCurrentUserId();
@@ -103,6 +108,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin, User")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> DeleteCommunity(Guid id)
         {
             var userId = GetCurrentUserId();
@@ -117,6 +123,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpPost("{id}/join")]
         [Authorize(Roles = "User, Admin")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> JoinCommunity(Guid id)
         {
             var userId = GetCurrentUserId();
@@ -128,6 +135,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpPost("{id}/leave")]
         [Authorize(Roles = "User, Admin")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> LeaveCommunity(Guid id)
         {
             var userId = GetCurrentUserId();

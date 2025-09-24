@@ -27,6 +27,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet("{id}")]
         [Authorize(Roles = "User,Admin")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<UserResponseDto?>> GetUser(Guid id)
         {
             var user = await _userService.GetUserAsync(id);
@@ -37,6 +38,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet("roles")]
         [Authorize(Roles = "Admin")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<UserResponseDto?>> GetAllUsersWithRoles()
         {
             var users = await _userService.GetAllUsersWithRolesAsync();
@@ -46,6 +48,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet("{id}/role")]
         [Authorize(Roles = "Admin")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<UserResponseDto>> GetUserWithRoles(Guid id)
         {
             var user = await _userService.GetUserWithRolesAsync(id);
@@ -55,6 +58,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet("admins")]
         [Authorize(Roles = "Admin")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetAllAdminUsers()
         {
             var adminUsers = await _userService.GetAllAdminUsersAsync();
@@ -64,6 +68,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpPost("{id}/revoke")]
         [Authorize(Roles = "Admin")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> RevokeUser(Guid id)
         {
             var result = await _userService.RevokedUserAsync(id);

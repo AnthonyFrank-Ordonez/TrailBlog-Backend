@@ -29,6 +29,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<PostResponseDto?>> GetPost(Guid id)
         {
             var post = await _postService.GetPostAsync(id);
@@ -37,6 +38,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<PostResponseDto>> CreatePost(PostDto post)
         {
             var userId = GetCurrentUserId();
@@ -47,6 +49,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> UpdatePost(Guid id, PostDto post)
         {
             var userId = GetCurrentUserId();
@@ -58,6 +61,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> DeletePost(Guid id)
         {
             var userId = GetCurrentUserId();

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 using TrailBlog.Api.Models;
 using TrailBlog.Api.Services;
@@ -19,6 +20,7 @@ namespace TrailBlog.Api.Controllers
         }
 
         [HttpPost("register")]
+        [EnableRateLimiting("auth-operations")]
         public async Task<ActionResult<AuthResultDto>> Register(RegisterDto request)
         {
             var result = await _authService.RegisterAsync(request);
@@ -27,6 +29,7 @@ namespace TrailBlog.Api.Controllers
         }
 
         [HttpPost("login")]
+        [EnableRateLimiting("auth-operations")]
         public async Task<ActionResult<AuthResultDto>> Login(LoginDto request)
         {
             var result = await _authService.LoginAsync(request);
@@ -35,6 +38,7 @@ namespace TrailBlog.Api.Controllers
         }
 
         [HttpPost("refresh-token")]
+        [EnableRateLimiting("fixed")]
         public async Task<ActionResult<AuthResultDto>> RefreshToken(RefreshTokenRequestDto request)
         {
             var result = await _authService.RefreshTokenAsync(request);
@@ -44,6 +48,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpPost("logout")]
         [Authorize]
+        [EnableRateLimiting("fixed")]
         public async Task<IActionResult> LogoutUser()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -59,6 +64,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpPost("assign-role")]
         [Authorize(Roles = "Admin")]
+        [EnableRateLimiting("per-user")]
         public async Task<IActionResult> AssignRole(AssignRoleDto request)
         {
             var success = await _authService.AssignRoleAsync(request);

@@ -76,7 +76,7 @@ builder.Services.AddRateLimiter(options =>
 
     options.AddFixedWindowLimiter("fixed", cfg =>
     {
-        cfg.PermitLimit = 5;
+        cfg.PermitLimit = 10;
         cfg.Window = TimeSpan.FromMinutes(3);
 
     });
@@ -101,7 +101,7 @@ builder.Services.AddRateLimiter(options =>
             "anonymous",
             _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 5,
+                PermitLimit = 10,
                 Window = TimeSpan.FromMinutes(3),
             });
     });
