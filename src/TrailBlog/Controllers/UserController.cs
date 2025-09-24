@@ -5,6 +5,7 @@ using TrailBlog.Api.Models;
 using TrailBlog.Api.Services;
 using TrailBlog.Api.Entities;
 using TrailBlog.Api.Helpers;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace TrailBlog.Api.Controllers
 {
@@ -16,6 +17,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<UserResponseDto>> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();

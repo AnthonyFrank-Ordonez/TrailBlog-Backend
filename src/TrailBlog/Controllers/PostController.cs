@@ -7,6 +7,7 @@ using TrailBlog.Api.Models;
 using TrailBlog.Api.Services;
 using TrailBlog.Api.Entities;
 using TrailBlog.Api.Helpers;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace TrailBlog.Api.Controllers
 {
@@ -19,6 +20,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<IEnumerable<PostResponseDto?>>> GetPosts()
         {
             var posts = await _postService.GetPostsAsync();
@@ -26,7 +28,7 @@ namespace TrailBlog.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<PostResponseDto?>> GetPost(Guid id)
         {
             var post = await _postService.GetPostAsync(id);
@@ -67,6 +69,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet("recent")]
         [AllowAnonymous]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<IEnumerable<PostResponseDto>>> GetRecentPosts([FromQuery] int page, [FromQuery] int pageSize)
         {
             var recentPosts = await _postService.GetRecentPostsAsync(page, pageSize);

@@ -5,6 +5,7 @@ using System.Security.Claims;
 using TrailBlog.Api.Models;
 using TrailBlog.Api.Services;
 using TrailBlog.Api.Entities;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace TrailBlog.Api.Controllers
 {
@@ -22,6 +23,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> GetAllCommunities()
         {
             var communities = await _communityService.GetAllCommunitiesAsync();
@@ -31,6 +33,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<CommunityResponseDto?>> GetCommunity(Guid id)
         {
             var community = await _communityService.GetCommunityAsync(id);
@@ -40,6 +43,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpGet("user")]
         [Authorize(Roles = "Admin, User")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> GetUserCommunities()
         {
             var userId = GetCurrentUserId();

@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using System.Security.Claims;
 using System.Text;
+using System.Threading.RateLimiting;
 using TrailBlog.Api.Data;
 using TrailBlog.Api.Exceptions;
 using TrailBlog.Api.Repositories;
@@ -45,6 +49,64 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// Add Rate Limitting
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.OnRejected = async (context, token) =>
+    {
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out TimeSpan retryAfter))
+        {
+            context.HttpContext.Response.Headers.RetryAfter = $"{retryAfter.TotalSeconds}";
+
+            ProblemDetailsFactory problemDetailsFactory = context.HttpContext.RequestServices
+                .GetRequiredService<ProblemDetailsFactory>();
+            Microsoft.AspNetCore.Mvc.ProblemDetails problemDetails = problemDetailsFactory
+                .CreateProblemDetails(
+                    context.HttpContext,
+                    StatusCodes.Status429TooManyRequests,
+                    "Too Many Requests",
+                    detail: $"Too many requests. Please try again after {retryAfter.TotalSeconds} seconds."
+                );
+
+            await context.HttpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken: token);
+        }
+    };
+
+    options.AddFixedWindowLimiter("fixed", cfg =>
+    {
+        cfg.PermitLimit = 5;
+        cfg.Window = TimeSpan.FromMinutes(3);
+
+    });
+
+    options.AddPolicy("per-user", httpContext =>
+    {
+        string? userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!string.IsNullOrWhiteSpace(userId))
+        {
+            return RateLimitPartition.GetTokenBucketLimiter(
+                userId,
+                _ => new TokenBucketRateLimiterOptions
+                {
+                    TokenLimit = 10,
+                    TokensPerPeriod = 2,
+                    ReplenishmentPeriod = TimeSpan.FromMinutes(1),
+                });
+        }
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            "anonymous",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(3),
+            });
+    });
+});
+
 builder.Services.AddAuthorization();
 
 // Register repositories
@@ -78,6 +140,8 @@ app.UseExceptionHandler();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseRateLimiter();
 
 app.MapControllers();
 
