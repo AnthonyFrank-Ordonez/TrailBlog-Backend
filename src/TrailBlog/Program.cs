@@ -91,8 +91,8 @@ builder.Services.AddRateLimiter(options =>
                 userId,
                 _ => new TokenBucketRateLimiterOptions
                 {
-                    TokenLimit = 10,
-                    TokensPerPeriod = 2,
+                    TokenLimit = 20,
+                    TokensPerPeriod = 5,
                     ReplenishmentPeriod = TimeSpan.FromMinutes(1),
                 });
         }
@@ -103,6 +103,20 @@ builder.Services.AddRateLimiter(options =>
             {
                 PermitLimit = 5,
                 Window = TimeSpan.FromMinutes(3),
+            });
+    });
+
+    options.AddPolicy("auth-operations", httpContext =>
+    {
+        string ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return RateLimitPartition.GetTokenBucketLimiter(
+            ipAddress,
+            _ => new TokenBucketRateLimiterOptions
+            {
+                TokenLimit = 5,
+                TokensPerPeriod = 2,
+                ReplenishmentPeriod = TimeSpan.FromMinutes(1)
             });
     });
 });
