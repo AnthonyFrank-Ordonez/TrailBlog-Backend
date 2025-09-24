@@ -38,7 +38,7 @@ namespace TrailBlog.Api.Controllers
         }
 
         [HttpPost("refresh-token")]
-        [EnableRateLimiting("fixed")]
+        [EnableRateLimiting("per-user")]
         public async Task<ActionResult<AuthResultDto>> RefreshToken(RefreshTokenRequestDto request)
         {
             var result = await _authService.RefreshTokenAsync(request);
@@ -48,7 +48,7 @@ namespace TrailBlog.Api.Controllers
 
         [HttpPost("logout")]
         [Authorize]
-        [EnableRateLimiting("fixed")]
+        [EnableRateLimiting("per-user")]
         public async Task<IActionResult> LogoutUser()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
