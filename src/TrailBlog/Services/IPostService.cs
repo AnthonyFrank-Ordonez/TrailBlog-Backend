@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TrailBlog.Api.Models;
-using TrailBlog.Api.Entities;
+﻿using TrailBlog.Api.Models;
 
 namespace TrailBlog.Api.Services
 {

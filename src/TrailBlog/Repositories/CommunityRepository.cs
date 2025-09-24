@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TrailBlog.Api.Data;
 using TrailBlog.Api.Entities;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TrailBlog.Api.Repositories
 {

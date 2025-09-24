@@ -1,5 +1,4 @@
 ﻿using TrailBlog.Api.Models;
-using TrailBlog.Api.Entities;
 
 namespace TrailBlog.Api.Services
 {

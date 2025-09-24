@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TrailBlog.Api.Data;
-using TrailBlog.Api.Models;
+﻿using TrailBlog.Api.Models;
 using TrailBlog.Api.Entities;
 using TrailBlog.Api.Repositories;
 using TrailBlog.Api.Exceptions;

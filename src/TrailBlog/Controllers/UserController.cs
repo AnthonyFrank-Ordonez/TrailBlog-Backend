@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TrailBlog.Api.Models;
 using TrailBlog.Api.Services;
-using TrailBlog.Api.Entities;
-using TrailBlog.Api.Helpers;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace TrailBlog.Api.Controllers
