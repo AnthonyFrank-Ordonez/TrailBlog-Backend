@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using TrailBlog.Api.Data;
 using TrailBlog.Api.Exceptions;
+using TrailBlog.Api.Extensions;
 using TrailBlog.Api.Repositories;
 using TrailBlog.Api.Services;
 
@@ -146,6 +147,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+    app.ApplyMigrations();
 }
 
 app.UseHttpsRedirection();

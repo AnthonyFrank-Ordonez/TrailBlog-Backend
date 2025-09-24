@@ -1,0 +1,25 @@
+services:
+  trailblog.api:
+    image: ${DOCKER_REGISTRY-}trailblogapi
+    container_name: trailblog.api
+    build:
+      context: .
+      dockerfile: src/TrailBlog/Dockerfile
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+
+  trailblog.database:
+    image: postgres:latest
+    container_name: trailblog.database
+    environment:
+      - POSTGRES_DB=trailblogdev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./.containers/trailblog-db:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+
+

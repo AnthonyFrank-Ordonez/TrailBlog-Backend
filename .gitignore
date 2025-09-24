@@ -73,3 +73,6 @@ appsettings.*.json
 
 # Secret storage
 secrets.json
+
+# docker postgres volume
+.containers/
