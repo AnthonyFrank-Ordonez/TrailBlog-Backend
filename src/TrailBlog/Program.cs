@@ -133,6 +133,7 @@ builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<ICommunityRepository, CommunityRepository>();
 builder.Services.AddScoped<IUserCommunityRepository, UserCommunityRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<ILikeRepository, LikeRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 // Register application services

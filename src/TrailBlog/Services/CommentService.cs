@@ -19,7 +19,7 @@ namespace TrailBlog.Api.Services
 
         public async Task<IEnumerable<CommentResponseDto>> GetAllDeletedCommentsAsync()
         {
-            var deletedComments = await _commentRepository.GetAllDeletedComments();
+            var deletedComments = await _commentRepository.GetAllDeletedCommentsAsync();
 
             return deletedComments.Select(dc => new CommentResponseDto
             {
