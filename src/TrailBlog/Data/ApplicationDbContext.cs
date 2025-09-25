@@ -16,6 +16,7 @@ namespace TrailBlog.Api.Data
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<UserCommunity> UserCommunities { get; set; }
         public DbSet<Like> Likes { get; set; }
+        public DbSet<Comment> Comments { get; set; }
             
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -26,6 +27,12 @@ namespace TrailBlog.Api.Data
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Username).IsUnique();
                 entity.HasIndex(e => e.Email).IsUnique();
+                entity.HasIndex(e => e.RefreshToken);
+                entity.HasIndex(e => e.CreatedAt);
+                entity.HasIndex(e => e.UpdatedAt);
+                entity.HasIndex(e => e.IsRevoked);
+                entity.HasIndex(e => new { e.IsRevoked, e.CreatedAt });
+                entity.HasIndex(e => new { e.IsRevoked, e.UpdatedAt });
                 entity.Property(e => e.Username).HasMaxLength(50).IsRequired();
                 entity.Property(e => e.Email).HasMaxLength(100).IsRequired();
             });
@@ -41,6 +48,11 @@ namespace TrailBlog.Api.Data
             modelBuilder.Entity<UserRole>(entity =>
             {
                 entity.HasKey(ur => new { ur.UserId, ur.RoleId });
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.RoleId);
+                entity.HasIndex(e => e.AssignedAt);
+                entity.HasIndex(e => new { e.UserId, e.AssignedAt });
+                entity.HasIndex(e => new { e.RoleId, e.AssignedAt });
 
                 entity.HasOne(ur => ur.User)
                     .WithMany(u => u.UserRoles)
@@ -57,6 +69,13 @@ namespace TrailBlog.Api.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Slug).IsUnique();
+                entity.HasIndex(e => e.CommunityId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.CreatedAt);
+                entity.HasIndex(e => e.UpdatedAt);
+                entity.HasIndex(e => new { e.UserId, e.CreatedAt });
+                entity.HasIndex(e => new { e.CommunityId, e.CreatedAt });
+
                 entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
 
                 entity.HasOne(e => e.User)
@@ -66,11 +85,15 @@ namespace TrailBlog.Api.Data
             });
 
             modelBuilder.Entity<Post>().Ignore(p => p.TotalLikes);
+            modelBuilder.Entity<Post>().Ignore(p => p.TotalComments);
 
             modelBuilder.Entity<Community>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Name).IsUnique();
+                entity.HasIndex(e => e.CreatedAt);
+                entity.HasIndex(e => e.OwnerId);
+                entity.HasIndex(e => new { e.OwnerId, e.CreatedAt });
                 entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
                 entity.Property(e => e.Description).HasMaxLength(500);
             });
@@ -78,6 +101,9 @@ namespace TrailBlog.Api.Data
             modelBuilder.Entity<UserCommunity>(entity =>
             {
                 entity.HasKey(uc => new { uc.UserId, uc.CommunityId });
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.CommunityId);
+                entity.HasIndex(e => e.JoinedDate);
 
                 entity.HasOne(ur => ur.User)
                     .WithMany(u => u.UserCommunities)
@@ -90,6 +116,23 @@ namespace TrailBlog.Api.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<Comment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.PostId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.CommentedAt);
+                entity.HasIndex(e => e.LastUpdatedAt);
+                entity.HasIndex(e => new { e.UserId, e.CommentedAt });
+                entity.HasIndex(e => new { e.UserId, e.LastUpdatedAt });
+                entity.HasIndex(e => new { e.PostId, e.CommentedAt });
+                entity.HasIndex(e => new { e.PostId, e.LastUpdatedAt });
+                entity.HasIndex(e => new { e.PostId, e.IsDeleted });
+                entity.HasIndex(e => e.IsDeleted);
+                entity.Property(e => e.Content).HasMaxLength(2000).IsRequired();
+                entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+            });
+
             
 
             modelBuilder.Entity<Role>().HasData(
@@ -99,4 +142,4 @@ namespace TrailBlog.Api.Data
 
         }
     }
-}
+}   

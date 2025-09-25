@@ -17,5 +17,6 @@
         public ICollection<UserCommunity> UserCommunities { get; set; } = new List<UserCommunity>();
         public ICollection<Community> Communities { get; set; } = new List<Community>();
         public ICollection<Post> Posts { get; set; } = new List<Post>();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
 }
