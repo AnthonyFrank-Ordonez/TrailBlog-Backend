@@ -3,7 +3,7 @@
     public class Comment
     {
         public Guid Id { get; set; }
-        public String Content { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
         public DateTime CommentedAt { get; set; } = DateTime.UtcNow;
         public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
         public bool IsDeleted { get; set; } = false;
