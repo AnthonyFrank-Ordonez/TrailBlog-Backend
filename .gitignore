@@ -76,3 +76,11 @@ secrets.json
 
 # docker postgres volume
 .containers/
+
+# docker
+docker-compose.override.yml
+
+# environment
+.env
+.env.development
+.env.production
