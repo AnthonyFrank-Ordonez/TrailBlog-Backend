@@ -1,6 +1,6 @@
 ﻿namespace TrailBlog.Api.Models
 {
-    public class CommunityDto
+    public sealed class CommunityDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;

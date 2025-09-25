@@ -2,7 +2,7 @@
 
 namespace TrailBlog.Api.Models
 {
-    public class RegisterDto
+    public sealed class RegisterDto
     {
         [Required(ErrorMessage = "Username is required")]
         public string Username { get; set; } = string.Empty;

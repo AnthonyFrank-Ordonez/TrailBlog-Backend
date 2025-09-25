@@ -2,7 +2,7 @@
 
 namespace TrailBlog.Api.Models
 {
-    public class PostDto
+    public sealed class PostDto
     {
         [Required(ErrorMessage = "Title is required")]
         public string Title { get; set; } = string.Empty;

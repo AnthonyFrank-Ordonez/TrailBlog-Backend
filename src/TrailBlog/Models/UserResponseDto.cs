@@ -1,6 +1,6 @@
 ﻿namespace TrailBlog.Api.Models
 {
-    public class UserResponseDto
+    public sealed class UserResponseDto
     {
         public Guid Id { get; set; }
         public string Username { get; set; } = null!;
