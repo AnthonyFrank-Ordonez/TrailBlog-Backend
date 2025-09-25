@@ -14,7 +14,7 @@ namespace TrailBlog.Api.Services
 
         public async Task<IEnumerable<PostResponseDto>> GetPostsAsync()
         {
-            var posts = await _postRepository.GetAllPostsDetailsAsync();
+            var posts = await _postRepository.GetAllPostsAsync();
 
             return posts.Select(p => new PostResponseDto
             {
@@ -24,9 +24,10 @@ namespace TrailBlog.Api.Services
                 Author = p.Author,
                 Slug = p.Slug,
                 CreatedAt = p.CreatedAt,
-                Username = p.User.Username,
                 CommunityName = p.Community.Name,
                 CommunityId = p.CommunityId,
+                TotalLike = p.TotalLikes,
+                TotalComment = p.TotalComments,
             }).ToList();
         }
 
@@ -45,9 +46,16 @@ namespace TrailBlog.Api.Services
                 Author = post.Author,
                 Slug = post.Slug,
                 CreatedAt = post.CreatedAt,
-                Username = post.User.Username,
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
+                Comments = post.Comments.Select(c => new CommentResponseDto
+                {
+                    Id = c.Id,
+                    Content = c.Content,
+                    CommentedAt = c.CommentedAt,
+                    LastUpdatedAt = c.LastUpdatedAt,
+                    IsDeleted = c.IsDeleted,
+                }).ToList()
             };
         }
 
@@ -85,7 +93,6 @@ namespace TrailBlog.Api.Services
                 Author = createdPost.Author,
                 Slug = createdPost.Slug,
                 CreatedAt = createdPost.CreatedAt,
-                Username = user?.Username ?? string.Empty,
                 CommunityName = post.CommunityName,
                 CommunityId = createdPost.CommunityId,
             };
@@ -143,9 +150,10 @@ namespace TrailBlog.Api.Services
                 Author = p.Author,
                 Slug = p.Slug,
                 CreatedAt = p.CreatedAt,
-                Username = p.User.Username,
                 CommunityName = p.Community.Name,
                 CommunityId = p.CommunityId,
+                TotalLike = p.TotalLikes,
+                TotalComment = p.TotalComments,
             }).ToList();
         }
 

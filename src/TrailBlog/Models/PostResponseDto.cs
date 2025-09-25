@@ -11,6 +11,9 @@
         public string Username { get; set; } = string.Empty;
         public string CommunityName { get; set; } = string.Empty;
         public Guid CommunityId { get; set; }
+        public List<CommentResponseDto> Comments { get; set; } = new List<CommentResponseDto>();
+        public int TotalLike { get; set; }
+        public int TotalComment { get; set; }
     }
 }
-    
+        

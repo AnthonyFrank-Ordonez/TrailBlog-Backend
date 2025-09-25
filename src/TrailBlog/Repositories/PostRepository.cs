@@ -8,10 +8,9 @@ namespace TrailBlog.Api.Repositories
     {
         public PostRepository(ApplicationDbContext context) : base(context) { }
 
-        public async Task<IEnumerable<Post>> GetAllPostsDetailsAsync()
+        public async Task<IEnumerable<Post>> GetAllPostsAsync()
         {
             return await _dbSet
-                .Include(p => p.User)   
                 .Include(p => p.Community)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync(); 
@@ -20,15 +19,14 @@ namespace TrailBlog.Api.Repositories
         public async Task<Post?> GetPostDetailByIdAsync(Guid id)
         {
             return await _dbSet
-                .Include(p => p.User)   
                 .Include(p => p.Community)
+                .Include(p => p.Comments)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task<IEnumerable<Post>> GetRecentPostsAsync(int take)
         {
             return await _dbSet
-                .Include(p => p.User)
                 .Include(p => p.Community)  
                 .OrderByDescending(p => p.CreatedAt)
                 .Take(take) 
@@ -41,7 +39,6 @@ namespace TrailBlog.Api.Repositories
             if (pageSize <= 0) pageSize = 10;
 
             return await _dbSet
-                .Include(p => p.User)
                 .Include(p => p.Community)
                 .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
