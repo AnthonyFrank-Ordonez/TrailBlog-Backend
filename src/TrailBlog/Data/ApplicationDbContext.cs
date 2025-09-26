@@ -92,10 +92,15 @@ namespace TrailBlog.Api.Data
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Name).IsUnique();
                 entity.HasIndex(e => e.CreatedAt);
-                entity.HasIndex(e => e.OwnerId);
-                entity.HasIndex(e => new { e.OwnerId, e.CreatedAt });
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => new { e.UserId, e.CreatedAt });
                 entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
                 entity.Property(e => e.Description).HasMaxLength(500);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.Communities)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<UserCommunity>(entity =>
@@ -131,6 +136,35 @@ namespace TrailBlog.Api.Data
                 entity.HasIndex(e => e.IsDeleted);
                 entity.Property(e => e.Content).HasMaxLength(2000).IsRequired();
                 entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.Comments)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Post)
+                   .WithMany(e => e.Comments)
+                   .HasForeignKey(e => e.PostId)
+                   .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Like>(entity =>
+            {
+                entity.HasIndex(e => e.PostId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => new { e.PostId, e.UserId });
+                entity.HasIndex(e => new { e.PostId, e.LikeAt });
+                entity.HasIndex(e => new { e.UserId, e.LikeAt });
+
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.Likes)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Post)
+                   .WithMany(e => e.Likes)
+                   .HasForeignKey(e => e.PostId)
+                   .OnDelete(DeleteBehavior.Cascade);
             });
 
             

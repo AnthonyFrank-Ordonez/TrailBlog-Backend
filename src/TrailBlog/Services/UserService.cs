@@ -13,11 +13,11 @@ namespace TrailBlog.Api.Services
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 
-        public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
+        public async Task<IEnumerable<PublicUserResponseDto>> GetAllUsersAsync()
         {
             var users = await _userrepository.GetAllAsync();
 
-            return users.Select(u => new UserResponseDto
+            return users.Select(u => new PublicUserResponseDto
             {
                 Id = u.Id,
                 Email = u.Email,
@@ -25,19 +25,18 @@ namespace TrailBlog.Api.Services
                 CreatedAt = u.CreatedAt,
                 UpdatedAt = u.UpdatedAt,
                 IsRevoked = u.IsRevoked,
-                RevokedAt = u.RevokedAt,
             }).ToList();
 
         }
 
-        public async Task<UserResponseDto?> GetUserAsync(Guid userId)
+        public async Task<PublicUserResponseDto?> GetUserAsync(Guid userId)
         {
             var user = await _userrepository.GetByIdAsync(userId);
 
             if (user is null) 
                 throw new NotFoundException($"No user found with the id of {userId}");
 
-            return new UserResponseDto
+            return new PublicUserResponseDto
             {
                 Id = user.Id,
                 Email = user.Email,
@@ -45,7 +44,6 @@ namespace TrailBlog.Api.Services
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt,
                 IsRevoked = user.IsRevoked,
-                RevokedAt = user.RevokedAt,
             };
         }
 

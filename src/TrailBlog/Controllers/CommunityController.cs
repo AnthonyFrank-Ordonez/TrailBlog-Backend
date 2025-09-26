@@ -91,7 +91,7 @@ namespace TrailBlog.Api.Controllers
             return CreatedAtAction(nameof(GetCommunity), new { id = createdCommunity.Id }, createdCommunity);
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         [Authorize(Roles = "Admin, User")]
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> UpdateCommunity(Guid id, CommunityDto community)

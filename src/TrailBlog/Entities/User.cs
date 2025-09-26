@@ -11,12 +11,13 @@
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public bool IsRevoked { get; set; } = false;
-        public DateTime? RevokedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? RevokedAt { get; set; }
 
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<UserCommunity> UserCommunities { get; set; } = new List<UserCommunity>();
         public ICollection<Community> Communities { get; set; } = new List<Community>();
         public ICollection<Post> Posts { get; set; } = new List<Post>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<Like> Likes { get; set; } = new List<Like>();
     }
 }

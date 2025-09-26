@@ -9,12 +9,14 @@ namespace TrailBlog.Api.Services
         ICommunityRepository communityRepository,
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
+        ILogger<CommunityService> logger,
         IUserCommunityRepository userCommunityRepository) : ICommunityService
     {
         private readonly ICommunityRepository _communityRepository = communityRepository;
         private readonly IUserCommunityRepository _userCommunityRepository = userCommunityRepository;
         private readonly IUserRepository _userRepository = userRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly ILogger _logger = logger;
 
 
         public async Task<IEnumerable<CommunityResponseDto>> GetAllCommunitiesAsync()
@@ -126,14 +128,20 @@ namespace TrailBlog.Api.Services
 
         public async Task<CommunityResponseDto> CreateCommunityAsync(CommunityDto community, Guid userId)
         {
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of ${userId}");
+
+            _logger.LogInformation("Creating community for userid: {UserId}", user.Id);
+
             if (community is null)
                 throw new ApplicationException("Invalid community. Please double check your input");
-            
 
             var newCommunity = new Community {
                 Name = community.Name,
                 Description = community.Description ?? "",
-                OwnerId = userId,
+                UserId = user.Id,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             };
@@ -143,8 +151,6 @@ namespace TrailBlog.Api.Services
 
             if (createdCommunity is null)
                 throw new ApplicationException("An error occured. Failed to create community");
-
-            var user = await _userRepository.GetByIdAsync(userId);
 
             if (user is null)
                 throw new NotFoundException($"User not found with the id of {userId}");
@@ -174,7 +180,7 @@ namespace TrailBlog.Api.Services
             if (existingCommunity is null)
                 throw new NotFoundException($"No community found with the id of {communityId}");
 
-            if (existingCommunity.OwnerId != userId)
+            if (existingCommunity.UserId != userId)
                 throw new UnauthorizedException("You are not authorized to update this community.");
 
             UpdateCommunityFields(existingCommunity, community);
@@ -200,9 +206,9 @@ namespace TrailBlog.Api.Services
             if (existingCommunity is null)
                 throw new NotFoundException($"No community found with the id of {communityId}");
 
-            if (existingCommunity.OwnerId != userId || !isAdmin)
+            if (existingCommunity.UserId != userId && !isAdmin)
                 throw new UnauthorizedException("You are not authorized to delete this community.");
-
+                
             var result = await _communityRepository.DeleteAsync(existingCommunity.Id);
             await _unitOfWork.SaveChangesAsync();
 

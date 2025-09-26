@@ -4,8 +4,8 @@ namespace TrailBlog.Api.Services
 {
     public interface IUserService
     {
-        Task<IEnumerable<UserResponseDto>> GetAllUsersAsync();
-        Task<UserResponseDto?> GetUserAsync(Guid userId);
+        Task<IEnumerable<PublicUserResponseDto>> GetAllUsersAsync();
+        Task<PublicUserResponseDto?> GetUserAsync(Guid userId);
         Task<IEnumerable<UserResponseDto>> GetAllUsersWithRolesAsync();   
         Task<UserResponseDto?> GetUserWithRolesAsync(Guid userId);
         Task<IEnumerable<UserResponseDto>> GetAllAdminUsersAsync();

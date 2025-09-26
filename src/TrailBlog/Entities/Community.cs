@@ -10,9 +10,7 @@
         
         public ICollection<Post> Posts { get; set; } = new List<Post>();
         public ICollection<UserCommunity> UserCommunities { get; set; } = new List<UserCommunity>();
-        public Guid OwnerId { get; set; }
+        public Guid UserId { get; set; }
         public User User { get; set; } = null!;
-
-
     }
 }

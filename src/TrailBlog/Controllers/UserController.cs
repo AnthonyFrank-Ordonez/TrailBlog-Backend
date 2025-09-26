@@ -15,7 +15,7 @@ namespace TrailBlog.Api.Controllers
         [HttpGet]
         [AllowAnonymous]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<UserResponseDto>> GetAllUsers()
+        public async Task<ActionResult<PublicUserResponseDto>> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
 
@@ -25,7 +25,7 @@ namespace TrailBlog.Api.Controllers
         [HttpGet("{id}")]
         [Authorize(Roles = "User,Admin")]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<UserResponseDto?>> GetUser(Guid id)
+        public async Task<ActionResult<PublicUserResponseDto?>> GetUser(Guid id)
         {
             var user = await _userService.GetUserAsync(id);
 
