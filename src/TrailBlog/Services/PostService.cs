@@ -31,8 +31,8 @@ namespace TrailBlog.Api.Services
                 CreatedAt = p.CreatedAt,
                 CommunityName = p.Community.Name,
                 CommunityId = p.CommunityId,
-                TotalLike = p.TotalLikes,
-                TotalComment = p.TotalComments,
+                TotalLike = p.Likes.Count(),
+                TotalComment = p.Comments.Count(),
             }).ToList();
         }
 
@@ -53,6 +53,7 @@ namespace TrailBlog.Api.Services
                 CreatedAt = post.CreatedAt,
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
+                TotalLike = post.Likes.Count(),
                 Comments = post.Comments.Select(c => new CommentResponseDto
                 {
                     Id = c.Id,
@@ -158,8 +159,8 @@ namespace TrailBlog.Api.Services
                 CreatedAt = p.CreatedAt,
                 CommunityName = p.Community.Name,
                 CommunityId = p.CommunityId,
-                TotalLike = p.TotalLikes,
-                TotalComment = p.TotalComments,
+                TotalLike = p.Likes.Count(),
+                TotalComment = p.Comments.Count(),
             }).ToList();
         }
 

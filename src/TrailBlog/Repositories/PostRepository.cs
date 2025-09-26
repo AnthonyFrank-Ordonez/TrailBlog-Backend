@@ -12,6 +12,8 @@ namespace TrailBlog.Api.Repositories
         {
             return await _dbSet
                 .Include(p => p.Community)
+                .Include(p => p.Likes)
+                .Include(p => p.Comments)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync(); 
         }
@@ -20,6 +22,7 @@ namespace TrailBlog.Api.Repositories
         {
             return await _dbSet
                 .Include(p => p.Community)
+                .Include(p => p.Likes)
                 .Include(p => p.Comments)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
@@ -27,7 +30,9 @@ namespace TrailBlog.Api.Repositories
         public async Task<IEnumerable<Post>> GetRecentPostsAsync(int take)
         {
             return await _dbSet
-                .Include(p => p.Community)  
+                .Include(p => p.Community)
+                .Include(p => p.Likes)
+                .Include(p => p.Comments)
                 .OrderByDescending(p => p.CreatedAt)
                 .Take(take) 
                 .ToListAsync();
@@ -40,6 +45,8 @@ namespace TrailBlog.Api.Repositories
 
             return await _dbSet
                 .Include(p => p.Community)
+                .Include(p => p.Likes)
+                .Include(p => p.Comments)
                 .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)

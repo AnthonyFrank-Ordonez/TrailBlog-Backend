@@ -28,10 +28,10 @@ namespace TrailBlog.Api.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<CommentResponseDto>> AddComment(Guid postId, CommentDto comment)
+        public async Task<ActionResult<CommentResponseDto>> AddComment(CommentDto comment)
         {
             var userId = GetCurrentUserId();
-            var newComment = await _commentService.AddCommentAsync(postId, userId, comment);
+            var newComment = await _commentService.AddCommentAsync(userId, comment);
 
             return Ok(newComment);
         }
@@ -39,7 +39,7 @@ namespace TrailBlog.Api.Controllers
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<CommentResponseDto>> EditComment(Guid id, CommentDto comment)
+        public async Task<ActionResult<CommentResponseDto>> EditComment(Guid id, UpdateCommentDto comment)
         {
             var userId = GetCurrentUserId();
             var updateComment = await _commentService.EditCommentAsync(id, userId, comment);

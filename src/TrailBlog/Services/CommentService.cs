@@ -27,22 +27,23 @@ namespace TrailBlog.Api.Services
                 UserId = dc.User.Id,
                 PostId = dc.Post.Id,
                 Content = dc.Content,
+                Username = dc.User.Username,
                 LastUpdatedAt = dc.LastUpdatedAt,
                 CommentedAt = dc.CommentedAt,
                 IsDeleted = dc.IsDeleted,
             });
         }
 
-        public async Task<CommentResponseDto> AddCommentAsync(Guid postId, Guid userId, CommentDto comment)
+        public async Task<CommentResponseDto> AddCommentAsync(Guid userId, CommentDto comment)
         {
-            var post = await _postRepository.GetByIdAsync(postId);
+            var post = await _postRepository.GetByIdAsync(comment.PostId);
             var user = await _userRepository.GetByIdAsync(userId);
 
             if (user is null)
                 throw new NotFoundException($"User with the id of {userId} not found");
 
             if (post is null)
-                throw new NotFoundException($"Post with the id of {postId} not found");
+                throw new NotFoundException($"Post with the id of {post?.Id} not found");
 
             var newComment = new Comment
             {
@@ -59,6 +60,9 @@ namespace TrailBlog.Api.Services
             return new CommentResponseDto
             {
                 Id = newComment.Id,
+                UserId = user.Id,
+                PostId = post.Id,
+                Username = user.Username,
                 Content = newComment.Content,
                 CommentedAt = newComment.CommentedAt,
                 LastUpdatedAt = newComment.LastUpdatedAt,
@@ -67,7 +71,7 @@ namespace TrailBlog.Api.Services
 
         }
 
-        public async Task<CommentResponseDto> EditCommentAsync(Guid commentId, Guid userId, CommentDto comment)
+        public async Task<CommentResponseDto> EditCommentAsync(Guid commentId, Guid userId, UpdateCommentDto comment)
         {
             var existingComment = await _commentRepository.GetByIdAsync(commentId);
             var user = await _userRepository.GetByIdAsync(userId);  
@@ -92,7 +96,9 @@ namespace TrailBlog.Api.Services
             return new CommentResponseDto
             {
                 Id = updatedComment.Id,
+                UserId = user.Id,
                 Content = updatedComment.Content,
+                Username = updatedComment.User.Username,
                 CommentedAt = updatedComment.CommentedAt,
                 LastUpdatedAt = updatedComment.LastUpdatedAt,
                 IsDeleted = updatedComment.IsDeleted,
@@ -141,7 +147,7 @@ namespace TrailBlog.Api.Services
             return OperationResult.Success("Successfully deleted the comment");
         }
 
-        private static void UpdateCommentField(Comment existingComment, CommentDto comment)
+        private static void UpdateCommentField(Comment existingComment, UpdateCommentDto comment)
         {
             if (!string.IsNullOrWhiteSpace(comment.Content)) existingComment.Content = comment.Content;
 
