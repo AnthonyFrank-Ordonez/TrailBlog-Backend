@@ -93,12 +93,11 @@ namespace TrailBlog.Api.Services
                 Author = createdPost.Author,
                 Slug = createdPost.Slug,
                 CreatedAt = createdPost.CreatedAt,
-                CommunityName = post.CommunityName,
                 CommunityId = createdPost.CommunityId,
             };
         }
 
-        public async Task<OperationResultDto> UpdatePostAsync(Guid id, Guid userId, PostDto post, bool isAdmin)
+        public async Task<OperationResultDto> UpdatePostAsync(Guid id, Guid userId, UpdatePostDto post, bool isAdmin)
         {
             var existingPost = await _postRepository.GetByIdAsync(id);
 
@@ -157,18 +156,36 @@ namespace TrailBlog.Api.Services
             }).ToList();
         }
 
-        private static void UpdatePostFields(Post existingPost, PostDto post)
+        private static void UpdatePostFields(Post existingPost, UpdatePostDto post)
         {
-            if (!string.IsNullOrWhiteSpace(post.Title))
+            bool hasChanges = false;
+
+            if (!string.IsNullOrWhiteSpace(post.Title) && 
+                !string.Equals(existingPost.Title, post.Title, StringComparison.Ordinal))
             {
                 existingPost.Title = post.Title;
                 existingPost.Slug = post.Title.ToLower().Replace(" ", "-");
+                hasChanges = true;
             }
 
-            if (!string.IsNullOrWhiteSpace(post.Content)) existingPost.Content = post.Content;
-            if (!string.IsNullOrWhiteSpace(post.Author)) existingPost.Author = post.Author;
+            if (!string.IsNullOrWhiteSpace(post.Content) &&
+                !string.Equals(existingPost.Content, post.Content, StringComparison.Ordinal))
+            {
+                existingPost.Content = post.Content;
+                hasChanges = true;
+            }
+            if (!string.IsNullOrWhiteSpace(post.Author) && 
+                !string.Equals(existingPost.Author, post.Author, StringComparison.Ordinal))
+            {
+                existingPost.Author = post.Author;
+                hasChanges = true;
+            }
 
-            existingPost.UpdatedAt = DateTime.UtcNow;
+            if (hasChanges)
+            {
+                existingPost.UpdatedAt = DateTime.UtcNow;
+            }
+
         }
     }
 

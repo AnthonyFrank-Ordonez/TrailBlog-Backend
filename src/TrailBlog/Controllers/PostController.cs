@@ -48,7 +48,7 @@ namespace TrailBlog.Api.Controllers
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<OperationResultDto>> UpdatePost(Guid id, PostDto post)
+        public async Task<ActionResult<OperationResultDto>> UpdatePost(Guid id, UpdatePostDto post)
         {
             var userId = GetCurrentUserId();
             var isAdmin = User.IsInRole("Admin");

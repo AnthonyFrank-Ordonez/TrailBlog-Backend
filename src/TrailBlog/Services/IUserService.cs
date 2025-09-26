@@ -10,5 +10,6 @@ namespace TrailBlog.Api.Services
         Task<UserResponseDto?> GetUserWithRolesAsync(Guid userId);
         Task<IEnumerable<UserResponseDto>> GetAllAdminUsersAsync();
         Task<OperationResultDto> RevokedUserAsync(Guid userId);
+        Task<OperationResultDto> DeleteUserAsync(Guid userId);
     }   
 }   

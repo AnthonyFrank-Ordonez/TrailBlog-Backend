@@ -73,6 +73,16 @@ namespace TrailBlog.Api.Controllers
             return Ok(result);
         }
 
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<OperationResultDto>> DeleteUser(Guid id)
+        {
+            var result = await _userService.DeleteUserAsync(id);
+
+            return Ok(result);
+        }
+
 
     }
 }

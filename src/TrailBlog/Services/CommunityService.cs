@@ -307,10 +307,25 @@ namespace TrailBlog.Api.Services
 
         private static void UpdateCommunityFields(Community existingCommunity, CommunityDto community)
         {
-            if (!string.IsNullOrWhiteSpace(existingCommunity.Name)) existingCommunity.Name = community.Name;
-            if (!string.IsNullOrWhiteSpace(existingCommunity.Description)) existingCommunity.Description = community.Description;
+            bool hasChanges = false;
 
-            existingCommunity.UpdatedAt = DateTime.UtcNow;
+            if (!string.IsNullOrWhiteSpace(existingCommunity.Name) &&
+                !string.Equals(existingCommunity.Name, community.Name, StringComparison.Ordinal))
+            {
+                existingCommunity.Name = community.Name;
+                hasChanges = true;
+            }
+            if (!string.IsNullOrWhiteSpace(existingCommunity.Description) &&
+                !string.Equals(existingCommunity.Description, community.Description, StringComparison.Ordinal))
+            {
+                existingCommunity.Description = community.Description;
+                hasChanges = true;
+            }
+
+            if (hasChanges)
+            {
+                existingCommunity.UpdatedAt = DateTime.UtcNow;
+            }
 
         }
     }

@@ -6,10 +6,12 @@ using TrailBlog.Api.Exceptions;
 namespace TrailBlog.Api.Services
 {
     public class UserService(
-        IUserRepository userRepository, 
+        IUserRepository userRepository,
+        ILogger<UserService> logger,
         IUnitOfWork unitOfWork) : IUserService
     {
         private readonly IUserRepository _userrepository = userRepository;
+        private readonly ILogger _logger = logger;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 
@@ -124,6 +126,24 @@ namespace TrailBlog.Api.Services
 
             return OperationResult.Success("Successfully revoked user");
                 
+        }
+
+        public async Task<OperationResultDto> DeleteUserAsync(Guid userId)
+        {
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of {user?.Id}");
+
+            _logger.LogInformation("Deleteing user with the id: {UserId}...", user.Id);
+
+            var result = await _userrepository.DeleteAsync(user.Id);
+            await _unitOfWork.SaveChangesAsync();
+
+            if (!result)
+                throw new ApplicationException("An Error occured. Unable to delete user.");
+
+            return OperationResult.Success("Successfuly deleted user");
         }
     }
 }
