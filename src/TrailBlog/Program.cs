@@ -15,6 +15,20 @@ using TrailBlog.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+const string CorsPolicyName = "DefaultCorsPolicy";
+
+// Cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: CorsPolicyName, builder =>
+    {
+        builder.WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .WithMethods("POST", "GET", "PUT", "PATCH", "DELETE");
+    });
+});
+
 // Add GlobalExceptionHandler
 builder.Services.AddProblemDetails(configure =>
 {
@@ -156,6 +170,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseExceptionHandler();
+
+app.UseCors(CorsPolicyName);
 
 app.UseAuthentication();
 app.UseAuthorization();
