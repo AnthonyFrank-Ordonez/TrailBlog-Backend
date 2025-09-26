@@ -10,8 +10,8 @@ namespace TrailBlog.Api.Models
         [Required(ErrorMessage = "Content is required")]
         public string Content { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Author is required")]
-        public string Author { get; set; } = string.Empty;
+        //[Required(ErrorMessage = "Author is required")]
+        //public string Author { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Community Id is required")]
         public Guid CommunityId { get; set; } = Guid.Empty;

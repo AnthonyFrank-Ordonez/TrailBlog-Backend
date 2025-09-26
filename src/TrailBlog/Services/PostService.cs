@@ -6,10 +6,15 @@ using TrailBlog.Api.Exceptions;
 
 namespace TrailBlog.Api.Services
 {
-    public class PostService(IPostRepository postRepository, IUserRepository userRepository, IUnitOfWork unitOfWork) : IPostService
+    public class PostService(
+        IPostRepository postRepository, 
+        IUserRepository userRepository, 
+        ICommunityRepository communityRepository,
+        IUnitOfWork unitOfWork) : IPostService
     {
         private readonly IPostRepository _postRepository = postRepository;
         private readonly IUserRepository _userrepository = userRepository;
+        private readonly ICommunityRepository _communityRepository = communityRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
         public async Task<IEnumerable<PostResponseDto>> GetPostsAsync()
@@ -61,29 +66,31 @@ namespace TrailBlog.Api.Services
 
         public async Task<PostResponseDto> CreatePostAsync(PostDto post, Guid userId)
         {
-            // Will Change Later
-            if (post is null)
-            {
-                throw new ValidationException("Invalid post data");
-            }
+
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of {user?.Id}");
+
+            var community = await _communityRepository.GetByIdAsync(post.CommunityId);
+
+            if (community is null)
+                throw new NotFoundException($"Community not found with the id of {community?.Id}");
 
             var newPost = new Post
             {
                 Title = post.Title,
                 Content = post.Content,
-                Author = post.Author,
+                Author = user.Username,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 Slug = post.Title.ToLower().Replace(" ", "-"),
-                UserId = userId,
-                CommunityId = post.CommunityId
+                UserId = user.Id,
+                CommunityId = community.Id
             };
 
             var createdPost = await _postRepository.AddAsync(newPost);
             await _unitOfWork.SaveChangesAsync();
-
-            var user = await _userrepository.GetByIdAsync(userId);
-
 
             return new PostResponseDto
             {
