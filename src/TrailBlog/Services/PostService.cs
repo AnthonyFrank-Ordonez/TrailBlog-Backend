@@ -71,12 +71,12 @@ namespace TrailBlog.Api.Services
             var user = await _userrepository.GetByIdAsync(userId);
 
             if (user is null)
-                throw new NotFoundException($"User not found with the id of {user?.Id}");
+                throw new NotFoundException($"User not found with the id of {userId}");
 
             var community = await _communityRepository.GetByIdAsync(post.CommunityId);
 
             if (community is null)
-                throw new NotFoundException($"Community not found with the id of {community?.Id}");
+                throw new NotFoundException($"Community not found with the id of {post.CommunityId}");
 
             var newPost = new Post
             {

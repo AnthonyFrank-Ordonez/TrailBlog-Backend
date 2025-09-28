@@ -133,9 +133,9 @@ namespace TrailBlog.Api.Services
             var user = await _userrepository.GetByIdAsync(userId);
 
             if (user is null)
-                throw new NotFoundException($"User not found with the id of {user?.Id}");
+                throw new NotFoundException($"User not found with the id of {userId}");
 
-            _logger.LogInformation("Deleteing user with the id: {UserId}...", user.Id);
+            _logger.LogInformation("Deleteing user with the id: {UserId}...", userId);
 
             var result = await _userrepository.DeleteAsync(user.Id);
             await _unitOfWork.SaveChangesAsync();

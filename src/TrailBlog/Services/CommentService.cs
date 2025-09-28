@@ -43,7 +43,7 @@ namespace TrailBlog.Api.Services
                 throw new NotFoundException($"User with the id of {userId} not found");
 
             if (post is null)
-                throw new NotFoundException($"Post with the id of {post?.Id} not found");
+                throw new NotFoundException($"Post with the id of {comment.PostId} not found");
 
             var newComment = new Comment
             {

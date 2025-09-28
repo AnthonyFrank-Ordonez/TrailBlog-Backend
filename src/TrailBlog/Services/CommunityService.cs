@@ -133,7 +133,7 @@ namespace TrailBlog.Api.Services
             if (user is null)
                 throw new NotFoundException($"User not found with the id of ${userId}");
 
-            _logger.LogInformation("Creating community for userid: {UserId}", user.Id);
+            _logger.LogInformation("Creating community for userid: {UserId}", userId);
 
             if (community is null)
                 throw new ApplicationException("Invalid community. Please double check your input");
