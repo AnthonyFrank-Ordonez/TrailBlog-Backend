@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,9 @@ builder.Services.AddCors(options =>
             .WithMethods("POST", "GET", "PUT", "PATCH", "DELETE");
     });
 });
+
+builder.Services.AddDataProtection()
+    .SetApplicationName("TrailBlog.Api");
 
 // Add GlobalExceptionHandler
 builder.Services.AddProblemDetails(configure =>
