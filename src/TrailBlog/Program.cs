@@ -168,6 +168,15 @@ if (app.Environment.IsDevelopment())
     app.ApplyMigrations();
 }
 
+if (app.Environment.IsProduction())
+{
+    var runMigrations = builder.Configuration.GetValue<bool>("RunMigrations", false);
+    if (runMigrations)
+    {
+        app.ApplyMigrations();
+    }
+}
+
 app.UseHttpsRedirection();
 
 app.UseExceptionHandler();
