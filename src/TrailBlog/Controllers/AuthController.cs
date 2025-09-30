@@ -55,20 +55,20 @@ namespace TrailBlog.Api.Controllers
             if (userId == null)
                 return Unauthorized();
 
-            await _authService.LogoutAsync(Guid.Parse(userId));
+            var result = await _authService.LogoutAsync(Guid.Parse(userId));
 
-            return Ok("Logout Successfully!");
+            return Ok(result);
         }
 
 
         [HttpPost("assign-role")]
         [Authorize(Roles = "Admin")]
         [EnableRateLimiting("per-user")]
-        public async Task<IActionResult> AssignRole(AssignRoleDto request)
+        public async Task<ActionResult<OperationResultDto>> AssignRole(AssignRoleDto request)
         {
-            var success = await _authService.AssignRoleAsync(request);
+            var result = await _authService.AssignRoleAsync(request);
 
-            return Ok("Role assigned succesfully");
+            return Ok(result);
         }
 
     }

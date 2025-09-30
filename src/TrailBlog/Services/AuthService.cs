@@ -86,7 +86,7 @@ namespace TrailBlog.Api.Services
             return await CreateAuthResponse(userWithRoles);
         }
 
-        public async Task<bool> LogoutAsync(Guid id)
+        public async Task<OperationResultDto> LogoutAsync(Guid id)
         {
             var user = await _userRepository.GetByIdAsync(id);
 
@@ -98,7 +98,7 @@ namespace TrailBlog.Api.Services
 
             await _unitOfWork.SaveChangesAsync();
 
-            return true;
+            return OperationResult.Success("Logout success");
 
         } 
 
@@ -120,7 +120,7 @@ namespace TrailBlog.Api.Services
         }
 
 
-        public async Task<bool> AssignRoleAsync(AssignRoleDto request)
+        public async Task<OperationResultDto> AssignRoleAsync(AssignRoleDto request)
         {
             var user = await _userRepository.GetByIdAsync(request.UserId);
             var role = await _roleRepository.GetRoleByNameAsync(request.RoleName);
@@ -146,7 +146,7 @@ namespace TrailBlog.Api.Services
             await _userRoleRepository.AddAsync(assignedRole);
             await _unitOfWork.SaveChangesAsync();
 
-            return true;
+            return OperationResult.Success("Role assign successful");
         }
 
         private async Task<User?> ValidateRefreshTokenAsync(Guid userId, string refreshToken)

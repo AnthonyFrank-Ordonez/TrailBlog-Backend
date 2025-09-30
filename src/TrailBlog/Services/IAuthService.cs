@@ -6,9 +6,9 @@ namespace TrailBlog.Api.Services
     {
         Task<AuthResultDto> RegisterAsync(RegisterDto request);
         Task<AuthResultDto> LoginAsync(LoginDto request);
-        Task<bool> LogoutAsync(Guid Id);
+        Task<OperationResultDto> LogoutAsync(Guid Id);
         Task<AuthResultDto> RefreshTokenAsync(RefreshTokenRequestDto request);
-        Task<bool> AssignRoleAsync(AssignRoleDto request);
+        Task<OperationResultDto> AssignRoleAsync(AssignRoleDto request);
 
     }
 }
