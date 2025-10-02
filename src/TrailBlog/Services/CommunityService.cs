@@ -70,23 +70,11 @@ namespace TrailBlog.Api.Services
         {
             var userCommunities = await _userCommunityRepository.GetUserCommunitiesAsync(userId);
 
-            if (userCommunities is null || !userCommunities.Any())
-                throw new NotFoundException("No user communities found");
-
             return userCommunities.Select(uc => new CommunityResponseDto
             {
                 Id = uc.Community.Id,
                 CommunityName = uc.Community.Name,
                 Owner = uc.Community.User.Username,
-                Posts = uc.Community.Posts.Select(p => new PostResponseDto
-                {
-                    Id = p.Id,
-                    Title = p.Title,
-                    Content = p.Content,
-                    Author = p.Author,
-                    Slug = p.Slug,
-                    CreatedAt = p.CreatedAt,
-                }).ToList()
             }).ToList();
         }
 

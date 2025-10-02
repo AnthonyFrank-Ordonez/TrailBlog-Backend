@@ -14,7 +14,6 @@ namespace TrailBlog.Api.Repositories
             return await _dbSet
                 .Where(uc => uc.UserId == userId)
                 .Include(uc => uc.Community)
-                    .ThenInclude(c => c.Posts)
                 .Include(uc => uc.Community)
                     .ThenInclude(c => c.User)
                 .ToListAsync();
