@@ -135,13 +135,27 @@ namespace TrailBlog.Api.Services
             };
 
             var createdCommunity = await _communityRepository.AddAsync(newCommunity);
-            await _unitOfWork.SaveChangesAsync();
 
             if (createdCommunity is null)
                 throw new ApplicationException("An error occured. Failed to create community");
 
             if (user is null)
                 throw new NotFoundException($"User not found with the id of {userId}");
+
+            var userCommunity = new UserCommunity
+            {
+                UserId = user.Id,
+                CommunityId = createdCommunity.Id,
+                JoinedDate = DateTime.UtcNow,
+            };
+
+            var joinedCommunity = await _userCommunityRepository.AddAsync(userCommunity);
+
+            if (joinedCommunity is null)
+                throw new ApplicationException("An error occured. Failed to join the community");
+
+            await _unitOfWork.SaveChangesAsync();
+
 
             return new CommunityResponseDto
             {
