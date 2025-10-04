@@ -23,7 +23,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: CorsPolicyName, builder =>
     {
-        builder.WithOrigins("http://localhost:4200", "https://trailblog.afordonez.com")
+        builder.WithOrigins("http://localhost:4200", "https://trail.afordonez.com")
             .AllowAnyHeader()
             .AllowCredentials()
             .WithMethods("POST", "GET", "PUT", "PATCH", "DELETE");
