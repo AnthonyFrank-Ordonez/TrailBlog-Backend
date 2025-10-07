@@ -74,6 +74,7 @@ namespace TrailBlog.Api.Services
             {
                 Id = uc.Community.Id,
                 CommunityName = uc.Community.Name,
+                Description = uc.Community.Description ?? null,
                 Owner = uc.Community.User.Username,
             }).ToList();
         }
