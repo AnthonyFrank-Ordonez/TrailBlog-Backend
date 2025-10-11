@@ -33,7 +33,7 @@ namespace TrailBlog.Api.Helpers
                 issuer: configuration.GetValue<string>("Jwt:Issuer"),
                 audience: configuration.GetValue<string>("Jwt:Audience"),
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(configuration.GetValue<int>("Jwt:ExpiryInDays")),
+                expires: DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("Jwt:ExpiryInMinutes")),
                 signingCredentials: creds
             );
 

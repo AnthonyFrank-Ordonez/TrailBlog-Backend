@@ -54,6 +54,7 @@ namespace TrailBlog.Api.Services
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
                 TotalLike = post.Likes.Count(),
+                TotalComment = post.Comments.Count(),
                 Comments = post.Comments.Select(c => new CommentResponseDto
                 {
                     Id = c.Id,
