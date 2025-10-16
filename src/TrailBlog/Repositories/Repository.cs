@@ -38,14 +38,10 @@ namespace TrailBlog.Api.Repositories
             return existingEntity;
         }
 
-        public virtual async Task<bool> DeleteAsync(Guid id)
+        public virtual Task DeleteAsync(T entity)
         {
-            var entity = await _dbSet.FindAsync(id);
-            if (entity is null) return false;
-
             _dbSet.Remove(entity);
-
-            return true;
+            return Task.CompletedTask;
 
         }
 

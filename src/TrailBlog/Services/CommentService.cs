@@ -139,10 +139,7 @@ namespace TrailBlog.Api.Services
             if (existingComment is null)
                 throw new NotFoundException($"Comment not found with the id {commentId}");
 
-            var isDeleted = await _commentRepository.DeleteAsync(existingComment.Id);
-
-            if (!isDeleted)
-                throw new ApplicationException("An error occured. Unable to delete the comment");
+            await _commentRepository.DeleteAsync(existingComment);
 
             return OperationResult.Success("Successfully deleted the comment");
         }

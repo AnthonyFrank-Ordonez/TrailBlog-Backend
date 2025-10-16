@@ -137,11 +137,8 @@ namespace TrailBlog.Api.Services
             if (post.UserId != userId && !isAdmin)
                 throw new UnauthorizedException("You are not authorized to update this post.");
 
-            var deletedPost = await _postRepository.DeleteAsync(post.Id);
+            await _postRepository.DeleteAsync(post);
             await _unitOfWork.SaveChangesAsync();
-
-            if (!deletedPost)
-                throw new ApiException("An error occurred. Post failed to delete");
 
             return OperationResult.Success("Post deleted successfully");
         }

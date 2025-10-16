@@ -137,11 +137,8 @@ namespace TrailBlog.Api.Services
 
             _logger.LogInformation("Deleteing user with the id: {UserId}...", userId);
 
-            var result = await _userrepository.DeleteAsync(user.Id);
+            await _userrepository.DeleteAsync(user);
             await _unitOfWork.SaveChangesAsync();
-
-            if (!result)
-                throw new ApplicationException("An Error occured. Unable to delete user.");
 
             return OperationResult.Success("Successfuly deleted user");
         }

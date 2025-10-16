@@ -212,11 +212,8 @@ namespace TrailBlog.Api.Services
             if (existingCommunity.UserId != userId && !isAdmin)
                 throw new UnauthorizedException("You are not authorized to delete this community.");
                 
-            var result = await _communityRepository.DeleteAsync(existingCommunity.Id);
+            await _communityRepository.DeleteAsync(existingCommunity);
             await _unitOfWork.SaveChangesAsync();
-
-            if (!result)
-                throw new ApplicationException("An error occured. Failed to delete the post");
 
             return new OperationResultDto
             {
@@ -294,11 +291,8 @@ namespace TrailBlog.Api.Services
             if (userCommunity is null)
                 throw new ApplicationException($"User: {userId} is not a member of this community.");
 
-            var result = await _userCommunityRepository.DeleteAsync(communityId);
+            await _userCommunityRepository.DeleteAsync(userCommunity);
             await _unitOfWork.SaveChangesAsync();
-
-            if (!result)
-                throw new ApplicationException("An error occured. Failed to leave the community");
 
             return new OperationResultDto
             {

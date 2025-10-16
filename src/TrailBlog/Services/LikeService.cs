@@ -58,9 +58,7 @@ namespace TrailBlog.Api.Services
 
             if (existingLike == null) throw new ApplicationException("You have not like this post");
 
-            var isDeleted = await _likeRepository.DeleteAsync(existingLike.Id);
-
-            if (!isDeleted) throw new ApplicationException("An error occured. unable to unlike the post");
+            await _likeRepository.DeleteAsync(existingLike);
 
             return OperationResult.Success("Successfully unlike the post");
         }
