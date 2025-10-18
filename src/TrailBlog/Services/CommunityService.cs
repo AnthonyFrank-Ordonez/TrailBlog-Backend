@@ -248,7 +248,7 @@ namespace TrailBlog.Api.Services
 
         }
 
-        public async Task<OperationResultDto> JoinCommunityAsync(Guid communityId, Guid userId)
+        public async Task<CommunityResponseDto> JoinCommunityAsync(Guid communityId, Guid userId)
         {
             var community = await _communityRepository.GetByIdAsync(communityId);
             var user = await _userRepository.GetByIdAsync(userId);
@@ -277,10 +277,12 @@ namespace TrailBlog.Api.Services
             if (joinedCommunity is null)
                 throw new ApplicationException("An error occured. Failed to joined the community");
 
-            return new OperationResultDto
+            return new CommunityResponseDto
             {
-                Success = true,
-                Message = "User has successfully joined the community."
+                Id = community.Id,
+                CommunityName = community.Name,
+                Description = community.Description ?? null,
+                Owner = community.User.Username,
             };
         }
 

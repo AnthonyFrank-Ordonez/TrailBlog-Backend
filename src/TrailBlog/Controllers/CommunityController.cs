@@ -122,13 +122,13 @@ namespace TrailBlog.Api.Controllers
         [HttpPost("{id}/join")]
         [Authorize(Roles = "User, Admin")]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<OperationResultDto>> JoinCommunity(Guid id)
+        public async Task<ActionResult<CommunityResponseDto>> JoinCommunity(Guid id)
         {
             var userId = GetCurrentUserId();
-            var result = await _communityService.JoinCommunityAsync(id, userId);
+            var community = await _communityService.JoinCommunityAsync(id, userId);
 
 
-            return Ok(result);
+            return Ok(community);
         }
 
         [HttpPost("{id}/leave")]

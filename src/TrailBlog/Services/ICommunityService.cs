@@ -13,7 +13,7 @@ namespace TrailBlog.Api.Services
         Task<OperationResultDto> UpdateCommunityAsync(Guid communityId, Guid userId, CommunityDto community, bool isAdmin = false);
         Task<OperationResultDto> DeleteCommunityAsync(Guid communityId, Guid userId, bool isAdmin = false);
         Task<IEnumerable<CommunityResponseDto>> SearchCommunitiesAsync(string query);
-        Task<OperationResultDto> JoinCommunityAsync(Guid communityId, Guid userId);
+        Task<CommunityResponseDto> JoinCommunityAsync(Guid communityId, Guid userId);
         Task<OperationResultDto> LeaveCommunityAsync(Guid communityId, Guid userId);
     }
 }

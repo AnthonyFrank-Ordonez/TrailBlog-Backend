@@ -19,11 +19,15 @@ var builder = WebApplication.CreateBuilder(args);
 const string CorsPolicyName = "DefaultCorsPolicy";
 
 // Cors
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? Array.Empty<string>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: CorsPolicyName, builder =>
     {
-        builder.WithOrigins("http://localhost:4200", "https://trail.afordonez.com")
+        builder.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowCredentials()
             .WithMethods("POST", "GET", "PUT", "PATCH", "DELETE");
