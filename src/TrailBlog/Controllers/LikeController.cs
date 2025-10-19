@@ -31,7 +31,7 @@ namespace TrailBlog.Api.Controllers
         public async Task<ActionResult<OperationResultDto>> RemoveLike(Guid id)
         {
             var userId = GetCurrentUserId();
-            var result = await _likeService.RemovePostLikeAsync(userId, id);
+            var result = await _likeService.AddPostDislikeAsync(userId, id);
 
             return Ok(result);
         }

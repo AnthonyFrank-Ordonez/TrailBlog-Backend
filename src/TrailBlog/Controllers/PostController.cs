@@ -19,7 +19,8 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetPostsPaged([FromQuery] int page, [FromQuery] int pageSize)
         {
-            var posts = await _postService.GetPostsPagedAsync(page, pageSize);
+            var userId = GetCurrentUserId();
+            var posts = await _postService.GetPostsPagedAsync(userId, page, pageSize);
 
             return Ok(posts);
         }
@@ -29,7 +30,8 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<PostResponseDto?>> GetPost(Guid id)
         {
-            var post = await _postService.GetPostAsync(id);
+            var userId = GetCurrentUserId();
+            var post = await _postService.GetPostAsync(id, userId);
             return Ok(post);
         }
 

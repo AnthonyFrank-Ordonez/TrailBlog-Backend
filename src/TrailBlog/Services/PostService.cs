@@ -18,7 +18,7 @@ namespace TrailBlog.Api.Services
         private readonly ICommunityRepository _communityRepository = communityRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<PagedResultDto<PostResponseDto>> GetPostsPagedAsync(int page, int pageSize)
+        public async Task<PagedResultDto<PostResponseDto>> GetPostsPagedAsync(Guid userId, int page, int pageSize)
         {
             // Validate
             if (page <= 0) page = 1;
@@ -44,7 +44,9 @@ namespace TrailBlog.Api.Services
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     TotalLike = p.Likes.Count,
-                    TotalComment = p.Comments.Count
+                    TotalComment = p.Comments.Count,
+                    IsLiked = p.Likes.Any(l => l.UserId == userId && l.IsLike == true),
+                    IsDisliked = p.Likes.Any(l => l.UserId == userId && l.IsLike == false),
                 })
                 .ToListAsync();
 
@@ -58,7 +60,7 @@ namespace TrailBlog.Api.Services
             };
         }
 
-        public async Task<PostResponseDto?> GetPostAsync(Guid id)
+        public async Task<PostResponseDto?> GetPostAsync(Guid id, Guid userId)
         {
             var post = await _postRepository.GetPostDetailByIdAsync(id);
 
@@ -77,6 +79,8 @@ namespace TrailBlog.Api.Services
                 CommunityId = post.CommunityId,
                 TotalLike = post.Likes.Count,
                 TotalComment = post.Comments.Count,
+                IsLiked = post.Likes.Any(l => l.UserId == userId && l.IsLike == true),
+                IsDisliked = post.Likes.Any(l => l.UserId == userId && l.IsLike == false),
                 Comments = post.Comments.Select(c => new CommentResponseDto
                 {
                     Id = c.Id,

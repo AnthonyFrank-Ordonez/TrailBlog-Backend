@@ -5,6 +5,8 @@
         public Guid Id { get; set; }
         public DateTime LikeAt { get; set; } = DateTime.UtcNow;
 
+        public bool IsLike { get; set; }
+
         public Guid PostId { get; set; }
         public Post Post { get; set; } = null!;
 

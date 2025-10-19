@@ -14,6 +14,8 @@
         public List<CommentResponseDto> Comments { get; set; } = new List<CommentResponseDto>();
         public int TotalLike { get; set; }
         public int TotalComment { get; set; }
+        public bool IsLiked { get; set; }
+        public bool IsDisliked { get; set; }
     }
 }
         

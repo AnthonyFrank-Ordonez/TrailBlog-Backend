@@ -27,16 +27,30 @@ namespace TrailBlog.Api.Services
 
             var existingLike = await _likeRepository.GetExistingLikeAsync(user.Id, post.Id);
 
-            if (existingLike != null) throw new ApplicationException("You already like this post");
+            if (existingLike != null) {
+                if (existingLike.IsLike)
+                {
+                    await _likeRepository.DeleteAsync(existingLike);
+                    await _unitOfWork.SaveChangesAsync();
+                    return OperationResult.Success("Removed Like successfully");
+                } else {
+                    existingLike.IsLike = true;
+                    existingLike.LikeAt = DateTime.UtcNow;
+                    await _likeRepository.UpdateAsync(existingLike.Id, existingLike);
+                    await _unitOfWork.SaveChangesAsync();
+                    return OperationResult.Success("Disliked successfully");
+                }
+            };
 
             var newLike = new Like
             {
                 UserId = user.Id,
                 PostId = post.Id,
+                IsLike = true,
                 LikeAt = DateTime.UtcNow,
             };
 
-            var result = await _likeRepository.AddAsync(newLike);
+            var result = await _likeRepository.AddAsync(newLike);   
             await _unitOfWork.SaveChangesAsync();
 
             if (result is null) throw new ApplicationException("An error occured. Unable to add like");
@@ -46,7 +60,7 @@ namespace TrailBlog.Api.Services
 
         }
 
-        public async Task<OperationResultDto> RemovePostLikeAsync(Guid userId, Guid postId)
+        public async Task<OperationResultDto> AddPostDislikeAsync(Guid userId, Guid postId)
         {
             var post = await _postRepository.GetByIdAsync(postId);
             var user = await _userRepository.GetByIdAsync(userId);
@@ -56,11 +70,36 @@ namespace TrailBlog.Api.Services
 
             var existingLike = await _likeRepository.GetExistingLikeAsync(user.Id, post.Id);
 
-            if (existingLike == null) throw new ApplicationException("You have not like this post");
+            if (existingLike != null)
+            {
+                if (!existingLike.IsLike)
+                {
+                    await _likeRepository.DeleteAsync(existingLike);
+                    await _unitOfWork.SaveChangesAsync();
+                    return OperationResult.Success("Removed dislike successfully");
+                }
+                else
+                {
+                    existingLike.IsLike = false;
+                    existingLike.LikeAt = DateTime.UtcNow;
+                    await _likeRepository.UpdateAsync(existingLike.Id, existingLike);
+                    await _unitOfWork.SaveChangesAsync();
+                    return OperationResult.Success("Like successfully");
+                }
+            };
 
-            await _likeRepository.DeleteAsync(existingLike);
+            var newLike = new Like
+            {
+                UserId = user.Id,
+                PostId = post.Id,
+                IsLike = false,
+                LikeAt = DateTime.UtcNow,
+            };
 
-            return OperationResult.Success("Successfully unlike the post");
+            var result = await _likeRepository.AddAsync(newLike);
+            await _unitOfWork.SaveChangesAsync();
+
+            return OperationResult.Success("Successfully dislike the post");
         }
 
 
