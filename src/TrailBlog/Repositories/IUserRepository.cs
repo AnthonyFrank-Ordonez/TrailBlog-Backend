@@ -4,9 +4,9 @@ namespace TrailBlog.Api.Repositories
 {
     public interface IUserRepository : IRepository<User>
     {
-        Task<IEnumerable<User>> GetAllUsersWithRolesAsync();
-        Task<IEnumerable<User>> GetAllAdminUsersAsync();
-        Task<IEnumerable<User>> GetAllNonAdminUsersAsync();
+        IQueryable<User> GetUserDetails();
+        IQueryable<User> GetAdminUsers();
+        IQueryable<User> GetNonAdminUsers();
         Task<User?> GetUserByIdWithRolesAsync(Guid userId);
         Task<User?> GetUserByUsernameWithRolesAsync(string username);
         Task<bool> UsernameExistsAsync(string username);

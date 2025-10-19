@@ -14,9 +14,9 @@ namespace TrailBlog.Api.Repositories
             _dbSet = _context.Set<T>();
         }
 
-        public virtual async Task<List<T>> GetAllAsync()
+        public virtual IQueryable<T> GetAll()
         {
-            return await _dbSet.ToListAsync();
+            return _dbSet.AsNoTracking();
         }
 
         public virtual async Task<T?> GetByIdAsync(Guid id)

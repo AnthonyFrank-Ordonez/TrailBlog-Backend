@@ -1,117 +1,146 @@
-﻿using TrailBlog.Api.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using TrailBlog.Api.Entities;
-using TrailBlog.Api.Repositories;
 using TrailBlog.Api.Exceptions;
+using TrailBlog.Api.Models;
+using TrailBlog.Api.Repositories;
 
 namespace TrailBlog.Api.Services
 {
     public class CommunityService(
         ICommunityRepository communityRepository,
         IUserRepository userRepository,
+        IPostRepository postRepository,
         IUnitOfWork unitOfWork,
         ILogger<CommunityService> logger,
         IUserCommunityRepository userCommunityRepository) : ICommunityService
     {
         private readonly ICommunityRepository _communityRepository = communityRepository;
         private readonly IUserCommunityRepository _userCommunityRepository = userCommunityRepository;
+        private readonly IPostRepository _postRepository = postRepository;
         private readonly IUserRepository _userRepository = userRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly ILogger _logger = logger;
 
-
-        public async Task<IEnumerable<CommunityResponseDto>> GetAllCommunitiesAsync()
+        public async Task<PagedResultDto<CommunityResponseDto>> GetCommunitiesPagedAsync(int page, int pageSize)
         {
-            var communities = await _communityRepository.GetAllCommunityWithUserandPostAsync();
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 10;
+            if (pageSize > 100) pageSize = 100;
 
-            return communities.Select(c => new CommunityResponseDto
-            {
-                Id = c.Id,
-                CommunityName = c.Name,
-                Owner = c.User.Username,
-                Posts = c.Posts.Select(p => new PostResponseDto
+            var query = _communityRepository.GetCommunityDetails();
+
+            var totalCount = await query.CountAsync();
+
+            var communities = await query
+                .OrderByDescending(c => c.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(c => new CommunityResponseDto
                 {
-                    Id = p.Id,
-                    Title = p.Title,
-                    Content = p.Content,
-                    Author = p.Author,
-                    Slug = p.Slug,
-                    CreatedAt = p.CreatedAt
-                }).ToList()
-            }).ToList();
+                    Id = c.Id,
+                    CommunityName = c.Name,
+                    Owner = c.User.Username,
+                    TotalPosts = c.Posts.Count,
+                })
+                .ToListAsync();
 
+            return new PagedResultDto<CommunityResponseDto>
+            {
+                Data = communities,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
         }
 
-        public async Task<CommunityResponseDto?> GetCommunityAsync(Guid id)
+        public async Task<PagedResultDto<PostResponseDto>> GetCommunityPostsPagedAsync(Guid id, int page, int pageSize)
         {
-            var community = await _communityRepository.GetCommunityWithUserandPostAsync(id);
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 10;
+            if (pageSize > 100) pageSize = 100;
+
+            var community = await _communityRepository.GetCommunityDetails()
+                .Where(c => c.Id == id)
+                .Select(c => new CommunityResponseDto
+                {
+                    Id = c.Id,
+                    CommunityName = c.Name,
+                    Owner = c.User.Username,
+                })
+                .FirstOrDefaultAsync();
 
             if (community is null)
                 throw new NotFoundException($"No community found with the id of {id}");
 
-            return new CommunityResponseDto
-            {
-                Id = community.Id,
-                CommunityName = community.Name,
-                Owner = community.User.Username,
-                Posts = community.Posts.Select(p => new PostResponseDto
+            var query = _postRepository.GetPostsDetails()
+                .Where(p => p.CommunityId == id);
+
+            var totalCount = await query.CountAsync();
+
+            var communityPosts = await query
+                .OrderByDescending(c => c.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new PostResponseDto
                 {
                     Id = p.Id,
-                    Title = p.Title,
-                    Content = p.Content,
-                    Author = p.Author,
-                    Slug = p.Slug,
-                    CreatedAt = p.CreatedAt
-                }).ToList()
-            };
-
-        }
-
-        public async Task<IEnumerable<CommunityResponseDto>> GetUserCommunitiesAsync(Guid userId)
-        {
-            var userCommunities = await _userCommunityRepository.GetUserCommunitiesAsync(userId);
-
-            return userCommunities.Select(uc => new CommunityResponseDto
-            {
-                Id = uc.Community.Id,
-                CommunityName = uc.Community.Name,
-                Description = uc.Community.Description ?? null,
-                Owner = uc.Community.User.Username,
-            }).ToList();
-        }
-
-        public async Task<IEnumerable<UserResponseDto>> GetCommunityMembersAsync(Guid communityId)
-        {
-            var community = await _userCommunityRepository.GetCommunityMemberAsync(communityId);
-
-            if (community is null || !community.Any())
-                throw new NotFoundException($"No community with the if of {communityId}");
-
-            return community.Select(c => new UserResponseDto
-            {
-                Id = c.User.Id,
-                Username = c.User.Username,
-                Email = c.User.Email,
-            }).ToList();
-
-        }
-
-        public async Task<IEnumerable<CommunityResponseDto>> GetAllCommunityPostsAsync()
-        {
-            var communityPosts = await _communityRepository.GetAllCommunityPostsAsync();
-
-            return communityPosts.Select(c => new CommunityResponseDto
-            {
-                CommunityName = c.Name,
-                Id = c.Id,
-                Posts = c.Posts.Select(p => new PostResponseDto
-                {
                     Title = p.Title,
                     Content = p.Content,
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
-                }).ToList()
-            });
+                    TotalLike = p.Likes.Count,
+                    TotalComment = p.Comments.Count
+                })
+                .ToListAsync();
+
+            return new PagedResultDto<PostResponseDto>
+            {
+                Data = communityPosts,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                Metadata = new Dictionary<string, object>
+                {
+                    ["communityId"] = community.Id,
+                    ["communityName"] = community.CommunityName
+                }
+            };
+        }
+
+        public async Task<IEnumerable<CommunityResponseDto>> GetUserCommunitiesAsync(Guid userId)
+        {
+            var userCommunities = await _userCommunityRepository.GetUserCommunitiesAsync(userId)
+                .Select(uc => new CommunityResponseDto
+                {
+                    Id = uc.Community.Id,
+                    CommunityName = uc.Community.Name,
+                    Description = uc.Community.Description ?? null,
+                    Owner = uc.Community.User.Username,
+                })
+                .ToListAsync();
+
+            return userCommunities;
+        }
+
+        public async Task<IEnumerable<UserResponseDto>> GetCommunityMembersAsync(Guid communityId)
+        {
+            var communityMembers = await _userCommunityRepository.GetCommunityMembersAsync(communityId)
+                .Select(c => new UserResponseDto
+                {
+                    Id = c.User.Id,
+                    Username = c.User.Username,
+                    Email = c.User.Email,
+                })
+                .ToListAsync();
+
+            if (communityMembers is null || !communityMembers.Any())
+                throw new NotFoundException($"No community with the if of {communityId}");
+
+            return communityMembers;
 
         }
 
@@ -227,24 +256,17 @@ namespace TrailBlog.Api.Services
             if (string.IsNullOrWhiteSpace(query))
                 throw new ApplicationException("An error occured. search query cannot be empty");
 
-            var communitiesResult = await _communityRepository.SearchCommunityAsync(query);
-
-            return communitiesResult.Select(cr => new CommunityResponseDto
-            {
-                Id = cr.Id,
-                CommunityName = cr.Name,
-                Owner = cr.User.Username,
-                Posts = cr.Posts.Select(p => new PostResponseDto
+            var communitiesResult = await _communityRepository.SearchCommunities(query)
+                .OrderByDescending(c => c.CreatedAt)
+                .Select(cr => new CommunityResponseDto
                 {
-                    Id = p.Id,
-                    Title = p.Title,
-                    Content = p.Content,
-                    Author = p.Author,
-                    Slug = p.Slug,
-                    CreatedAt = p.CreatedAt
+                    Id = cr.Id,
+                    CommunityName = cr.Name,
+                    Owner = cr.User.Username,
                 })
-                    .ToList()
-            }).ToList();
+                .ToListAsync();
+
+            return communitiesResult;
 
         }
 

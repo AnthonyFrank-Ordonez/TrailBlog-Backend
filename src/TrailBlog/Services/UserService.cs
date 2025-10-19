@@ -1,7 +1,9 @@
-﻿using TrailBlog.Api.Models;
-using TrailBlog.Api.Repositories;
-using TrailBlog.Api.Helpers;
+﻿using Microsoft.EntityFrameworkCore;
+using TrailBlog.Api.Entities;
 using TrailBlog.Api.Exceptions;
+using TrailBlog.Api.Helpers;
+using TrailBlog.Api.Models;
+using TrailBlog.Api.Repositories;
 
 namespace TrailBlog.Api.Services
 {
@@ -15,19 +17,78 @@ namespace TrailBlog.Api.Services
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 
-        public async Task<IEnumerable<PublicUserResponseDto>> GetAllUsersAsync()
+        public async Task<PagedResultDto<PublicUserResponseDto>> GetUsersPagedAsync(int page, int pageSize)
         {
-            var users = await _userrepository.GetAllAsync();
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 10;
+            if (page > 100) pageSize = 100;
 
-            return users.Select(u => new PublicUserResponseDto
+            var query = _userrepository.GetUserDetails();
+
+            var totalCount = await query.CountAsync();
+
+            var users = await query
+                .OrderByDescending(u => u.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(user => new PublicUserResponseDto
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    Username = user.Username,
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt,
+                    IsRevoked = user.IsRevoked,
+                })
+                .ToListAsync();
+
+            return new PagedResultDto<PublicUserResponseDto>
             {
-                Id = u.Id,
-                Email = u.Email,
-                Username = u.Username,
-                CreatedAt = u.CreatedAt,
-                UpdatedAt = u.UpdatedAt,
-                IsRevoked = u.IsRevoked,
-            }).ToList();
+                Data = users,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+
+        }
+
+        public async Task<PagedResultDto<UserResponseDto>> GetUsersWithRolesPagedAsync(int page, int pageSize)
+        {
+
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 10;
+            if (page > 100) pageSize = 100;
+
+            var query = _userrepository.GetUserDetails();
+
+            var totalCount = await query.CountAsync();
+
+            var usersWithRoles = await query
+                .OrderByDescending(u => u.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(user => new UserResponseDto
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    Username = user.Username,
+                    Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt,
+                    IsRevoked = user.IsRevoked,
+                    RevokedAt = user.RevokedAt
+                })
+                .ToListAsync();
+
+            return new PagedResultDto<UserResponseDto>
+            {
+                Data = usersWithRoles,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
 
         }
 
@@ -47,25 +108,6 @@ namespace TrailBlog.Api.Services
                 UpdatedAt = user.UpdatedAt,
                 IsRevoked = user.IsRevoked,
             };
-        }
-
-        public async Task<IEnumerable<UserResponseDto>> GetAllUsersWithRolesAsync()
-        {
-
-            var users = await _userrepository.GetAllUsersWithRolesAsync();
-
-            return users.Select(u => new UserResponseDto
-            {
-                Id = u.Id,
-                Email = u.Email,
-                Username = u.Username,
-                Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                CreatedAt = u.CreatedAt,
-                UpdatedAt = u.UpdatedAt,
-                IsRevoked = u.IsRevoked,
-                RevokedAt = u.RevokedAt
-            }).ToList();
-
         }
 
         public async Task<UserResponseDto?> GetUserWithRolesAsync(Guid userId)
@@ -90,19 +132,22 @@ namespace TrailBlog.Api.Services
 
         public async Task<IEnumerable<UserResponseDto>> GetAllAdminUsersAsync()
         {
-            var adminUsers = await _userrepository.GetAllAdminUsersAsync();
+            var adminUsers = await _userrepository
+                .GetAdminUsers()
+                .Select(user => new UserResponseDto
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    Username = user.Username,
+                    Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt,
+                    IsRevoked = user.IsRevoked,
+                    RevokedAt = user.RevokedAt
+                })
+                .ToListAsync();
 
-            return adminUsers.Select(u => new UserResponseDto
-            {
-                Id = u.Id,
-                Email = u.Email,
-                Username = u.Username,
-                Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                CreatedAt = u.CreatedAt,
-                UpdatedAt = u.UpdatedAt,
-                IsRevoked = u.IsRevoked,
-                RevokedAt = u.RevokedAt
-            }).ToList();
+            return adminUsers;
         }
 
         public async Task<OperationResultDto> RevokedUserAsync(Guid userId)

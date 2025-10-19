@@ -8,50 +8,19 @@ namespace TrailBlog.Api.Repositories
     {
         public PostRepository(ApplicationDbContext context) : base(context) { }
 
-        public async Task<IEnumerable<Post>> GetAllPostsAsync()
+        public IQueryable<Post> GetPostsDetails()
         {
-            return await _dbSet
+            return _dbSet
                 .Include(p => p.Community)
                 .Include(p => p.Likes)
                 .Include(p => p.Comments)
-                .OrderByDescending(p => p.CreatedAt)
-                .ToListAsync(); 
+                .AsNoTracking();
         }
 
         public async Task<Post?> GetPostDetailByIdAsync(Guid id)
         {
-            return await _dbSet
-                .Include(p => p.Community)
-                .Include(p => p.Likes)
-                .Include(p => p.Comments)
+            return await GetPostsDetails()
                 .FirstOrDefaultAsync(p => p.Id == id);
-        }
-
-        public async Task<IEnumerable<Post>> GetRecentPostsAsync(int take)
-        {
-            return await _dbSet
-                .Include(p => p.Community)
-                .Include(p => p.Likes)
-                .Include(p => p.Comments)
-                .OrderByDescending(p => p.CreatedAt)
-                .Take(take) 
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<Post>> GetRecentPostsPagedAsync(int page, int pageSize)
-        {
-            if (page <= 0) page = 1;
-            if (pageSize <= 0) pageSize = 10;
-
-            return await _dbSet
-                .Include(p => p.Community)
-                .Include(p => p.Likes)
-                .Include(p => p.Comments)
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
         }
     }
 }

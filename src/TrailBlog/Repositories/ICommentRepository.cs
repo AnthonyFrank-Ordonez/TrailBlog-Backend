@@ -4,6 +4,7 @@ namespace TrailBlog.Api.Repositories
 {
     public interface ICommentRepository : IRepository<Comment>
     {
-        Task<IEnumerable<Comment>> GetAllDeletedCommentsAsync();
+        IQueryable<Comment> GetCommentsDetails();
+        IQueryable<Comment> GetDeletedComments();
     }
 }

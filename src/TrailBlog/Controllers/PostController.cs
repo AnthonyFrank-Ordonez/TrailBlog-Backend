@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TrailBlog.Api.Models;
@@ -19,9 +17,10 @@ namespace TrailBlog.Api.Controllers
         [HttpGet]
         [AllowAnonymous]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<IEnumerable<PostResponseDto?>>> GetPosts()
+        public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetPostsPaged([FromQuery] int page, [FromQuery] int pageSize)
         {
-            var posts = await _postService.GetPostsAsync();
+            var posts = await _postService.GetPostsPagedAsync(page, pageSize);
+
             return Ok(posts);
         }
 
@@ -67,16 +66,6 @@ namespace TrailBlog.Api.Controllers
             var result = await _postService.DeletePostAsync(id, userId, isAdmin);
 
             return Ok(result);
-        }
-
-        [HttpGet("recent")]
-        [AllowAnonymous]
-        [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<IEnumerable<PostResponseDto>>> GetRecentPosts([FromQuery] int page, [FromQuery] int pageSize)
-        {
-            var recentPosts = await _postService.GetRecentPostsAsync(page, pageSize);
-
-            return Ok(recentPosts);
         }
 
         private Guid GetCurrentUserId()

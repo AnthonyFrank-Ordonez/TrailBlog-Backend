@@ -3,6 +3,7 @@ using TrailBlog.Api.Models;
 using TrailBlog.Api.Repositories;
 using TrailBlog.Api.Helpers;
 using TrailBlog.Api.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace TrailBlog.Api.Services
 {
@@ -17,23 +18,44 @@ namespace TrailBlog.Api.Services
         private readonly ICommunityRepository _communityRepository = communityRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<IEnumerable<PostResponseDto>> GetPostsAsync()
+        public async Task<PagedResultDto<PostResponseDto>> GetPostsPagedAsync(int page, int pageSize)
         {
-            var posts = await _postRepository.GetAllPostsAsync();
+            // Validate
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 10;
+            if (pageSize > 100) pageSize = 100;
 
-            return posts.Select(p => new PostResponseDto
+            var query = _postRepository.GetPostsDetails();
+
+            var totalCount = await query.CountAsync();
+
+            var posts = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new PostResponseDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Author = p.Author,
+                    Slug = p.Slug,
+                    CreatedAt = p.CreatedAt,
+                    CommunityName = p.Community.Name,
+                    CommunityId = p.CommunityId,
+                    TotalLike = p.Likes.Count,
+                    TotalComment = p.Comments.Count
+                })
+                .ToListAsync();
+
+            return new PagedResultDto<PostResponseDto>
             {
-                Id = p.Id,
-                Title = p.Title,
-                Content = p.Content,
-                Author = p.Author,
-                Slug = p.Slug,
-                CreatedAt = p.CreatedAt,
-                CommunityName = p.Community.Name,
-                CommunityId = p.CommunityId,
-                TotalLike = p.Likes.Count(),
-                TotalComment = p.Comments.Count(),
-            }).ToList();
+                Data = posts,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
         }
 
         public async Task<PostResponseDto?> GetPostAsync(Guid id)
@@ -53,8 +75,8 @@ namespace TrailBlog.Api.Services
                 CreatedAt = post.CreatedAt,
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
-                TotalLike = post.Likes.Count(),
-                TotalComment = post.Comments.Count(),
+                TotalLike = post.Likes.Count,
+                TotalComment = post.Comments.Count,
                 Comments = post.Comments.Select(c => new CommentResponseDto
                 {
                     Id = c.Id,
@@ -142,26 +164,7 @@ namespace TrailBlog.Api.Services
 
             return OperationResult.Success("Post deleted successfully");
         }
-
-        public async Task<IEnumerable<PostResponseDto>> GetRecentPostsAsync(int page, int pageSize)
-        {
-            var posts = await _postRepository.GetRecentPostsPagedAsync(page, pageSize);
-
-            return posts.Select(p => new PostResponseDto
-            {
-                Id = p.Id,
-                Title = p.Title,
-                Content = p.Content,
-                Author = p.Author,
-                Slug = p.Slug,
-                CreatedAt = p.CreatedAt,
-                CommunityName = p.Community.Name,
-                CommunityId = p.CommunityId,
-                TotalLike = p.Likes.Count(),
-                TotalComment = p.Comments.Count(),
-            }).ToList();
-        }
-
+       
         private static void UpdatePostFields(Post existingPost, UpdatePostDto post)
         {
             bool hasChanges = false;

@@ -18,9 +18,9 @@ namespace TrailBlog.Api.Controllers
         [HttpGet("deleted")]
         [Authorize(Roles = "Admin")]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<CommentResponseDto>> GetAllDeletedComments()
+        public async Task<ActionResult<CommentResponseDto>> GetDeletedComments()
         {
-            var deletedComments = await _commentService.GetAllDeletedCommentsAsync();
+            var deletedComments = await _commentService.GetDeletedComments();
 
             return Ok(deletedComments);
         }

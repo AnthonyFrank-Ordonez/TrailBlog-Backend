@@ -8,56 +8,30 @@ namespace TrailBlog.Api.Repositories
     {
         public CommunityRepository(ApplicationDbContext context) : base(context) { }
 
-        public async Task<IEnumerable<Community?>> GetAllCommunityWithUserAsync()
+        public IQueryable<Community> GetCommunityDetails()
         {
-            return await _dbSet
-                .OrderByDescending(c => c.CreatedAt)
-                .Include(c => c.User)
-                .ToListAsync();
+            return _dbSet
+                .Include(cy => cy.User)
+                .Include(cy => cy.Posts)
+                .AsNoTracking();
         }
 
-        public async Task<IEnumerable<Community?>> GetAllCommunityWithPostsAsync()
+        public IQueryable<Community> GetRecentCommunities()
         {
-            return await _dbSet
-                .OrderByDescending(c => c.CreatedAt)
-                .Include(c => c.Posts)
-                .ToListAsync();
+            return GetCommunityDetails()
+                .OrderByDescending(cy => cy.CreatedAt);
         }
 
-        public async Task<IEnumerable<Community>> GetAllCommunityWithUserandPostAsync()
+        public async Task<Community?> GetCommunityDetailsAsync(Guid communityId)
         {
-            return await _dbSet
-                .OrderByDescending(c => c.CreatedAt)
-                .Include(c => c.User)
-                .Include(c => c.Posts)
-                .ToListAsync();
-
-        }
-
-        public async Task<Community?> GetCommunityWithUserandPostAsync(Guid communityId)
-        {
-            return await _dbSet
-                .Include(c => c.User)
-                .Include(c => c.Posts)
+            return await GetCommunityDetails()
                 .FirstOrDefaultAsync(c => c.Id == communityId);
-
         }
 
-        public async Task<IEnumerable<Community>> GetAllCommunityPostsAsync()
+        public IQueryable<Community> SearchCommunities(string searchQuery)
         {
-            return await _dbSet
-                .Include(c => c.Posts.OrderByDescending(p => p.CreatedAt).Take(5))
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<Community>> SearchCommunityAsync(string searchQuery)
-        {
-            return await _dbSet
-                .Where(c => c.Name.Contains(searchQuery))
-                .OrderByDescending(c => c.CreatedAt)
-                .Include(c => c.Posts)
-                .Include(c => c.User)
-                .ToListAsync();
+            return GetCommunityDetails()
+                .Where(c => c.Name.Contains(searchQuery));
         }
 
 

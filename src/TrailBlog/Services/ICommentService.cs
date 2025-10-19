@@ -4,7 +4,7 @@ namespace TrailBlog.Api.Services
 {
     public interface ICommentService
     {
-        Task<IEnumerable<CommentResponseDto>> GetAllDeletedCommentsAsync();
+        Task<IEnumerable<CommentResponseDto>> GetDeletedComments();
         Task<CommentResponseDto> AddCommentAsync(Guid userId, CommentDto comment);
         Task<CommentResponseDto> EditCommentAsync(Guid commentId, Guid userId, UpdateCommentDto comment);
         Task<OperationResultDto> InitialDeleteCommentAsync(Guid commentId, Guid userId, bool isAdmin = false);

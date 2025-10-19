@@ -1,4 +1,5 @@
-﻿using TrailBlog.Api.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using TrailBlog.Api.Entities;
 using TrailBlog.Api.Exceptions;
 using TrailBlog.Api.Helpers;
 using TrailBlog.Api.Models;
@@ -17,21 +18,24 @@ namespace TrailBlog.Api.Services
         private readonly IUserRepository _userRepository = userRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<IEnumerable<CommentResponseDto>> GetAllDeletedCommentsAsync()
+        public async Task<IEnumerable<CommentResponseDto>> GetDeletedComments()
         {
-            var deletedComments = await _commentRepository.GetAllDeletedCommentsAsync();
+            var deletedComments = await _commentRepository
+                .GetDeletedComments()
+                .Select(dc => new CommentResponseDto
+                {
+                    Id = dc.Id,
+                    UserId = dc.User.Id,
+                    PostId = dc.Post.Id,
+                    Content = dc.Content,
+                    Username = dc.User.Username,
+                    LastUpdatedAt = dc.LastUpdatedAt,
+                    CommentedAt = dc.CommentedAt,
+                    IsDeleted = dc.IsDeleted
+                })
+                .ToListAsync();
 
-            return deletedComments.Select(dc => new CommentResponseDto
-            {
-                Id = dc.Id,
-                UserId = dc.User.Id,
-                PostId = dc.Post.Id,
-                Content = dc.Content,
-                Username = dc.User.Username,
-                LastUpdatedAt = dc.LastUpdatedAt,
-                CommentedAt = dc.CommentedAt,
-                IsDeleted = dc.IsDeleted,
-            });
+            return deletedComments;
         }
 
         public async Task<CommentResponseDto> AddCommentAsync(Guid userId, CommentDto comment)

@@ -8,23 +8,25 @@ namespace TrailBlog.Api.Repositories
     {
         public UserCommunityRepository(ApplicationDbContext context) : base(context) { }
 
-
-        public async Task<IEnumerable<UserCommunity>> GetUserCommunitiesAsync(Guid userId)
+        public IQueryable<UserCommunity> GetUserCommunitiesDetails()
         {
-            return await _dbSet
-                .Where(uc => uc.UserId == userId)
-                .Include(uc => uc.Community)
+            return _dbSet
+                .Include(uc => uc.User)
                 .Include(uc => uc.Community)
                     .ThenInclude(c => c.User)
-                .ToListAsync();
+                .AsNoTracking();
         }
 
-        public async Task<IEnumerable<UserCommunity>> GetCommunityMemberAsync(Guid communityId)
+        public IQueryable<UserCommunity> GetUserCommunitiesAsync(Guid userId)
         {
-            return await _dbSet
-                .Where(uc => uc.CommunityId == communityId)
-                .Include(uc => uc.User)
-                .ToListAsync();
+            return GetUserCommunitiesDetails()
+                .Where(uc => uc.UserId == userId);
+        }
+
+        public IQueryable<UserCommunity> GetCommunityMembersAsync(Guid communityId)
+        {
+            return GetUserCommunitiesDetails()
+                .Where(uc => uc.CommunityId == communityId);
         }
 
         public async Task<UserCommunity?> ExistingMemberAsync(Guid communityId, Guid userId)

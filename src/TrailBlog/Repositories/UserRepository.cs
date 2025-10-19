@@ -8,57 +8,41 @@ namespace TrailBlog.Api.Repositories
     {
         public UserRepository(ApplicationDbContext context) : base(context) {}
 
-        public async Task<IEnumerable<User>> GetAllUsersWithRolesAsync()
+        public IQueryable<User> GetUserDetails()
         {
-            return await _dbSet
+            return _dbSet
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
-                .ToListAsync();
+                .AsNoTracking();
         }
 
-        public async Task<IEnumerable<User>> GetAllAdminUsersAsync()
+        public IQueryable<User> GetAdminUsers()
         {
-            var adminRoleName = new[] { "admin" };
 
-            return await _dbSet
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .Where(u => u.UserRoles.Any(ur =>
+            return GetUserDetails().Where(u => u.UserRoles.Any(ur =>
                     ur.Role != null &&
                     ur.Role.Name != null &&
-                    adminRoleName.Contains(ur.Role.Name.ToLower()))
-                )
-                .ToListAsync();
+                    ur.Role.Name.ToLower() == "admin"));
         }
 
-        public async Task<IEnumerable<User>> GetAllNonAdminUsersAsync()
+        public IQueryable<User> GetNonAdminUsers()
         {
-            var adminRoleName = new[] { "admin" };
 
-            return await _dbSet
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .Where(u => !u.UserRoles.Any(ur =>
+            return GetUserDetails().Where(u => u.UserRoles.Any(ur =>
                     ur.Role != null &&
                     ur.Role.Name != null &&
-                    adminRoleName.Contains(ur.Role.Name.ToLower()))
-                )
-                .ToListAsync();
+                    ur.Role.Name.ToLower() != "admin"));
         }
 
         public async Task<User?> GetUserByIdWithRolesAsync(Guid userId)
         {
-            return await _dbSet
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
+            return await GetUserDetails()
                 .FirstAsync(u => u.Id == userId);
         }
 
         public async Task<User?> GetUserByUsernameWithRolesAsync(string username)
         {
-            return await _dbSet
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
+            return await GetUserDetails()
                 .FirstOrDefaultAsync(u => u.Username == username);
         }
 

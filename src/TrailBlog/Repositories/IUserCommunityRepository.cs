@@ -4,8 +4,9 @@ namespace TrailBlog.Api.Repositories
 {
     public interface IUserCommunityRepository : IRepository<UserCommunity>
     {
-        Task<IEnumerable<UserCommunity>> GetUserCommunitiesAsync(Guid userId);
-        Task<IEnumerable<UserCommunity>> GetCommunityMemberAsync(Guid communityId);
+        IQueryable<UserCommunity> GetUserCommunitiesDetails();
+        IQueryable<UserCommunity> GetUserCommunitiesAsync(Guid userId);
+        IQueryable<UserCommunity> GetCommunityMembersAsync(Guid communityId);
         Task<UserCommunity?> ExistingMemberAsync(Guid communityId, Guid userid);
     }
 }

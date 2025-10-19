@@ -22,9 +22,9 @@ namespace TrailBlog.Api.Controllers
         [HttpGet]
         [AllowAnonymous]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> GetAllCommunities()
+        public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> GetAllCommunities([FromQuery] int page, [FromQuery] int pageSize)
         {
-            var communities = await _communityService.GetAllCommunitiesAsync();
+            var communities = await _communityService.GetCommunitiesPagedAsync(page, pageSize);
 
             return Ok(communities);
         }
@@ -32,9 +32,9 @@ namespace TrailBlog.Api.Controllers
         [HttpGet("{id}")]
         [AllowAnonymous]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<CommunityResponseDto?>> GetCommunity(Guid id)
+        public async Task<ActionResult<CommunityResponseDto?>> GetCommunity(Guid id, [FromQuery] int page, [FromQuery] int pageSize)
         {
-            var community = await _communityService.GetCommunityAsync(id);
+            var community = await _communityService.GetCommunityPostsPagedAsync(id, page, pageSize);
 
             return Ok(community);
         }
@@ -58,16 +58,6 @@ namespace TrailBlog.Api.Controllers
             var members = await _communityService.GetCommunityMembersAsync(id);
 
             return Ok(members);
-        }
-
-        [HttpGet("communities")]
-        [AllowAnonymous]
-        [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> GetAllCommunityPosts()
-        {
-            var communityPosts = await _communityService.GetAllCommunityPostsAsync();
-
-            return Ok(communityPosts);
         }
 
         [HttpPost("search")]

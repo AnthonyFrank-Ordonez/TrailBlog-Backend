@@ -8,13 +8,19 @@ namespace TrailBlog.Api.Repositories
     {
         public CommentRepository(ApplicationDbContext context) : base(context) { }
 
-        public async Task<IEnumerable<Comment>> GetAllDeletedCommentsAsync()
+        public IQueryable<Comment> GetCommentsDetails()
         {
-            return await _dbSet
+            return _dbSet
                 .Include(c => c.User)
                 .Include(c => c.Post)
-                .Where(c => c.IsDeleted)
-                .ToListAsync();
+                .AsNoTracking();
+            
+        }
+
+        public IQueryable<Comment> GetDeletedComments()
+        {
+            return GetCommentsDetails()
+                .Where(c => c.IsDeleted);
         }
 
     }

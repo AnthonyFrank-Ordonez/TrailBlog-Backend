@@ -2,7 +2,7 @@
 {
     public interface IRepository<T> where T : class
     {
-        Task<List<T>> GetAllAsync();
+        IQueryable<T> GetAll();
         Task<T?> GetByIdAsync(Guid id);
         Task<T> AddAsync(T entity);
         Task<T?> UpdateAsync(Guid id, T entity);
