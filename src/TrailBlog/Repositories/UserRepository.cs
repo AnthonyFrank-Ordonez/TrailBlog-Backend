@@ -8,12 +8,13 @@ namespace TrailBlog.Api.Repositories
     {
         public UserRepository(ApplicationDbContext context) : base(context) {}
 
-        public IQueryable<User> GetUserDetails()
+        public IQueryable<User> GetUserDetails(bool readOnly = true)
         {
-            return _dbSet
+            var query = _dbSet
                 .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .AsNoTracking();
+                .ThenInclude(ur => ur.Role);
+
+            return readOnly ? query.AsNoTracking() : query;
         }
 
         public IQueryable<User> GetAdminUsers()
@@ -36,13 +37,13 @@ namespace TrailBlog.Api.Repositories
 
         public async Task<User?> GetUserByIdWithRolesAsync(Guid userId)
         {
-            return await GetUserDetails()
-                .FirstAsync(u => u.Id == userId);
+            return await GetUserDetails(readOnly: false)
+                .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
         public async Task<User?> GetUserByUsernameWithRolesAsync(string username)
         {
-            return await GetUserDetails()
+            return await GetUserDetails(readOnly: false)
                 .FirstOrDefaultAsync(u => u.Username == username);
         }
 

@@ -8,13 +8,13 @@ namespace TrailBlog.Api.Repositories
     {
         public CommentRepository(ApplicationDbContext context) : base(context) { }
 
-        public IQueryable<Comment> GetCommentsDetails()
+        public IQueryable<Comment> GetCommentsDetails(bool readOnly = true)
         {
-            return _dbSet
+            var query = _dbSet
                 .Include(c => c.User)
-                .Include(c => c.Post)
-                .AsNoTracking();
+                .Include(c => c.Post);
             
+            return readOnly ? query.AsNoTracking() : query;
         }
 
         public IQueryable<Comment> GetDeletedComments()

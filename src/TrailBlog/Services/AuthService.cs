@@ -10,6 +10,7 @@ namespace TrailBlog.Api.Services
     public class AuthService(
         IUserRepository userRepository,
         IRoleRepository roleRepository,
+        ILogger<AuthService> logger,
         IUserRoleRepository userRoleRepository,
         IUnitOfWork unitOfWork, 
         IConfiguration configuration) : IAuthService
@@ -19,6 +20,7 @@ namespace TrailBlog.Api.Services
         private readonly IRoleRepository _roleRepository = roleRepository;
         private readonly IUserRoleRepository _userRoleRepository = userRoleRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly ILogger _logger = logger;
 
         public async Task<AuthResultDto> LoginAsync(LoginDto request)
         {
@@ -152,8 +154,10 @@ namespace TrailBlog.Api.Services
         private async Task<User?> ValidateRefreshTokenAsync(Guid userId, string refreshToken)
         {
             var user = await _userRepository.GetByIdAsync(userId);
+            _logger.LogInformation("Send Refresh Token {refreshToken}", refreshToken);
+            _logger.LogInformation("User Refresh Token {refreshToken}", user?.RefreshToken);
 
-            if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime < DateTime.UtcNow)
+            if (user is null || user?.RefreshToken != refreshToken || user.RefreshTokenExpiryTime < DateTime.UtcNow)
             {
                 return null;
             }

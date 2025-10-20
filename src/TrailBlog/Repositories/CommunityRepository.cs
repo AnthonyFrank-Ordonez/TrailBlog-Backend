@@ -8,12 +8,13 @@ namespace TrailBlog.Api.Repositories
     {
         public CommunityRepository(ApplicationDbContext context) : base(context) { }
 
-        public IQueryable<Community> GetCommunityDetails()
+        public IQueryable<Community> GetCommunityDetails(bool readOnly = true)
         {
-            return _dbSet
+            var query = _dbSet
                 .Include(cy => cy.User)
-                .Include(cy => cy.Posts)
-                .AsNoTracking();
+                .Include(cy => cy.Posts);
+
+            return readOnly ? query.AsNoTracking() : query;
         }
 
         public IQueryable<Community> GetRecentCommunities()

@@ -8,13 +8,15 @@ namespace TrailBlog.Api.Repositories
     {
         public PostRepository(ApplicationDbContext context) : base(context) { }
 
-        public IQueryable<Post> GetPostsDetails()
+        public IQueryable<Post> GetPostsDetails(bool readOnly = true)
         {
-            return _dbSet
+
+            var query = _dbSet
                 .Include(p => p.Community)
                 .Include(p => p.Likes)
-                .Include(p => p.Comments)
-                .AsNoTracking();
+                .Include(p => p.Comments);
+
+            return readOnly ? query.AsNoTracking() : query;
         }
 
         public async Task<Post?> GetPostDetailByIdAsync(Guid id)

@@ -4,7 +4,7 @@ namespace TrailBlog.Api.Repositories
 {
     public interface IUserRepository : IRepository<User>
     {
-        IQueryable<User> GetUserDetails();
+        IQueryable<User> GetUserDetails(bool readOnly = true);
         IQueryable<User> GetAdminUsers();
         IQueryable<User> GetNonAdminUsers();
         Task<User?> GetUserByIdWithRolesAsync(Guid userId);
