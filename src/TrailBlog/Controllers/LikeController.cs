@@ -14,26 +14,26 @@ namespace TrailBlog.Api.Controllers
     {
         private readonly ILikeService _likeService = likeService;
 
-        [HttpPost("{id}")]
+        [HttpPost("{id}/like")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<OperationResultDto>> AddLike(Guid id)
+        public async Task<ActionResult<PostResponseDto>> AddLike(Guid id)
         {
             var userId = GetCurrentUserId();
-            var result = await _likeService.AddPostLikeAsync(userId, id);
+            var post = await _likeService.AddPostLikeAsync(userId, id);
 
-            return Ok(result);
+            return Ok(post);
         }
 
-        [HttpDelete("{id}")]
+        [HttpPost("{id}/dislike")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<OperationResultDto>> RemoveLike(Guid id)
+        public async Task<ActionResult<PostResponseDto>> RemoveLike(Guid id)
         {
             var userId = GetCurrentUserId();
-            var result = await _likeService.AddPostDislikeAsync(userId, id);
+            var post = await _likeService.AddPostDislikeAsync(userId, id);
 
-            return Ok(result);
+            return Ok(post);
         }
 
         private Guid GetCurrentUserId()

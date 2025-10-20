@@ -5,7 +5,7 @@ namespace TrailBlog.Api.Services
 {
     public interface ILikeService
     {
-        Task<OperationResultDto> AddPostLikeAsync(Guid userId, Guid postId);
-        Task<OperationResultDto> AddPostDislikeAsync(Guid userId, Guid postId);
+        Task<PostResponseDto> AddPostLikeAsync(Guid userId, Guid postId);
+        Task<PostResponseDto> AddPostDislikeAsync(Guid userId, Guid postId);
     }
 }

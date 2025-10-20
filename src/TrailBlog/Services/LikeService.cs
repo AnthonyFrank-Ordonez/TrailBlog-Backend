@@ -17,9 +17,9 @@ namespace TrailBlog.Api.Services
         private readonly IUserRepository _userRepository = userRepository;
         private readonly IPostRepository _postRepository = postRepository;
 
-        public async Task<OperationResultDto> AddPostLikeAsync(Guid userId, Guid postId)
+        public async Task<PostResponseDto> AddPostLikeAsync(Guid userId, Guid postId)
         {
-            var post = await _postRepository.GetByIdAsync(postId);
+            var post = await _postRepository.GetPostDetailByIdAsync(postId);
             var user = await _userRepository.GetByIdAsync(userId);
 
             if (user is null) throw new NotFoundException($"User with the id of {userId} not found");
@@ -32,13 +32,16 @@ namespace TrailBlog.Api.Services
                 {
                     await _likeRepository.DeleteAsync(existingLike);
                     await _unitOfWork.SaveChangesAsync();
-                    return OperationResult.Success("Removed Like successfully");
+
+                    return CreatePostResponse(post, userId);
+
                 } else {
                     existingLike.IsLike = true;
                     existingLike.LikeAt = DateTime.UtcNow;
                     await _likeRepository.UpdateAsync(existingLike.Id, existingLike);
                     await _unitOfWork.SaveChangesAsync();
-                    return OperationResult.Success("Disliked successfully");
+
+                    return CreatePostResponse(post, userId);
                 }
             };
 
@@ -55,14 +58,12 @@ namespace TrailBlog.Api.Services
 
             if (result is null) throw new ApplicationException("An error occured. Unable to add like");
 
-            return OperationResult.Success("Added like successfuly");
-
-
+            return CreatePostResponse(post, userId);
         }
 
-        public async Task<OperationResultDto> AddPostDislikeAsync(Guid userId, Guid postId)
+        public async Task<PostResponseDto> AddPostDislikeAsync(Guid userId, Guid postId)
         {
-            var post = await _postRepository.GetByIdAsync(postId);
+            var post = await _postRepository.GetPostDetailByIdAsync(postId);
             var user = await _userRepository.GetByIdAsync(userId);
 
             if (user is null) throw new NotFoundException($"User with the id of {userId} not found");
@@ -76,7 +77,7 @@ namespace TrailBlog.Api.Services
                 {
                     await _likeRepository.DeleteAsync(existingLike);
                     await _unitOfWork.SaveChangesAsync();
-                    return OperationResult.Success("Removed dislike successfully");
+                    return CreatePostResponse(post, userId);
                 }
                 else
                 {
@@ -84,7 +85,7 @@ namespace TrailBlog.Api.Services
                     existingLike.LikeAt = DateTime.UtcNow;
                     await _likeRepository.UpdateAsync(existingLike.Id, existingLike);
                     await _unitOfWork.SaveChangesAsync();
-                    return OperationResult.Success("Like successfully");
+                    return CreatePostResponse(post, userId);
                 }
             };
 
@@ -99,9 +100,27 @@ namespace TrailBlog.Api.Services
             var result = await _likeRepository.AddAsync(newLike);
             await _unitOfWork.SaveChangesAsync();
 
-            return OperationResult.Success("Successfully dislike the post");
+            return CreatePostResponse(post, userId);
         }
 
+        private PostResponseDto CreatePostResponse(Post post, Guid userId)
+        {
+            return new PostResponseDto
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                Author = post.Author,
+                Slug = post.Slug,
+                CreatedAt = post.CreatedAt,
+                CommunityName = post.Community.Name,
+                CommunityId = post.CommunityId,
+                TotalLike = post.Likes.Count,
+                TotalComment = post.Comments.Count,
+                IsLiked = post.Likes.Any(l => l.UserId == userId && l.IsLike == true),
+                IsDisliked = post.Likes.Any(l => l.UserId == userId && l.IsLike == false),
+            };
+        }
 
     }
 }
