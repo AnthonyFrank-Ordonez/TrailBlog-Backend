@@ -15,9 +15,9 @@ namespace TrailBlog.Api.Data
         public DbSet<Community> Communities { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<UserCommunity> UserCommunities { get; set; }
-        public DbSet<Like> Likes { get; set; }
         public DbSet<Comment> Comments { get; set; }
-            
+        public DbSet<Reaction> Reactions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -84,9 +84,6 @@ namespace TrailBlog.Api.Data
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            modelBuilder.Entity<Post>().Ignore(p => p.TotalLikes);
-            modelBuilder.Entity<Post>().Ignore(p => p.TotalComments);
-
             modelBuilder.Entity<Community>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -148,23 +145,25 @@ namespace TrailBlog.Api.Data
                    .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<Like>(entity =>
+            modelBuilder.Entity<Reaction>(entity =>
             {
-                entity.HasIndex(e => e.PostId);
+                entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.UserId);
-                entity.HasIndex(e => new { e.PostId, e.UserId });
-                entity.HasIndex(e => new { e.PostId, e.LikeAt });
-                entity.HasIndex(e => new { e.UserId, e.LikeAt });
+                entity.HasIndex(e => e.PostId);
+                entity.HasIndex(e => new { e.UserId, e.PostId }).IsUnique();
+                entity.HasIndex(e => new { e.UserId, e.ReactedAt });
+                entity.HasIndex(e => new { e.PostId, e.ReactedAt });
 
                 entity.HasOne(e => e.User)
-                    .WithMany(e => e.Likes)
+                    .WithMany(e => e.Reactions)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(e => e.Post)
-                   .WithMany(e => e.Likes)
-                   .HasForeignKey(e => e.PostId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                    .WithMany(e => e.Reactions)
+                    .HasForeignKey(e => e.PostId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
             });
 
             

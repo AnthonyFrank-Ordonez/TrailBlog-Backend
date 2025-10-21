@@ -46,6 +46,27 @@ namespace TrailBlog.Api.Controllers
             return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
         }
 
+        [HttpPost("{id}/like")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PostResponseDto>> LikePost(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var result = await _postService.AddPostLikeAsync(userId, id);
+            return Ok(result);
+        }
+
+
+        [HttpPost("{id}/dislike")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PostResponseDto>> DislikePOst(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var result = await _postService.AddPostDisLikeAsync(userId, id);
+            return Ok(result);
+        }
+
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]

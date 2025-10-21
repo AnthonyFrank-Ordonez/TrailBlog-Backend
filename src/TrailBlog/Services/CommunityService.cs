@@ -55,7 +55,7 @@ namespace TrailBlog.Api.Services
             };
         }
 
-        public async Task<PagedResultDto<PostResponseDto>> GetCommunityPostsPagedAsync(Guid id, int page, int pageSize)
+        public async Task<PagedResultDto<PostResponseDto>> GetCommunityPostsPagedAsync(Guid id, Guid userId, int page, int pageSize)
         {
             if (page <= 0) page = 1;
             if (pageSize <= 0) pageSize = 10;
@@ -91,8 +91,11 @@ namespace TrailBlog.Api.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
-                    TotalLike = p.Likes.Count,
-                    TotalComment = p.Comments.Count
+                    TotalLike = p.Reactions.Count(r => r.IsLike),
+                    TotalDislike = p.Reactions.Count(r => r.IsDislike),
+                    TotalComment = p.Comments.Count,
+                    IsLiked = p.Reactions.Any(r => r.UserId == userId && r.IsLike == true),
+                    IsDisliked = p.Reactions.Any(r => r.UserId == userId && r.IsDislike == true),
                 })
                 .ToListAsync();
 

@@ -13,7 +13,7 @@ namespace TrailBlog.Api.Repositories
 
             var query = _dbSet
                 .Include(p => p.Community)
-                .Include(p => p.Likes)
+                .Include(p => p.Reactions)
                 .Include(p => p.Comments);
 
             return readOnly ? query.AsNoTracking() : query;

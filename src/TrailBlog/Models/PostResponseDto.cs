@@ -25,6 +25,7 @@ namespace TrailBlog.Api.Models
         public List<CommentResponseDto> Comments { get; set; } = new List<CommentResponseDto>();
 
         public int TotalLike { get; set; }
+        public int TotalDislike { get; set; }
 
         public int TotalComment { get; set; }
 

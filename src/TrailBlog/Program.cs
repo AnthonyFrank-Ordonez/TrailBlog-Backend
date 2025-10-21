@@ -155,7 +155,7 @@ builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<ICommunityRepository, CommunityRepository>();
 builder.Services.AddScoped<IUserCommunityRepository, UserCommunityRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-builder.Services.AddScoped<ILikeRepository, LikeRepository>();
+builder.Services.AddScoped<IReactionRepository, ReactionRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 // Register application services
@@ -163,7 +163,6 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
-builder.Services.AddScoped<ILikeService, LikeService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 
 var app = builder.Build();

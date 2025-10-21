@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TrailBlog.Api.Data;
@@ -11,9 +12,11 @@ using TrailBlog.Api.Data;
 namespace TrailBlog.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251021062159_AddReactionsTable")]
+    partial class AddReactionsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,6 +114,39 @@ namespace TrailBlog.Api.Migrations
                     b.HasIndex("UserId", "CreatedAt");
 
                     b.ToTable("Communities");
+                });
+
+            modelBuilder.Entity("TrailBlog.Api.Entities.Like", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsLike")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LikeAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("PostId", "LikeAt");
+
+                    b.HasIndex("PostId", "UserId");
+
+                    b.HasIndex("UserId", "LikeAt");
+
+                    b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("TrailBlog.Api.Entities.Post", b =>
@@ -383,6 +419,25 @@ namespace TrailBlog.Api.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TrailBlog.Api.Entities.Like", b =>
+                {
+                    b.HasOne("TrailBlog.Api.Entities.Post", "Post")
+                        .WithMany("Likes")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TrailBlog.Api.Entities.User", "User")
+                        .WithMany("Likes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TrailBlog.Api.Entities.Post", b =>
                 {
                     b.HasOne("TrailBlog.Api.Entities.Community", "Community")
@@ -470,6 +525,8 @@ namespace TrailBlog.Api.Migrations
                 {
                     b.Navigation("Comments");
 
+                    b.Navigation("Likes");
+
                     b.Navigation("Reactions");
                 });
 
@@ -483,6 +540,8 @@ namespace TrailBlog.Api.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("Communities");
+
+                    b.Navigation("Likes");
 
                     b.Navigation("Posts");
 

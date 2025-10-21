@@ -18,6 +18,6 @@
         public ICollection<Community> Communities { get; set; } = new List<Community>();
         public ICollection<Post> Posts { get; set; } = new List<Post>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
-        public ICollection<Like> Likes { get; set; } = new List<Like>();
+        public ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
     }
 }

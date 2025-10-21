@@ -11,11 +11,13 @@ namespace TrailBlog.Api.Services
         IPostRepository postRepository, 
         IUserRepository userRepository, 
         ICommunityRepository communityRepository,
+        IReactionRepository reactionRepository,
         IUnitOfWork unitOfWork) : IPostService
     {
         private readonly IPostRepository _postRepository = postRepository;
         private readonly IUserRepository _userrepository = userRepository;
         private readonly ICommunityRepository _communityRepository = communityRepository;
+        private readonly IReactionRepository _reactionRepository = reactionRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
         public async Task<PagedResultDto<PostResponseDto>> GetPostsPagedAsync(Guid userId, int page, int pageSize)
@@ -43,10 +45,11 @@ namespace TrailBlog.Api.Services
                     CreatedAt = p.CreatedAt,
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
-                    TotalLike = p.Likes.Count,
+                    TotalLike = p.Reactions.Count(r => r.IsLike),
+                    TotalDislike = p.Reactions.Count(r => r.IsDislike),
                     TotalComment = p.Comments.Count,
-                    IsLiked = p.Likes.Any(l => l.UserId == userId && l.IsLike == true),
-                    IsDisliked = p.Likes.Any(l => l.UserId == userId && l.IsLike == false),
+                    IsLiked = p.Reactions.Any(r => r.UserId == userId && r.IsLike == true),
+                    IsDisliked = p.Reactions.Any(r => r.UserId == userId && r.IsDislike == true),
                 })
                 .ToListAsync();
 
@@ -77,10 +80,11 @@ namespace TrailBlog.Api.Services
                 CreatedAt = post.CreatedAt,
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
-                TotalLike = post.Likes.Count,
+                TotalLike = post.Reactions.Count(r => r.IsLike),
+                TotalDislike = post.Reactions.Count(r => r.IsDislike),
                 TotalComment = post.Comments.Count,
-                IsLiked = post.Likes.Any(l => l.UserId == userId && l.IsLike == true),
-                IsDisliked = post.Likes.Any(l => l.UserId == userId && l.IsLike == false),
+                IsLiked = post.Reactions.Any(r => r.UserId == userId && r.IsLike == true),
+                IsDisliked = post.Reactions.Any(r => r.UserId == userId && r.IsLike == true),
                 Comments = post.Comments.Select(c => new CommentResponseDto
                 {
                     Id = c.Id,
@@ -132,6 +136,16 @@ namespace TrailBlog.Api.Services
             };
         }
 
+        public async Task<PostResponseDto> AddPostLikeAsync(Guid userId, Guid postId)
+        {
+            return await ToggleReactionsAsync(userId, postId, isLike: true);
+        }
+
+        public async Task<PostResponseDto> AddPostDisLikeAsync(Guid userId, Guid postId)
+        {
+            return await ToggleReactionsAsync(userId, postId, isLike: false);
+        }
+
         public async Task<OperationResultDto> UpdatePostAsync(Guid id, Guid userId, UpdatePostDto post, bool isAdmin)
         {
             var existingPost = await _postRepository.GetByIdAsync(id);
@@ -168,7 +182,49 @@ namespace TrailBlog.Api.Services
 
             return OperationResult.Success("Post deleted successfully");
         }
-       
+        
+        private async Task<PostResponseDto> ToggleReactionsAsync(Guid userId, Guid postId, bool isLike)
+        {
+            var post = await _postRepository.GetPostDetailByIdAsync(postId, isReadOnly: false);
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null) throw new NotFoundException($"User with the id of {userId} not found");
+            if (post is null) throw new NotFoundException($"Post with the id of {postId} not found");
+
+            var existingReaction = await _reactionRepository.GetExistingReactionAsync(user.Id, post.Id);
+
+            if (existingReaction != null)
+            {
+                if ((isLike && existingReaction.IsLike) || (!isLike && existingReaction.IsDislike))
+                {
+                    await _reactionRepository.DeleteAsync(existingReaction);
+                }
+                else
+                {
+                    existingReaction.IsLike = isLike;
+                    existingReaction.IsDislike = !isLike;
+                    existingReaction.ReactedAt = DateTime.UtcNow;
+                    await _reactionRepository.UpdateAsync(existingReaction.Id, existingReaction);
+                }
+            }
+            else
+            {
+                var newReaction = new Reaction
+                {
+                    UserId = user.Id,
+                    PostId = post.Id,
+                    IsLike = isLike,
+                    IsDislike = !isLike,
+                    ReactedAt = DateTime.UtcNow
+                };
+                await _reactionRepository.AddAsync(newReaction);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            return CreatePostResponse(post, userId);
+
+        }
+
         private static void UpdatePostFields(Post existingPost, UpdatePostDto post)
         {
             bool hasChanges = false;
@@ -199,6 +255,26 @@ namespace TrailBlog.Api.Services
                 existingPost.UpdatedAt = DateTime.UtcNow;
             }
 
+        }
+
+        private PostResponseDto CreatePostResponse(Post post, Guid userId)
+        {
+            return new PostResponseDto
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                Author = post.Author,
+                Slug = post.Slug,
+                CreatedAt = post.CreatedAt,
+                CommunityName = post.Community.Name,
+                CommunityId = post.CommunityId,
+                TotalLike = post.Reactions.Count(r => r.IsLike),
+                TotalDislike = post.Reactions.Count(r => r.IsDislike),
+                TotalComment = post.Comments.Count,
+                IsLiked = post.Reactions.Any(r => r.UserId == userId && r.IsLike == true),
+                IsDisliked = post.Reactions.Any(r => r.UserId == userId && r.IsDislike == true),
+            };
         }
     }
 

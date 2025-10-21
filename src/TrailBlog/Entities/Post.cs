@@ -17,12 +17,7 @@ namespace TrailBlog.Api.Entities
 
         public Guid CommunityId { get; set; }
         public Community Community { get; set; } = null!;
-        public ICollection<Like> Likes { get; set; } = new List<Like>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
-
-        [NotMapped]
-        public int TotalLikes => Likes?.Count ?? 0;
-        [NotMapped]
-        public int TotalComments => Comments?.Count ?? 0;
+        public ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
     }
 }

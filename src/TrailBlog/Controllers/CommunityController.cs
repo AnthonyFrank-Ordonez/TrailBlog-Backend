@@ -34,7 +34,8 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<CommunityResponseDto?>> GetCommunity(Guid id, [FromQuery] int page, [FromQuery] int pageSize)
         {
-            var community = await _communityService.GetCommunityPostsPagedAsync(id, page, pageSize);
+            var userId = GetCurrentUserId();
+            var community = await _communityService.GetCommunityPostsPagedAsync(id, userId, page, pageSize);
 
             return Ok(community);
         }
