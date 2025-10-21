@@ -19,9 +19,9 @@ namespace TrailBlog.Api.Repositories
             return readOnly ? query.AsNoTracking() : query;
         }
 
-        public async Task<Post?> GetPostDetailByIdAsync(Guid id)
+        public async Task<Post?> GetPostDetailByIdAsync(Guid id, bool isReadOnly = true)
         {
-            return await GetPostsDetails()
+            return await GetPostsDetails(readOnly: isReadOnly)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
     }

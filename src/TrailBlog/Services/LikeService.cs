@@ -19,7 +19,7 @@ namespace TrailBlog.Api.Services
 
         public async Task<PostResponseDto> AddPostLikeAsync(Guid userId, Guid postId)
         {
-            var post = await _postRepository.GetPostDetailByIdAsync(postId);
+            var post = await _postRepository.GetPostDetailByIdAsync(postId, isReadOnly: false);
             var user = await _userRepository.GetByIdAsync(userId);
 
             if (user is null) throw new NotFoundException($"User with the id of {userId} not found");
@@ -63,7 +63,7 @@ namespace TrailBlog.Api.Services
 
         public async Task<PostResponseDto> AddPostDislikeAsync(Guid userId, Guid postId)
         {
-            var post = await _postRepository.GetPostDetailByIdAsync(postId);
+            var post = await _postRepository.GetPostDetailByIdAsync(postId, isReadOnly: false);
             var user = await _userRepository.GetByIdAsync(userId);
 
             if (user is null) throw new NotFoundException($"User with the id of {userId} not found");

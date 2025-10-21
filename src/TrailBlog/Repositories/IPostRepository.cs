@@ -5,6 +5,6 @@ namespace TrailBlog.Api.Repositories
     public interface IPostRepository : IRepository<Post>
     {
         IQueryable<Post> GetPostsDetails(bool readOnly = true);
-        Task<Post?> GetPostDetailByIdAsync(Guid id);
+        Task<Post?> GetPostDetailByIdAsync(Guid id, bool isReadOnly = true);
     }
 }   
