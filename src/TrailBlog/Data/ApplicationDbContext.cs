@@ -150,7 +150,7 @@ namespace TrailBlog.Api.Data
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.UserId);
                 entity.HasIndex(e => e.PostId);
-                entity.HasIndex(e => new { e.UserId, e.PostId }).IsUnique();
+                entity.HasIndex(e => new { e.UserId, e.PostId, e.ReactionId }).IsUnique();
                 entity.HasIndex(e => new { e.UserId, e.ReactedAt });
                 entity.HasIndex(e => new { e.PostId, e.ReactedAt });
 

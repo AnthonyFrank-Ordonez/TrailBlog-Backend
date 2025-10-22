@@ -91,11 +91,19 @@ namespace TrailBlog.Api.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
-                    TotalLike = p.Reactions.Count(r => r.IsLike),
-                    TotalDislike = p.Reactions.Count(r => r.IsDislike),
                     TotalComment = p.Comments.Count,
-                    IsLiked = p.Reactions.Any(r => r.UserId == userId && r.IsLike == true),
-                    IsDisliked = p.Reactions.Any(r => r.UserId == userId && r.IsDislike == true),
+                    Reactions = p.Reactions
+                        .GroupBy(r => r.ReactionId)
+                        .Select(g => new PostReactionSummaryDto
+                        {
+                            ReactionId = g.Key,
+                            Count = g.Count()
+                        })
+                        .ToList(),
+                    UserReactionsIds = p.Reactions
+                        .Where(r => r.UserId == userId)
+                        .Select(r => r.ReactionId)
+                        .ToList(),
                 })
                 .ToListAsync();
 

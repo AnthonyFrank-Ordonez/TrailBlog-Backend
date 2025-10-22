@@ -4,9 +4,9 @@
     {
         public Guid Id { get; set; }
 
-        public bool IsLike { get; set; } = false;
-        public bool IsDislike { get; set; } = false;
-        public DateTime ReactedAt { get; set; } 
+        public int ReactionId { get; set; }
+
+        public DateTime ReactedAt { get; set; }     
 
         public Guid UserId { get; set; }
         public User User { get; set; } = null!;

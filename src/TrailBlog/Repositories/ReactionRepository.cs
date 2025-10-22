@@ -8,10 +8,14 @@ namespace TrailBlog.Api.Repositories
     {
         public ReactionRepository(ApplicationDbContext context) : base(context) { }
 
-        public async Task<Reaction?> GetExistingReactionAsync(Guid userId, Guid postId)
+        public async Task<Reaction?> GetExistingReactionAsync(Guid userId, Guid postId, int reactionId)
         {
             return await _dbSet
-                .FirstOrDefaultAsync(r => r.UserId == userId && r.PostId == postId);
+                .FirstOrDefaultAsync(r => 
+                    r.UserId == userId && 
+                    r.PostId == postId && 
+                    r.ReactionId == reactionId
+                );
         }
     }
 
