@@ -30,7 +30,9 @@ builder.Services.AddCors(options =>
         builder.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowCredentials()
-            .WithMethods("POST", "GET", "PUT", "PATCH", "DELETE");
+            .WithMethods("POST", "GET", "PUT", "PATCH", "DELETE")
+            .WithExposedHeaders("X-Session-Id");
+
     });
 });
 
@@ -51,6 +53,9 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -164,6 +169,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IRandomPaginationService, RandomPaginationService>();
 
 var app = builder.Build();
 

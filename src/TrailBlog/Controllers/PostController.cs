@@ -17,10 +17,10 @@ namespace TrailBlog.Api.Controllers
         [HttpGet]
         [AllowAnonymous]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetPostsPaged([FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetPostsPaged([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? sessionId = null)
         {
             var userId = GetCurrentUserId();
-            var posts = await _postService.GetPostsPagedAsync(userId, page, pageSize);
+            var posts = await _postService.GetPostsPagedAsync(userId, page, pageSize, sessionId);
 
             return Ok(posts);
         }

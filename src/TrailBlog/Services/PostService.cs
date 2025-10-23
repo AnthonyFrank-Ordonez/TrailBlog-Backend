@@ -12,15 +12,17 @@ namespace TrailBlog.Api.Services
         IUserRepository userRepository, 
         ICommunityRepository communityRepository,
         IReactionRepository reactionRepository,
+        IRandomPaginationService randomPaginationService,
         IUnitOfWork unitOfWork) : IPostService
     {
         private readonly IPostRepository _postRepository = postRepository;
         private readonly IUserRepository _userrepository = userRepository;
         private readonly ICommunityRepository _communityRepository = communityRepository;
         private readonly IReactionRepository _reactionRepository = reactionRepository;
+        private readonly IRandomPaginationService _randomPaginationService = randomPaginationService;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<PagedResultDto<PostResponseDto>> GetPostsPagedAsync(Guid userId, int page, int pageSize)
+        public async Task<PagedResultDto<PostResponseDto>> GetPostsPagedAsync(Guid userId, int page, int pageSize, string? sessionId = null)
         {
             // Validate
             if (page <= 0) page = 1;
@@ -29,13 +31,12 @@ namespace TrailBlog.Api.Services
 
             var query = _postRepository.GetPostsDetails();
 
-            var totalCount = await query.CountAsync();
-
-            var posts = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(p => new PostResponseDto
+            var result = await _randomPaginationService.GetRandomPagedAsync(
+                query,
+                page,
+                pageSize,
+                sessionId ?? string.Empty,
+                p => new PostResponseDto
                 {
                     Id = p.Id,
                     Title = p.Title,
@@ -49,7 +50,8 @@ namespace TrailBlog.Api.Services
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
                         .GroupBy(r => r.ReactionId)
-                        .Select(g => new PostReactionSummaryDto {
+                        .Select(g => new PostReactionSummaryDto
+                        {
                             ReactionId = g.Key,
                             Count = g.Count()
                         })
@@ -58,17 +60,51 @@ namespace TrailBlog.Api.Services
                         .Where(r => r.UserId == userId)
                         .Select(r => r.ReactionId)
                         .ToList()
-                })
-                .ToListAsync();
+                }
+            );
 
-            return new PagedResultDto<PostResponseDto>
-            {
-                Data = posts,
-                Page = page,
-                PageSize = pageSize,
-                TotalCount = totalCount,
-                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
-            };
+            return result;
+
+            //var totalCount = await query.CountAsync();
+
+            //var posts = await query
+            //    .OrderByDescending(p => p.CreatedAt)
+            //    .Skip((page - 1) * pageSize)
+            //    .Take(pageSize)
+            //    .Select(p => new PostResponseDto
+            //    {
+            //        Id = p.Id,
+            //        Title = p.Title,
+            //        Content = p.Content,
+            //        Author = p.Author,
+            //        Slug = p.Slug,
+            //        CreatedAt = p.CreatedAt,
+            //        CommunityName = p.Community.Name,
+            //        CommunityId = p.CommunityId,
+            //        TotalComment = p.Comments.Count,
+            //        TotalReactions = p.Reactions.Count,
+            //        Reactions = p.Reactions
+            //            .GroupBy(r => r.ReactionId)
+            //            .Select(g => new PostReactionSummaryDto {
+            //                ReactionId = g.Key,
+            //                Count = g.Count()
+            //            })
+            //            .ToList(),
+            //        UserReactionsIds = p.Reactions
+            //            .Where(r => r.UserId == userId)
+            //            .Select(r => r.ReactionId)
+            //            .ToList()
+            //    })
+            //    .ToListAsync();
+
+            //return new PagedResultDto<PostResponseDto>
+            //{
+            //    Data = posts,
+            //    Page = page,
+            //    PageSize = pageSize,
+            //    TotalCount = totalCount,
+            //    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            //};
         }
 
         public async Task<PostResponseDto?> GetPostAsync(Guid id, Guid userId)
