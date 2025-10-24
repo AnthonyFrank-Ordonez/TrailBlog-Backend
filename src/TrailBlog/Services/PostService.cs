@@ -1,9 +1,11 @@
-﻿using TrailBlog.Api.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using TrailBlog.Api.Entities;
+using TrailBlog.Api.Exceptions;
+using TrailBlog.Api.Extensions;
+using TrailBlog.Api.Helpers;
 using TrailBlog.Api.Models;
 using TrailBlog.Api.Repositories;
-using TrailBlog.Api.Helpers;
-using TrailBlog.Api.Exceptions;
-using Microsoft.EntityFrameworkCore;
 
 namespace TrailBlog.Api.Services
 {
@@ -12,15 +14,18 @@ namespace TrailBlog.Api.Services
         IUserRepository userRepository, 
         ICommunityRepository communityRepository,
         IReactionRepository reactionRepository,
-        IRandomPaginationService randomPaginationService,
-        IUnitOfWork unitOfWork) : IPostService
+        IUnitOfWork unitOfWork,
+        IMemoryCache cache,
+        IHttpContextAccessor httpContextAccessor) : IPostService
     {
         private readonly IPostRepository _postRepository = postRepository;
         private readonly IUserRepository _userrepository = userRepository;
         private readonly ICommunityRepository _communityRepository = communityRepository;
         private readonly IReactionRepository _reactionRepository = reactionRepository;
-        private readonly IRandomPaginationService _randomPaginationService = randomPaginationService;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IMemoryCache _cache = cache;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
 
         public async Task<PagedResultDto<PostResponseDto>> GetPostsPagedAsync(Guid userId, int page, int pageSize, string? sessionId = null)
         {
@@ -29,13 +34,12 @@ namespace TrailBlog.Api.Services
             if (pageSize <= 0) pageSize = 10;
             if (pageSize > 100) pageSize = 100;
 
-            var query = _postRepository.GetPostsDetails();
-
-            var result = await _randomPaginationService.GetRandomPagedAsync(
-                query,
-                page,
-                pageSize,
-                sessionId ?? string.Empty,
+            var result = await _postRepository.GetPostsDetails()
+                .ToRandomPagedAsync(
+                _cache,
+                page, 
+                pageSize, 
+                sessionId,
                 p => new PostResponseDto
                 {
                     Id = p.Id,
@@ -60,51 +64,11 @@ namespace TrailBlog.Api.Services
                         .Where(r => r.UserId == userId)
                         .Select(r => r.ReactionId)
                         .ToList()
-                }
-            );
+                },
+                _httpContextAccessor
+             );
 
             return result;
-
-            //var totalCount = await query.CountAsync();
-
-            //var posts = await query
-            //    .OrderByDescending(p => p.CreatedAt)
-            //    .Skip((page - 1) * pageSize)
-            //    .Take(pageSize)
-            //    .Select(p => new PostResponseDto
-            //    {
-            //        Id = p.Id,
-            //        Title = p.Title,
-            //        Content = p.Content,
-            //        Author = p.Author,
-            //        Slug = p.Slug,
-            //        CreatedAt = p.CreatedAt,
-            //        CommunityName = p.Community.Name,
-            //        CommunityId = p.CommunityId,
-            //        TotalComment = p.Comments.Count,
-            //        TotalReactions = p.Reactions.Count,
-            //        Reactions = p.Reactions
-            //            .GroupBy(r => r.ReactionId)
-            //            .Select(g => new PostReactionSummaryDto {
-            //                ReactionId = g.Key,
-            //                Count = g.Count()
-            //            })
-            //            .ToList(),
-            //        UserReactionsIds = p.Reactions
-            //            .Where(r => r.UserId == userId)
-            //            .Select(r => r.ReactionId)
-            //            .ToList()
-            //    })
-            //    .ToListAsync();
-
-            //return new PagedResultDto<PostResponseDto>
-            //{
-            //    Data = posts,
-            //    Page = page,
-            //    PageSize = pageSize,
-            //    TotalCount = totalCount,
-            //    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
-            //};
         }
 
         public async Task<PostResponseDto?> GetPostAsync(Guid id, Guid userId)
@@ -147,6 +111,49 @@ namespace TrailBlog.Api.Services
                     IsDeleted = c.IsDeleted,
                 })
                 .ToList()
+            };
+        }
+
+        public async Task<PostResponseDto?> GetPostBySlugAsync(string slug, Guid userId)
+        {
+            var post = await _postRepository.GetPostDetailBySlugAsync(slug);
+
+            if (post is null)
+                throw new NotFoundException($"No posts found with the slug of {slug}");
+
+            return new PostResponseDto
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                Author = post.Author,
+                Slug = post.Slug,
+                CreatedAt = post.CreatedAt,
+                CommunityName = post.Community.Name,
+                CommunityId = post.CommunityId,
+                TotalComment = post.Comments.Count,
+                TotalReactions = post.Reactions.Count,
+                Reactions = post.Reactions
+                       .GroupBy(r => r.ReactionId)
+                       .Select(g => new PostReactionSummaryDto
+                       {
+                           ReactionId = g.Key,
+                           Count = g.Count()
+                       })
+                       .ToList(),
+                UserReactionsIds = post.Reactions
+                       .Where(r => r.UserId == userId)
+                       .Select(r => r.ReactionId)
+                       .ToList(),
+                Comments = post.Comments.Select(c => new CommentResponseDto
+                {
+                    Id = c.Id,
+                    Content = c.Content,
+                    CommentedAt = c.CommentedAt,
+                    LastUpdatedAt = c.LastUpdatedAt,
+                    IsDeleted = c.IsDeleted,
+                })
+               .ToList()
             };
         }
 

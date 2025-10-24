@@ -35,6 +35,18 @@ namespace TrailBlog.Api.Controllers
             return Ok(post);
         }
 
+        [HttpGet("slug/{slug}")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PostResponseDto>> GetPostBySlug(string slug)
+        {
+            var userId = GetCurrentUserId();
+            var post = await _postService.GetPostBySlugAsync(slug, userId);
+
+            return Ok(post);
+
+        }
+
         [HttpPost]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]

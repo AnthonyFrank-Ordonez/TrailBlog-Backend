@@ -169,7 +169,6 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
-builder.Services.AddScoped<IRandomPaginationService, RandomPaginationService>();
 
 var app = builder.Build();
 

@@ -1,30 +1,20 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using TrailBlog.Api.Models;
 
-namespace TrailBlog.Api.Services
+namespace TrailBlog.Api.Extensions
 {
-    public class RandomPaginationService : IRandomPaginationService
+    public static class QueryableExtensions
     {
-        private readonly IMemoryCache _cache;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public RandomPaginationService(IMemoryCache cache, IHttpContextAccessor httpContextAccessor)
+        public static async Task<PagedResultDto<TDto>> ToRandomPagedAsync<TDto, TEntity>(
+            this IQueryable<TEntity> query,
+            IMemoryCache cache,
+            int page,
+            int pageSize,
+            string? sessionId,
+            Func<TEntity, TDto> selector,
+            IHttpContextAccessor httpContextAccessor) where TEntity : class
         {
-            _cache = cache;
-            _httpContextAccessor = httpContextAccessor;
-        }
-
-
-        public async Task<PagedResultDto<T>> GetRandomPagedAsync<T, TEntity>(
-            IQueryable<TEntity> query, 
-            int page, 
-            int pageSize, 
-            string sessionId, 
-            Func<TEntity, T> selector) where TEntity : class
-        {
-            // Validate paramters
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;
             if (pageSize > 100) pageSize = 100;
@@ -36,7 +26,7 @@ namespace TrailBlog.Api.Services
 
             var cacheKey = $"random_query_{sessionId}";
 
-            if (!_cache.TryGetValue(cacheKey, out List<object>? shuffledIds) || shuffledIds == null)
+            if (!cache.TryGetValue(cacheKey, out List<object>? shuffledIds) || shuffledIds == null)
             {
                 // Get primary keys
                 var allIds = await query
@@ -52,7 +42,7 @@ namespace TrailBlog.Api.Services
                 var cacheOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(10));
 
-                _cache.Set(cacheKey, shuffledIds, cacheOptions);
+                cache.Set(cacheKey, shuffledIds, cacheOptions);
             }
 
             var totalCount = shuffledIds.Count;
@@ -76,9 +66,9 @@ namespace TrailBlog.Api.Services
                 .Select(id => selector(entityDict[id]))
                 .ToList();
 
-            _httpContextAccessor.HttpContext?.Response?.Headers.Append("X-Session-Id", sessionId);
+            httpContextAccessor.HttpContext?.Response?.Headers.Append("X-Session-Id", sessionId);
 
-            return new PagedResultDto<T>
+            return new PagedResultDto<TDto>
             {
                 Data = orderedResults,
                 Page = page,

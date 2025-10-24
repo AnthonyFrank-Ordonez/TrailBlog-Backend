@@ -21,8 +21,14 @@ namespace TrailBlog.Api.Repositories
 
         public async Task<Post?> GetPostDetailByIdAsync(Guid id, bool isReadOnly = true)
         {
-            return await GetPostsDetails(readOnly: isReadOnly)
+            return await GetPostsDetails(readOnly: isReadOnly)  
                 .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<Post?> GetPostDetailBySlugAsync(string slug, bool isReadOnly = true)
+        {
+            return await GetPostsDetails(readOnly: isReadOnly)
+                .FirstOrDefaultAsync(p => p.Slug == slug);
         }
     }
 }

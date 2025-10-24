@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using TrailBlog.Api.Data;
 
 namespace TrailBlog.Api.Repositories
@@ -24,6 +25,11 @@ namespace TrailBlog.Api.Repositories
             return await _dbSet.FindAsync(id);
         }
 
+        public virtual async Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.FirstOrDefaultAsync(predicate);
+        }
+
         public virtual async Task<T> AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
@@ -42,7 +48,6 @@ namespace TrailBlog.Api.Repositories
         {
             _dbSet.Remove(entity);
             return Task.CompletedTask;
-
         }
 
     }
