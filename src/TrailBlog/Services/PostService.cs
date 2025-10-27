@@ -145,15 +145,17 @@ namespace TrailBlog.Api.Services
                        .Where(r => r.UserId == userId)
                        .Select(r => r.ReactionId)
                        .ToList(),
-                Comments = post.Comments.Select(c => new CommentResponseDto
-                {
-                    Id = c.Id,
-                    Content = c.Content,
-                    Username = c.User.Username,
-                    CommentedAt = c.CommentedAt,
-                    LastUpdatedAt = c.LastUpdatedAt,
-                    IsDeleted = c.IsDeleted,
-                })
+                Comments = post.Comments
+                    .OrderByDescending(c => c.CommentedAt)
+                    .Select(c => new CommentResponseDto
+                    {
+                        Id = c.Id,
+                        Content = c.Content,
+                        Username = c.User.Username,
+                        CommentedAt = c.CommentedAt,
+                        LastUpdatedAt = c.LastUpdatedAt,
+                        IsDeleted = c.IsDeleted,
+                    })
                .ToList()
             };
         }
