@@ -149,6 +149,7 @@ namespace TrailBlog.Api.Services
                 {
                     Id = c.Id,
                     Content = c.Content,
+                    Username = c.User.Username,
                     CommentedAt = c.CommentedAt,
                     LastUpdatedAt = c.LastUpdatedAt,
                     IsDeleted = c.IsDeleted,
