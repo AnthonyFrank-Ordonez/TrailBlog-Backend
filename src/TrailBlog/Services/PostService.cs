@@ -164,6 +164,32 @@ namespace TrailBlog.Api.Services
             };
         }
 
+        public async Task<IEnumerable<RecentViewedPostDto>> GetRecentlyViewedPostAsync(Guid userId)
+        {
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of {userId}");
+
+            var recentViewedPosts = await _recentViewedPostRepository
+                .GetRecentViewedPosts(rvp => rvp.UserId == userId)
+                .Select(rvp => new RecentViewedPostDto
+                {
+                    PostId = rvp.Post.Id,
+                    Title = rvp.Post.Title,
+                    Content = rvp.Post.Content,
+                    Author = rvp.Post.Author,
+                    Slug = rvp.Post.Slug,
+                    CreatedAt = rvp.Post.CreatedAt,
+                    CommunityName = rvp.Post.Community.Name,
+                    TotalComment = rvp.Post.Comments.Count,
+                    TotalReactions = rvp.Post.Reactions.Count,
+                })
+                .ToListAsync();
+
+            return recentViewedPosts;
+        }
+
         public async Task<PostResponseDto> CreatePostAsync(PostDto post, Guid userId)
         {
 

@@ -47,6 +47,17 @@ namespace TrailBlog.Api.Controllers
 
         }
 
+        [HttpGet("recent-viewed-posts")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<IEnumerable<RecentViewedPostDto>>> GetRecentlyViewedPosts()
+        {
+            var userId = GetCurrentUserId();
+            var recentPosts = await _postService.GetRecentlyViewedPostAsync(userId);
+
+            return Ok(recentPosts);
+        }
+
         [HttpPost]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]

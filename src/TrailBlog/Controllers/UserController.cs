@@ -15,7 +15,7 @@ namespace TrailBlog.Api.Controllers
         [HttpGet]
         [AllowAnonymous]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<PublicUserResponseDto>> GetUsersPaged([FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<ActionResult<PagedResultDto<PublicUserResponseDto>>> GetUsersPaged([FromQuery] int page, [FromQuery] int pageSize)
         {
             var users = await _userService.GetUsersPagedAsync(page, pageSize);
 
@@ -36,7 +36,7 @@ namespace TrailBlog.Api.Controllers
         [HttpGet("roles")]
         [Authorize(Roles = "Admin")]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<UserResponseDto?>> GetAllUsersWithRoles([FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<ActionResult<PagedResultDto<UserResponseDto>?>> GetAllUsersWithRoles([FromQuery] int page, [FromQuery] int pageSize)
         {
             var users = await _userService.GetUsersWithRolesPagedAsync(page, pageSize);
 
