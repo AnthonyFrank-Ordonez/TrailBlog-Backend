@@ -19,5 +19,7 @@ namespace TrailBlog.Api.Entities
         public Community Community { get; set; } = null!;
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
+        public ICollection<RecentViewedPost> RecentViewedPosts { get; set; } = new List<RecentViewedPost>();
+
     }
 }

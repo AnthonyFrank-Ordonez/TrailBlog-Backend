@@ -17,6 +17,7 @@ namespace TrailBlog.Api.Data
         public DbSet<UserCommunity> UserCommunities { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Reaction> Reactions { get; set; }
+        public DbSet<RecentViewedPost> RecentViewedPosts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -164,6 +165,27 @@ namespace TrailBlog.Api.Data
                     .HasForeignKey(e => e.PostId)
                     .OnDelete(DeleteBehavior.Cascade);
 
+            });
+
+            modelBuilder.Entity<RecentViewedPost>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => new { e.UserId, e.PostId }).IsUnique();
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.PostId);
+                entity.HasIndex(e => e.ViewedAt);
+                entity.HasIndex(e => new { e.UserId, e.ViewedAt });
+                entity.HasIndex(e => new { e.PostId, e.ViewedAt });
+
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.RecentViewedPosts)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Post)
+                    .WithMany(e => e.RecentViewedPosts)
+                    .HasForeignKey(e => e.PostId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             

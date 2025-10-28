@@ -14,6 +14,7 @@ namespace TrailBlog.Api.Services
         IUserRepository userRepository, 
         ICommunityRepository communityRepository,
         IReactionRepository reactionRepository,
+        IRecentViewedPostRepository recentViewedPostRepository,
         IUnitOfWork unitOfWork,
         IMemoryCache cache,
         IHttpContextAccessor httpContextAccessor) : IPostService
@@ -22,6 +23,7 @@ namespace TrailBlog.Api.Services
         private readonly IUserRepository _userrepository = userRepository;
         private readonly ICommunityRepository _communityRepository = communityRepository;
         private readonly IReactionRepository _reactionRepository = reactionRepository;
+        private readonly IRecentViewedPostRepository _recentViewedPostRepository = recentViewedPostRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IMemoryCache _cache = cache;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
@@ -120,6 +122,8 @@ namespace TrailBlog.Api.Services
 
             if (post is null)
                 throw new NotFoundException($"No posts found with the slug of {slug}");
+
+            await TrackPostViewAsync(userId, post.Id);
 
             return new PostResponseDto
             {
@@ -269,6 +273,43 @@ namespace TrailBlog.Api.Services
             return CreatePostResponse(post, userId);
         }
 
+        private async Task TrackPostViewAsync(Guid userId, Guid postId)
+        {
+            const int MAX_RECENT_VIEWS = 20;
+            const int DELETE_COUNT = 10;
+
+            var existingView = await _recentViewedPostRepository.FindOneAsync(rvp => rvp.UserId == userId && rvp.PostId == postId);
+
+            if (existingView != null)
+            {
+                existingView.ViewedAt = DateTime.UtcNow;
+                await _recentViewedPostRepository.UpdateAsync(existingView.Id, existingView);
+            }
+            else
+            {
+                var newRecentView = new RecentViewedPost
+                {
+                    UserId = userId,
+                    PostId = postId,
+                    ViewedAt = DateTime.UtcNow
+                };
+
+                await _recentViewedPostRepository.AddAsync(newRecentView);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            var currentCount = await _recentViewedPostRepository
+                .GetRecentViewedPosts(rvp => rvp.UserId == userId)
+                .CountAsync();
+
+            if (currentCount > MAX_RECENT_VIEWS)
+            {
+                await _recentViewedPostRepository
+                    .DeleteOldestViewsAsync(rvp => rvp.UserId == userId, DELETE_COUNT);
+            }
+        }
+
         private static void UpdatePostFields(Post existingPost, UpdatePostDto post)
         {
             bool hasChanges = false;
@@ -300,6 +341,7 @@ namespace TrailBlog.Api.Services
             }
 
         }
+
 
         private PostResponseDto CreatePostResponse(Post post, Guid userId)
         {
