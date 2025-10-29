@@ -50,10 +50,10 @@ namespace TrailBlog.Api.Controllers
         [HttpGet("recent-viewed-posts")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<IEnumerable<RecentViewedPostDto>>> GetRecentlyViewedPosts()
+        public async Task<ActionResult<IEnumerable<RecentViewedPostDto>>> GetRecentlyViewedPosts([FromQuery] int? count)
         {
             var userId = GetCurrentUserId();
-            var recentPosts = await _postService.GetRecentlyViewedPostAsync(userId);
+            var recentPosts = await _postService.GetRecentlyViewedPostAsync(userId, count ?? 10);
 
             return Ok(recentPosts);
         }

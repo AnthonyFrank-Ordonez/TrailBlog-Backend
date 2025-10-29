@@ -164,7 +164,7 @@ namespace TrailBlog.Api.Services
             };
         }
 
-        public async Task<IEnumerable<RecentViewedPostDto>> GetRecentlyViewedPostAsync(Guid userId)
+        public async Task<IEnumerable<RecentViewedPostDto>> GetRecentlyViewedPostAsync(Guid userId, int count = 10)
         {
             var user = await _userrepository.GetByIdAsync(userId);
 
@@ -173,6 +173,8 @@ namespace TrailBlog.Api.Services
 
             var recentViewedPosts = await _recentViewedPostRepository
                 .GetRecentViewedPosts(rvp => rvp.UserId == userId)
+                .OrderByDescending(rvp => rvp.ViewedAt)
+                .Take(count)
                 .Select(rvp => new RecentViewedPostDto
                 {
                     PostId = rvp.Post.Id,
