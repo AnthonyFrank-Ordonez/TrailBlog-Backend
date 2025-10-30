@@ -31,11 +31,6 @@ namespace TrailBlog.Api.Services
 
         public async Task<PagedResultDto<PostResponseDto>> GetPostsPagedAsync(Guid? userId, int page, int pageSize, string? sessionId = null)
         {
-            // Validate
-            if (page <= 0) page = 1;
-            if (pageSize <= 0) pageSize = 10;
-            if (pageSize > 100) pageSize = 100;
-
             var result = await _postRepository.GetPostsDetails()
                 .ToRandomPagedAsync(
                 _cache,
@@ -69,6 +64,43 @@ namespace TrailBlog.Api.Services
                 },
                 _httpContextAccessor
              );
+
+            return result;
+        }
+
+        public async Task<PagedResultDto<PostResponseDto>> GetPopularPostsPagedAsync(Guid? userId, int page, int pageSize)
+        {
+            var result = await _postRepository.GetPostsDetails()
+                .ToPagedAsync(
+                page,
+                pageSize,
+                selector: p => new PostResponseDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Author = p.Author,
+                    Slug = p.Slug,
+                    CreatedAt = p.CreatedAt,
+                    CommunityName = p.Community.Name,
+                    CommunityId = p.CommunityId,
+                    TotalComment = p.Comments.Count,
+                    TotalReactions = p.Reactions.Count,
+                    Reactions = p.Reactions
+                        .GroupBy(r => r.ReactionId)
+                        .Select(g => new PostReactionSummaryDto
+                        {
+                            ReactionId = g.Key,
+                            Count = g.Count()
+                        })
+                        .ToList(),
+                    UserReactionsIds = p.Reactions
+                        .Where(r => r.UserId == userId)
+                        .Select(r => r.ReactionId)
+                        .ToList()
+                },
+                orderBy: p => (p.Reactions.Count * 2) + (p.Comments.Count * 3),
+                descending: true);
 
             return result;
         }

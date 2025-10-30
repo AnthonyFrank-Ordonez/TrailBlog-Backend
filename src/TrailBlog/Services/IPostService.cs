@@ -5,6 +5,7 @@ namespace TrailBlog.Api.Services
     public interface IPostService
     {
         Task<PagedResultDto<PostResponseDto>> GetPostsPagedAsync(Guid? userId, int page = 1, int pageSize = 10, string? sessionId = null);
+        Task<PagedResultDto<PostResponseDto>> GetPopularPostsPagedAsync(Guid? userId, int page = 1, int pageSize = 10);
         Task<PostResponseDto?> GetPostAsync(Guid id, Guid userId);
         Task<PostResponseDto?> GetPostBySlugAsync(string slug, Guid? userId);
         Task<IEnumerable<RecentViewedPostDto>> GetRecentlyViewedPostAsync(Guid userId, int count = 10);

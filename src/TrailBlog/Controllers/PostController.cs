@@ -26,6 +26,16 @@ namespace TrailBlog.Api.Controllers
             return Ok(posts);
         }
 
+        [HttpGet("popular")]
+        [AllowAnonymous]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetPopularPosts([FromQuery] int page, [FromQuery] int pageSize)
+        {
+            var userId = this.GetCurrentUserId();
+            var posts = await _postService.GetPopularPostsPagedAsync(userId, page, pageSize);
+            return Ok(posts);
+        }
+
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]

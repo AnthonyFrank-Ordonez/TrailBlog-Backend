@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using System.Linq.Expressions;
 using TrailBlog.Api.Models;
 
 namespace TrailBlog.Api.Extensions
@@ -71,6 +72,42 @@ namespace TrailBlog.Api.Extensions
             return new PagedResultDto<TDto>
             {
                 Data = orderedResults,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+        }
+
+        public static async Task<PagedResultDto<TDto>> ToPagedAsync<TDto, TEntity, TOrderKey>(
+            this IQueryable<TEntity> query,
+            int page,
+            int pageSize,
+            Expression<Func<TEntity, TDto>> selector,
+            Expression<Func<TEntity, TOrderKey>> orderBy,
+            bool descending = false) where TEntity : class
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 100) pageSize = 100;
+
+
+            var orderedQuery = descending 
+                ? query.OrderByDescending(orderBy) 
+                : query.OrderBy(orderBy);
+
+            var pagedQuery = orderedQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
+
+            var totalCount = await orderedQuery.CountAsync();
+            var items = await pagedQuery
+                .Select(selector)
+                .ToListAsync();
+
+            return new PagedResultDto<TDto>
+            {
+                Data = items,
                 Page = page,
                 PageSize = pageSize,
                 TotalCount = totalCount,
