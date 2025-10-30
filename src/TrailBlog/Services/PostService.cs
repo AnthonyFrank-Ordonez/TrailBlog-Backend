@@ -29,7 +29,7 @@ namespace TrailBlog.Api.Services
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
 
-        public async Task<PagedResultDto<PostResponseDto>> GetPostsPagedAsync(Guid userId, int page, int pageSize, string? sessionId = null)
+        public async Task<PagedResultDto<PostResponseDto>> GetPostsPagedAsync(Guid? userId, int page, int pageSize, string? sessionId = null)
         {
             // Validate
             if (page <= 0) page = 1;
@@ -116,14 +116,17 @@ namespace TrailBlog.Api.Services
             };
         }
 
-        public async Task<PostResponseDto?> GetPostBySlugAsync(string slug, Guid userId)
+        public async Task<PostResponseDto?> GetPostBySlugAsync(string slug, Guid? userId)
         {
             var post = await _postRepository.GetPostDetailBySlugAsync(slug);
 
             if (post is null)
                 throw new NotFoundException($"No posts found with the slug of {slug}");
 
-            await TrackPostViewAsync(userId, post.Id);
+            if (userId.HasValue)
+            {
+                await TrackPostViewAsync(userId.Value, post.Id);
+            }
 
             return new PostResponseDto
             {
