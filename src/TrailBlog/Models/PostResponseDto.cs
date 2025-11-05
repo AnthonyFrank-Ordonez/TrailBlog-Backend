@@ -19,6 +19,9 @@ namespace TrailBlog.Api.Models
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Username { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public Guid? UserId { get; set; }
+
         public string CommunityName { get; set; } = string.Empty;
 
         public Guid CommunityId { get; set; }

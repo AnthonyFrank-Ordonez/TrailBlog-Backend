@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Hosting;
 using TrailBlog.Api.Entities;
 using TrailBlog.Api.Exceptions;
 using TrailBlog.Api.Extensions;
@@ -47,6 +48,7 @@ namespace TrailBlog.Api.Services
                     CreatedAt = p.CreatedAt,
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
+                    UserId = p.User.Id,
                     TotalComment = p.Comments.Count,
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
@@ -84,6 +86,7 @@ namespace TrailBlog.Api.Services
                     CreatedAt = p.CreatedAt,
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
+                    UserId = p.User.Id,
                     TotalComment = p.Comments.Count,
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
@@ -170,6 +173,7 @@ namespace TrailBlog.Api.Services
                 CreatedAt = post.CreatedAt,
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
+                UserId = post.User.Id,
                 TotalComment = post.Comments.Count,
                 TotalReactions = post.Reactions.Count,
                 Reactions = post.Reactions
@@ -420,6 +424,7 @@ namespace TrailBlog.Api.Services
                 CommunityId = post.CommunityId,
                 TotalComment = post.Comments.Count,
                 TotalReactions = post.Reactions.Count,
+                UserId = post.User.Id,
                 Reactions = post.Reactions
                         .GroupBy(r => r.ReactionId)
                         .Select(g => new PostReactionSummaryDto

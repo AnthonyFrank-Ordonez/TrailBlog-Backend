@@ -90,6 +90,7 @@ namespace TrailBlog.Api.Services
                     Content = p.Content,
                     Author = p.Author,
                     Slug = p.Slug,
+                    UserId = p.User.Id,
                     CreatedAt = p.CreatedAt,
                     TotalComment = p.Comments.Count,
                     Reactions = p.Reactions
