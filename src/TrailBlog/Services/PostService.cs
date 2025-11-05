@@ -48,7 +48,7 @@ namespace TrailBlog.Api.Services
                     CreatedAt = p.CreatedAt,
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
-                    UserId = p.User.Id,
+                    IsOwner = userId.HasValue && p.UserId == userId.Value,
                     TotalComment = p.Comments.Count,
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
@@ -86,7 +86,7 @@ namespace TrailBlog.Api.Services
                     CreatedAt = p.CreatedAt,
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
-                    UserId = p.User.Id,
+                    IsOwner = userId.HasValue && p.UserId == userId.Value,
                     TotalComment = p.Comments.Count,
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
@@ -125,6 +125,7 @@ namespace TrailBlog.Api.Services
                 CreatedAt = post.CreatedAt,
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
+                IsOwner = post.UserId == userId,
                 TotalComment = post.Comments.Count,
                 TotalReactions = post.Reactions.Count,
                 Reactions = post.Reactions
@@ -173,7 +174,7 @@ namespace TrailBlog.Api.Services
                 CreatedAt = post.CreatedAt,
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
-                UserId = post.User.Id,
+                IsOwner = userId.HasValue && post.UserId == userId.Value,
                 TotalComment = post.Comments.Count,
                 TotalReactions = post.Reactions.Count,
                 Reactions = post.Reactions
@@ -422,9 +423,9 @@ namespace TrailBlog.Api.Services
                 CreatedAt = post.CreatedAt,
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
+                IsOwner = post.UserId == userId,
                 TotalComment = post.Comments.Count,
                 TotalReactions = post.Reactions.Count,
-                UserId = post.User.Id,
                 Reactions = post.Reactions
                         .GroupBy(r => r.ReactionId)
                         .Select(g => new PostReactionSummaryDto

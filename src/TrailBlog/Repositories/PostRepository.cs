@@ -12,7 +12,6 @@ namespace TrailBlog.Api.Repositories
         {
 
             var query = _dbSet
-                .Include(p => p.User)
                 .Include(p => p.Community)
                 .Include(p => p.Reactions)
                 .Include(p => p.Comments)

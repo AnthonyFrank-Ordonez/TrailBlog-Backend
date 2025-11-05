@@ -19,12 +19,9 @@ namespace TrailBlog.Api.Models
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Username { get; set; }
 
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Guid? UserId { get; set; }
-
         public string CommunityName { get; set; } = string.Empty;
 
-        public Guid CommunityId { get; set; }
+        public Guid CommunityId { get; set; }   
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 
@@ -32,7 +29,9 @@ namespace TrailBlog.Api.Models
 
         public List<PostReactionSummaryDto> Reactions { get; set; } = new List<PostReactionSummaryDto>();
 
-        public List<int> UserReactionsIds { get; set; } = new List<int>();  
+        public List<int> UserReactionsIds { get; set; } = new List<int>();
+
+        public bool IsOwner { get; set; }
 
         public int TotalComment { get; set; }
 
