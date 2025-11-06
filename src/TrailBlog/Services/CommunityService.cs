@@ -284,7 +284,7 @@ namespace TrailBlog.Api.Services
 
         public async Task<CommunityResponseDto> JoinCommunityAsync(Guid communityId, Guid userId)
         {
-            var community = await _communityRepository.GetByIdAsync(communityId);
+            var community = await _communityRepository.GetCommunityDetailsAsync(communityId);
             var user = await _userRepository.GetByIdAsync(userId);
 
             if (community is null)
