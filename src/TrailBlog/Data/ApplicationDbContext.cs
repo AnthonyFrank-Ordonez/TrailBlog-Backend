@@ -107,6 +107,9 @@ namespace TrailBlog.Api.Data
                 entity.HasIndex(e => e.UserId);
                 entity.HasIndex(e => e.CommunityId);
                 entity.HasIndex(e => e.JoinedDate);
+                entity.HasIndex(e => e.IsFavorite);
+                entity.HasIndex(e => new { e.UserId, e.IsFavorite });
+                entity.HasIndex(e => new { e.CommunityId, e.IsFavorite });
 
                 entity.HasOne(ur => ur.User)
                     .WithMany(u => u.UserCommunities)

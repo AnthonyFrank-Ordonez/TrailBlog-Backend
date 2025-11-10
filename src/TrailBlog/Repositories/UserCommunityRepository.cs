@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using TrailBlog.Api.Data;
 using TrailBlog.Api.Entities;
 
@@ -24,6 +25,12 @@ namespace TrailBlog.Api.Repositories
                 .Where(uc => uc.UserId == userId);
         }
 
+        public async Task<UserCommunity?> GetUserCommunityAsync(Expression<Func<UserCommunity, bool>> predicate,  bool isReadOnly = true)
+        {
+            return await GetUserCommunitiesDetails(readOnly: isReadOnly)
+                .FirstOrDefaultAsync(predicate);
+        }
+
         public IQueryable<UserCommunity> GetCommunityMembersAsync(Guid communityId)
         {
             return GetUserCommunitiesDetails()
@@ -36,7 +43,13 @@ namespace TrailBlog.Api.Repositories
                 .FirstOrDefaultAsync(uc => uc.Community.Id == communityId && uc.UserId == userId);
         }
 
+        public async Task<UserCommunity?> UpdateAsync(Guid userId, Guid communityId, UserCommunity entity)
+        {
+            var existingEntity = await _dbSet.FindAsync(userId, communityId);
+            if (existingEntity is null) return null;
 
-
+            _context.Entry(existingEntity).CurrentValues.SetValues(entity);
+            return existingEntity;
+        }
     }
 }

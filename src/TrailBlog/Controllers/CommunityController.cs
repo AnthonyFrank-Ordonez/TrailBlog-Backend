@@ -4,6 +4,7 @@ using System.Security.Claims;
 using TrailBlog.Api.Models;
 using TrailBlog.Api.Services;
 using Microsoft.AspNetCore.RateLimiting;
+using TrailBlog.Api.Extensions;
 
 namespace TrailBlog.Api.Controllers
 {
@@ -34,7 +35,7 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<CommunityResponseDto?>> GetCommunity(Guid id, [FromQuery] int page, [FromQuery] int pageSize)
         {
-            var userId = GetCurrentUserId();
+            var userId = this.GetCurrentUserId();
             var community = await _communityService.GetCommunityPostsPagedAsync(id, userId, page, pageSize);
 
             return Ok(community);
@@ -45,7 +46,7 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<IEnumerable<CommunityResponseDto>>> GetUserCommunities()
         {
-            var userId = GetCurrentUserId();
+            var userId = this.GetRequiredUserId();
             var userCommunities = await _communityService.GetUserCommunitiesAsync(userId);
 
             return Ok(userCommunities);
@@ -76,10 +77,32 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<CommunityResponseDto>> CreateCommunity(CommunityDto community)
         {
-            var userId = GetCurrentUserId();
+            var userId = this.GetRequiredUserId();
             var createdCommunity = await _communityService.CreateCommunityAsync(community, userId);
 
             return CreatedAtAction(nameof(GetCommunity), new { id = createdCommunity.Id }, createdCommunity);
+        }
+
+        [HttpPost("{id}/favorite")]
+        [Authorize(Roles = "Admin, User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<CommunityResponseDto>> FavoriteCommunity(Guid id)
+        {
+            var userId = this.GetRequiredUserId();
+            var userCommunity = await _communityService.FavoriteCommunityAsync(id, userId);
+
+            return Ok(userCommunity);
+        }
+
+        [HttpPost("{id}/unfavorite")]
+        [Authorize(Roles = "Admin, User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<CommunityResponseDto>> UnfavoriteCommunity(Guid id)
+        {
+            var userId = this.GetRequiredUserId();
+            var userCommunity = await _communityService.UnfavoriteCommunityAsync(id, userId);
+
+            return Ok(userCommunity);
         }
 
         [HttpPut("{id}")]
@@ -87,7 +110,7 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> UpdateCommunity(Guid id, CommunityDto community)
         {
-            var userId = GetCurrentUserId();
+            var userId = this.GetRequiredUserId();
             var isAdmin = User.IsInRole("Admin");
             var result = await _communityService.UpdateCommunityAsync(id, userId, community, isAdmin);
 
@@ -100,7 +123,7 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> DeleteCommunity(Guid id)
         {
-            var userId = GetCurrentUserId();
+            var userId = this.GetRequiredUserId();
             var isAdmin = User.IsInRole("Admin");
             var result = await _communityService.DeleteCommunityAsync(id, userId, isAdmin);
 
@@ -115,7 +138,7 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<CommunityResponseDto>> JoinCommunity(Guid id)
         {
-            var userId = GetCurrentUserId();
+            var userId = this.GetRequiredUserId();
             var community = await _communityService.JoinCommunityAsync(id, userId);
 
 
@@ -127,17 +150,10 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> LeaveCommunity(Guid id)
         {
-            var userId = GetCurrentUserId();
+            var userId = this.GetRequiredUserId();
             var result = await _communityService.LeaveCommunityAsync(id, userId);
 
             return Ok(result);
-        }
-
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.TryParse(userIdString, out var userId) ? userId : Guid.Empty;
         }
 
     }

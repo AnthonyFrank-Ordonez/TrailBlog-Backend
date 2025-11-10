@@ -16,9 +16,11 @@ namespace TrailBlog.Api.Models
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<PostResponseDto>? Posts { get; set; }
 
+        public bool IsFavorite { get; set; }
+
         public int TotalPosts { get; set; }
 
         public int TotalMembers { get; set; }
     }
 }   
-        
+            

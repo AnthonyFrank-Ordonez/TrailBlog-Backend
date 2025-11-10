@@ -55,7 +55,7 @@ namespace TrailBlog.Api.Services
             };
         }
 
-        public async Task<PagedResultDto<PostResponseDto>> GetCommunityPostsPagedAsync(Guid id, Guid userId, int page, int pageSize)
+        public async Task<PagedResultDto<PostResponseDto>> GetCommunityPostsPagedAsync(Guid id, Guid? userId, int page, int pageSize)
         {
             if (page <= 0) page = 1;
             if (pageSize <= 0) pageSize = 10;
@@ -90,7 +90,7 @@ namespace TrailBlog.Api.Services
                     Content = p.Content,
                     Author = p.Author,
                     Slug = p.Slug,
-                    IsOwner = p.UserId == userId,
+                    IsOwner = userId.HasValue && p.UserId == userId,
                     CreatedAt = p.CreatedAt,
                     TotalComment = p.Comments.Count,
                     Reactions = p.Reactions
@@ -132,6 +132,7 @@ namespace TrailBlog.Api.Services
                     CommunityName = uc.Community.Name,
                     Description = uc.Community.Description ?? null,
                     Owner = uc.Community.User.Username,
+                    IsFavorite = uc.IsFavorite
                 })
                 .ToListAsync();
 
@@ -154,6 +155,50 @@ namespace TrailBlog.Api.Services
 
             return communityMembers;
 
+        }
+
+        public async Task<CommunityResponseDto> FavoriteCommunityAsync(Guid communityId, Guid userId)
+        {
+            var userCommunity = await _userCommunityRepository.GetUserCommunityAsync(uc => uc.UserId == userId &&  uc.CommunityId == communityId, isReadOnly: false);
+
+            if (userCommunity is null)
+                throw new NotFoundException("User Community not found!");
+
+            userCommunity.IsFavorite = true;
+
+            await _userCommunityRepository.UpdateAsync(userCommunity.UserId, userCommunity.CommunityId, userCommunity);
+            await _unitOfWork.SaveChangesAsync();
+
+            return new CommunityResponseDto
+            {
+                Id = userCommunity.Community.Id,
+                CommunityName = userCommunity.Community.Name,
+                Description = userCommunity.Community.Description,
+                Owner = userCommunity.User.Username,
+                IsFavorite = userCommunity.IsFavorite,
+            };
+        }
+
+        public async Task<CommunityResponseDto> UnfavoriteCommunityAsync(Guid communityId, Guid userId)
+        {
+            var userCommunity = await _userCommunityRepository.GetUserCommunityAsync(uc => uc.UserId == userId && uc.CommunityId == communityId, isReadOnly: false);
+
+            if (userCommunity is null)
+                throw new NotFoundException("User Community not found!");
+
+            userCommunity.IsFavorite = false;
+
+            await _userCommunityRepository.UpdateAsync(userCommunity.UserId, userCommunity.CommunityId, userCommunity);
+            await _unitOfWork.SaveChangesAsync();
+
+            return new CommunityResponseDto
+            {
+                Id = userCommunity.Community.Id,
+                CommunityName = userCommunity.Community.Name,
+                Description = userCommunity.Community.Description,
+                Owner = userCommunity.User.Username,
+                IsFavorite = userCommunity.IsFavorite,
+            };
         }
 
         public async Task<CommunityResponseDto> CreateCommunityAsync(CommunityDto community, Guid userId)
