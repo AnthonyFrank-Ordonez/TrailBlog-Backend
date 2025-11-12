@@ -199,6 +199,7 @@ namespace TrailBlog.Api.Services
                         CommentedAt = c.CommentedAt,
                         LastUpdatedAt = c.LastUpdatedAt,
                         IsDeleted = c.IsDeleted,
+                        IsOwner = userId.HasValue && c.UserId == userId.Value,
                     })
                .ToList()
             };
