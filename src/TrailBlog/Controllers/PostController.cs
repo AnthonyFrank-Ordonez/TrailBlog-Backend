@@ -69,6 +69,17 @@ namespace TrailBlog.Api.Controllers
             return Ok(recentPosts);
         }
 
+        [HttpGet("saved")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetSavedPosts([FromQuery] int page, [FromQuery] int pageSize)
+        {
+            var userId = this.GetRequiredUserId();
+            var savedPosts = await _postService.GetSavedPostsPagedAsync(userId, page, pageSize);
+
+            return Ok(savedPosts);
+        }
+
         [HttpPost]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]

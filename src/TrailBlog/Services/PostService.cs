@@ -16,6 +16,7 @@ namespace TrailBlog.Api.Services
         ICommunityRepository communityRepository,
         IReactionRepository reactionRepository,
         IRecentViewedPostRepository recentViewedPostRepository,
+        ISavedPostRepository savedPostRepository,
         IUnitOfWork unitOfWork,
         IMemoryCache cache,
         IHttpContextAccessor httpContextAccessor) : IPostService
@@ -25,6 +26,7 @@ namespace TrailBlog.Api.Services
         private readonly ICommunityRepository _communityRepository = communityRepository;
         private readonly IReactionRepository _reactionRepository = reactionRepository;
         private readonly IRecentViewedPostRepository _recentViewedPostRepository = recentViewedPostRepository;
+        private readonly ISavedPostRepository _savedPostRepository = savedPostRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IMemoryCache _cache = cache;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
@@ -87,6 +89,51 @@ namespace TrailBlog.Api.Services
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = userId.HasValue && p.UserId == userId.Value,
+                    TotalComment = p.Comments.Count,
+                    TotalReactions = p.Reactions.Count,
+                    Reactions = p.Reactions
+                        .GroupBy(r => r.ReactionId)
+                        .Select(g => new PostReactionSummaryDto
+                        {
+                            ReactionId = g.Key,
+                            Count = g.Count()
+                        })
+                        .ToList(),
+                    UserReactionsIds = p.Reactions
+                        .Where(r => r.UserId == userId)
+                        .Select(r => r.ReactionId)
+                        .ToList()
+                },
+                orderBy: p => (p.Reactions.Count * 2) + (p.Comments.Count * 3),
+                descending: true);
+
+            return result;
+        }
+
+        public async Task<PagedResultDto<PostResponseDto>> GetSavedPostsPagedAsync(Guid userId, int page, int pageSize)
+        {
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of {userId}");
+
+            var result = await _savedPostRepository
+                .GetSavedPosts(sp => sp.UserId == userId)
+                .Select(sp => sp.Post)
+                .ToPagedAsync(
+                page,
+                pageSize,
+                selector: p => new PostResponseDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Author = p.Author,
+                    Slug = p.Slug,
+                    CreatedAt = p.CreatedAt,
+                    CommunityName = p.Community.Name,
+                    CommunityId = p.CommunityId,
+                    IsOwner = p.UserId == userId,
                     TotalComment = p.Comments.Count,
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
