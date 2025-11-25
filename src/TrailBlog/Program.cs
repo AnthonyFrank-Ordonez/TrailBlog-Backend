@@ -178,6 +178,7 @@ builder.Services.AddScoped<IUserCommunityRepository, UserCommunityRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IReactionRepository, ReactionRepository>();
 builder.Services.AddScoped<IRecentViewedPostRepository, RecentViewedPostRepository>();
+builder.Services.AddScoped<ISavedPostRepository, SavedPostRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 // Register application services
