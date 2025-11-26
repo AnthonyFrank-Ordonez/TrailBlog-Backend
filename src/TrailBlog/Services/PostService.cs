@@ -51,6 +51,7 @@ namespace TrailBlog.Api.Services
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = userId.HasValue && p.UserId == userId.Value,
+                    isSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
                     TotalComment = p.Comments.Count,
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
@@ -89,6 +90,7 @@ namespace TrailBlog.Api.Services
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = userId.HasValue && p.UserId == userId.Value,
+                    isSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
                     TotalComment = p.Comments.Count,
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
@@ -222,6 +224,7 @@ namespace TrailBlog.Api.Services
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
                 IsOwner = userId.HasValue && post.UserId == userId.Value,
+                isSaved = userId.HasValue && post.SavedPosts.Any(sp => sp.UserId == userId.Value),
                 TotalComment = post.Comments.Count,
                 TotalReactions = post.Reactions.Count,
                 Reactions = post.Reactions
@@ -319,6 +322,7 @@ namespace TrailBlog.Api.Services
                 CommunityId = createdPost.CommunityId,
                 CommunityName = community.Name,
                 IsOwner = true,
+                isSaved = false,
                 TotalComment = 0,
                 TotalReactions = 0,
                 Reactions = new List<PostReactionSummaryDto>(),
@@ -537,6 +541,7 @@ namespace TrailBlog.Api.Services
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
                 IsOwner = post.UserId == userId,
+                isSaved = post.SavedPosts.Any(sp => sp.UserId == userId),
                 TotalComment = post.Comments.Count,
                 TotalReactions = post.Reactions.Count,
                 Reactions = post.Reactions

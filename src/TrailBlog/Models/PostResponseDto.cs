@@ -32,6 +32,7 @@ namespace TrailBlog.Api.Models
         public List<int> UserReactionsIds { get; set; } = new List<int>();
 
         public bool IsOwner { get; set; }
+        public bool isSaved { get; set; }
 
         public int TotalComment { get; set; }
 
