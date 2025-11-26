@@ -101,6 +101,17 @@ namespace TrailBlog.Api.Controllers
             return Ok(result);
         }
 
+        [HttpPost("{id}/saved")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PostResponseDto>> SavedPost(Guid id)
+        {
+            var userId = this.GetRequiredUserId();
+            var result = await _postService.SavedPostAsync(userId, id);
+
+            return Ok(result);
+        }
+
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
@@ -124,5 +135,16 @@ namespace TrailBlog.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpDelete("{id}/saved")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<OperationResultDto>> DeleteSavedPosts(Guid id)
+        {
+            var userId = this.GetRequiredUserId();
+            var result = await _postService.DeleteSavedPostAsync(userId, id);
+
+            return Ok(result);
+        } 
     }
 }

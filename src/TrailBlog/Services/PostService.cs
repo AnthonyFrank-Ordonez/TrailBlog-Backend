@@ -326,6 +326,39 @@ namespace TrailBlog.Api.Services
             };
         }
 
+        public async Task<PostResponseDto> SavedPostAsync(Guid userId, Guid postId)
+        {
+            var user = await _userrepository.GetByIdAsync(userId);
+            
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of {userId}");
+
+            var post = await _postRepository.GetPostDetailByIdAsync(postId);
+
+            if (post is null)
+                throw new NotFoundException($"Post not found with the id of {postId}");
+
+            var existingSavedPost = await _savedPostRepository.ExistingSavedPostAsync(userId, postId);
+
+            if (existingSavedPost)
+            {
+                throw new ApiException("Post is already saved.");
+            } else
+            {
+                var newSavedPost = new SavedPost
+                {
+                    UserId = userId,
+                    PostId = postId,
+                    SavedAt = DateTime.UtcNow,
+                };
+
+                await _savedPostRepository.AddAsync(newSavedPost);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            return CreatePostResponse(post, userId);
+        }
+
         public async Task<OperationResultDto> UpdatePostAsync(Guid id, Guid userId, UpdatePostDto post, bool isAdmin)
         {
             var existingPost = await _postRepository.GetByIdAsync(id);
@@ -361,6 +394,33 @@ namespace TrailBlog.Api.Services
             await _unitOfWork.SaveChangesAsync();
 
             return OperationResult.Success("Post deleted successfully");
+        }
+
+        public async Task<OperationResultDto> DeleteSavedPostAsync(Guid userId, Guid postId)
+        {
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of {userId}");
+
+            var post = await _postRepository.GetByIdAsync(postId);
+
+            if (post is null)
+                throw new NotFoundException($"Post not found with the id of {postId}");
+
+            var existingSavedPost = await _savedPostRepository
+                .FindOneAsync(sp => sp.UserId == userId && sp.PostId == postId);
+
+            if (existingSavedPost is null)
+            {
+                throw new ApiException("Invalid operation. Post is not saved.");
+            } else
+            {
+                await _savedPostRepository.DeleteAsync(existingSavedPost);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            return OperationResult.Success("Post unsaved successfully");
         }
         
         public async Task<PostResponseDto> TogglePostReactionAsync(Guid userId, Guid postId, AddReactionDto reaction)
@@ -463,7 +523,6 @@ namespace TrailBlog.Api.Services
             }
 
         }
-
 
         private PostResponseDto CreatePostResponse(Post post, Guid userId)
         {

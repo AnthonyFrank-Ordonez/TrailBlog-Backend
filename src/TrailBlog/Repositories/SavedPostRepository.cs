@@ -29,5 +29,10 @@ namespace TrailBlog.Api.Repositories
             return GetSavedPostDetail(readOnly: isReadOnly)
                 .Where(predicate);
         }
+
+        public async Task<bool> ExistingSavedPostAsync(Guid userId, Guid postId)
+        {
+            return await _dbSet.AnyAsync(sp => sp.UserId == userId && sp.PostId == postId);
+        }
     }
 }
