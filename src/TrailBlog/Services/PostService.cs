@@ -317,6 +317,12 @@ namespace TrailBlog.Api.Services
                 Slug = createdPost.Slug,
                 CreatedAt = createdPost.CreatedAt,
                 CommunityId = createdPost.CommunityId,
+                CommunityName = community.Name,
+                IsOwner = true,
+                TotalComment = 0,
+                TotalReactions = 0,
+                Reactions = new List<PostReactionSummaryDto>(),
+                UserReactionsIds = new List<int>()
             };
         }
 
