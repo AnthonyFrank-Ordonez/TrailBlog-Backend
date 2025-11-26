@@ -360,7 +360,7 @@ namespace TrailBlog.Api.Services
                 await _unitOfWork.SaveChangesAsync();
             }
 
-            return CreatePostResponse(post, userId);
+            return CreatePostResponse(post, userId, isSavedOveride: true);
         }
 
         public async Task<OperationResultDto> UpdatePostAsync(Guid id, Guid userId, UpdatePostDto post, bool isAdmin)
@@ -528,7 +528,7 @@ namespace TrailBlog.Api.Services
 
         }
 
-        private PostResponseDto CreatePostResponse(Post post, Guid userId)
+        private PostResponseDto CreatePostResponse(Post post, Guid userId, bool? isSavedOveride = null)
         {
             return new PostResponseDto
             {
@@ -541,7 +541,7 @@ namespace TrailBlog.Api.Services
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
                 IsOwner = post.UserId == userId,
-                isSaved = post.SavedPosts.Any(sp => sp.UserId == userId),
+                isSaved = isSavedOveride ?? post.SavedPosts.Any(sp => sp.UserId == userId),
                 TotalComment = post.Comments.Count,
                 TotalReactions = post.Reactions.Count,
                 Reactions = post.Reactions
