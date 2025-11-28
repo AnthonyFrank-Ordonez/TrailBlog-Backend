@@ -456,7 +456,7 @@ namespace TrailBlog.Api.Services
 
             await _unitOfWork.SaveChangesAsync();
 
-            return CreatePostResponse(post, userId);
+            return CreatePostResponse(post, userId, showComments: true);
         }
 
         private async Task TrackPostViewAsync(Guid userId, Guid postId)
@@ -528,7 +528,7 @@ namespace TrailBlog.Api.Services
 
         }
 
-        private PostResponseDto CreatePostResponse(Post post, Guid userId, bool? isSavedOveride = null)
+        private PostResponseDto CreatePostResponse(Post post, Guid userId, bool? isSavedOveride = null, bool? showComments = null)
         {
             return new PostResponseDto
             {
@@ -556,8 +556,20 @@ namespace TrailBlog.Api.Services
                         .Where(r => r.UserId == userId)
                         .Select(r => r.ReactionId)
                         .ToList(),
+                Comments = showComments == true ? post.Comments
+                    .OrderByDescending(c => c.CommentedAt)
+                    .Select(c => new CommentResponseDto
+                    {
+                        Id = c.Id,
+                        Content = c.Content,
+                        Username = c.User.Username,
+                        CommentedAt = c.CommentedAt,
+                        LastUpdatedAt = c.LastUpdatedAt,
+                        IsDeleted = c.IsDeleted,
+                        IsOwner = c.UserId == userId,
+                    })
+                   .ToList() : null
             };
         }
     }
-
 }
