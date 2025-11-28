@@ -52,7 +52,7 @@ namespace TrailBlog.Api.Services
                     CommunityId = p.CommunityId,
                     IsOwner = userId.HasValue && p.UserId == userId.Value,
                     isSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
-                    TotalComment = p.Comments.Count,
+                    TotalComment = p.Comments.Count(c => !c.IsDeleted),
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
                         .GroupBy(r => r.ReactionId)
@@ -91,7 +91,7 @@ namespace TrailBlog.Api.Services
                     CommunityId = p.CommunityId,
                     IsOwner = userId.HasValue && p.UserId == userId.Value,
                     isSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
-                    TotalComment = p.Comments.Count,
+                    TotalComment = p.Comments.Count(c => !c.IsDeleted),
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
                         .GroupBy(r => r.ReactionId)
@@ -136,7 +136,7 @@ namespace TrailBlog.Api.Services
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = p.UserId == userId,
-                    TotalComment = p.Comments.Count,
+                    TotalComment = p.Comments.Count(c => !c.IsDeleted),
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
                         .GroupBy(r => r.ReactionId)
@@ -175,7 +175,7 @@ namespace TrailBlog.Api.Services
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
                 IsOwner = post.UserId == userId,
-                TotalComment = post.Comments.Count,
+                TotalComment = post.Comments.Count(c => !c.IsDeleted),
                 TotalReactions = post.Reactions.Count,
                 Reactions = post.Reactions
                         .GroupBy(r => r.ReactionId)
@@ -225,7 +225,7 @@ namespace TrailBlog.Api.Services
                 CommunityId = post.CommunityId,
                 IsOwner = userId.HasValue && post.UserId == userId.Value,
                 isSaved = userId.HasValue && post.SavedPosts.Any(sp => sp.UserId == userId.Value),
-                TotalComment = post.Comments.Count,
+                TotalComment = post.Comments.Count(c => !c.IsDeleted),
                 TotalReactions = post.Reactions.Count,
                 Reactions = post.Reactions
                        .GroupBy(r => r.ReactionId)
@@ -275,7 +275,7 @@ namespace TrailBlog.Api.Services
                     Slug = rvp.Post.Slug,
                     CreatedAt = rvp.Post.CreatedAt,
                     CommunityName = rvp.Post.Community.Name,
-                    TotalComment = rvp.Post.Comments.Count,
+                    TotalComment = rvp.Post.Comments.Count(c => !c.IsDeleted),
                     TotalReactions = rvp.Post.Reactions.Count,
                 })
                 .ToListAsync();
@@ -558,7 +558,7 @@ namespace TrailBlog.Api.Services
                 CommunityId = post.CommunityId,
                 IsOwner = post.UserId == userId,
                 isSaved = isSavedOveride ?? post.SavedPosts.Any(sp => sp.UserId == userId),
-                TotalComment = post.Comments.Count,
+                TotalComment = post.Comments.Count(c => !c.IsDeleted),
                 TotalReactions = post.Reactions.Count,
                 Reactions = post.Reactions
                         .GroupBy(r => r.ReactionId)
@@ -577,8 +577,8 @@ namespace TrailBlog.Api.Services
                     .Select(c => new CommentResponseDto
                     {
                         Id = c.Id,
-                        Content = c.Content,
-                        Username = c.User.Username,
+                        Content = c.IsDeleted ? "[This comment has been deleted]" : c.Content,
+                        Username = c.IsDeleted ? "Unknown" : c.User.Username,
                         CommentedAt = c.CommentedAt,
                         LastUpdatedAt = c.LastUpdatedAt,
                         IsDeleted = c.IsDeleted,
