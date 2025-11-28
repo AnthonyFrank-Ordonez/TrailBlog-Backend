@@ -145,6 +145,17 @@ namespace TrailBlog.Api.Controllers
             var result = await _postService.DeleteSavedPostAsync(userId, id);
 
             return Ok(result);
-        } 
+        }
+
+        [HttpDelete("recent-viewed-posts")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<OperationResultDto>> DeleteAllRecentViewPosts()
+        {
+            var userId = this.GetRequiredUserId();
+            var result = await _postService.DeleteAllRecentViewedPostAsync(userId);
+
+            return Ok(result);
+        }
     }
 }

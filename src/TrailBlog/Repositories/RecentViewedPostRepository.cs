@@ -39,5 +39,12 @@ namespace TrailBlog.Api.Repositories
                 .ExecuteDeleteAsync();
 
         }
+
+        public async Task<int> DeleteAllRecentViewsAsync(Expression<Func<RecentViewedPost, bool>> predicate)
+        {
+            return await _dbSet
+                .Where(predicate)
+                .ExecuteDeleteAsync();
+        }
     }
 }

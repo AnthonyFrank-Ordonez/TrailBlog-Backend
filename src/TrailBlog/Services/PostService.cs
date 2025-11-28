@@ -426,7 +426,23 @@ namespace TrailBlog.Api.Services
 
             return OperationResult.Success("Post unsaved successfully");
         }
-        
+
+        public async Task<OperationResultDto> DeleteAllRecentViewedPostAsync(Guid userId)
+        {
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of {userId}");
+
+            var deletedCount = await _recentViewedPostRepository
+                .DeleteAllRecentViewsAsync(rvp => rvp.UserId == userId);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return OperationResult.Success($"Successfully deleted, {deletedCount} recent viewed posts");
+        }
+
+
         public async Task<PostResponseDto> TogglePostReactionAsync(Guid userId, Guid postId, AddReactionDto reaction)
         {
             var post = await _postRepository.GetPostDetailByIdAsync(postId, isReadOnly: false);

@@ -15,7 +15,8 @@ namespace TrailBlog.Api.Services
         Task<PostResponseDto> TogglePostReactionAsync(Guid userId, Guid postId, AddReactionDto reaction);
         Task<OperationResultDto> UpdatePostAsync(Guid id, Guid userId, UpdatePostDto post, bool isAdmin = false);
         Task<OperationResultDto> DeletePostAsync(Guid id, Guid userId, bool isAdmin = false);
-        Task<OperationResultDto> DeleteSavedPostAsync(Guid userId, Guid postId); 
+        Task<OperationResultDto> DeleteSavedPostAsync(Guid userId, Guid postId);
+        Task<OperationResultDto> DeleteAllRecentViewedPostAsync(Guid userid);
 
     }
 }
