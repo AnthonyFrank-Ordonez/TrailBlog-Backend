@@ -71,6 +71,7 @@ namespace TrailBlog.Api.Services
                 CommentedAt = newComment.CommentedAt,
                 LastUpdatedAt = newComment.LastUpdatedAt,
                 IsDeleted = newComment.IsDeleted,
+                IsOwner = true,
             };
 
         }
