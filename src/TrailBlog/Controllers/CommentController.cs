@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
+using TrailBlog.Api.Extensions;
 using TrailBlog.Api.Models;
 using TrailBlog.Api.Services;
 
@@ -30,7 +31,7 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<CommentResponseDto>> AddComment(CommentDto comment)
         {
-            var userId = GetCurrentUserId();
+            var userId = this.GetRequiredUserId();
             var newComment = await _commentService.AddCommentAsync(userId, comment);
 
             return Ok(newComment);
@@ -41,7 +42,7 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<CommentResponseDto>> EditComment(Guid id, UpdateCommentDto comment)
         {
-            var userId = GetCurrentUserId();
+            var userId = this.GetRequiredUserId();
             var updateComment = await _commentService.EditCommentAsync(id, userId, comment);
 
             return Ok(updateComment);
@@ -52,7 +53,7 @@ namespace TrailBlog.Api.Controllers
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> InitialDeleteComment(Guid id)
         {
-            var userId = GetCurrentUserId();
+            var userId = this.GetRequiredUserId();
             var isAdmin = User.IsInRole("Admin");
             var result = await _commentService.InitialDeleteCommentAsync(id, userId, isAdmin);
 
@@ -60,19 +61,13 @@ namespace TrailBlog.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "User,Admin")]
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> DeletePost(Guid id)
         {
+            var isAdmin = User.IsInRole("Admin");
             var result = await _commentService.DeletePostAsync(id);
             return Ok(result);
-        }
-
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.TryParse(userIdString, out var userId) ? userId : Guid.Empty;
         }
     }
 }

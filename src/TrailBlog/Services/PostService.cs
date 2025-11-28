@@ -244,8 +244,8 @@ namespace TrailBlog.Api.Services
                     .Select(c => new CommentResponseDto
                     {
                         Id = c.Id,
-                        Content = c.Content,
-                        Username = c.User.Username,
+                        Content = c.IsDeleted ? "[This comment has been deleted]" : c.Content,
+                        Username = c.IsDeleted ? "Unknown" : c.User.Username,
                         CommentedAt = c.CommentedAt,
                         LastUpdatedAt = c.LastUpdatedAt,
                         IsDeleted = c.IsDeleted,

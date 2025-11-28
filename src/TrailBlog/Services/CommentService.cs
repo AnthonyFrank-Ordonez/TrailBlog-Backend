@@ -122,7 +122,7 @@ namespace TrailBlog.Api.Services
                 throw new NotFoundException($"Comment with the id of {commentId} not found");
 
             if (existingComment.UserId != userId && !isAdmin)
-                throw new UnauthorizedException("You are unauthorize to edit this comment");
+                throw new UnauthorizedException("You are unauthorize to delete this comment");
 
             existingComment.IsDeleted = true;
 
@@ -136,12 +136,15 @@ namespace TrailBlog.Api.Services
 
         }
 
-        public async Task<OperationResultDto> DeletePostAsync(Guid commentId)
+        public async Task<OperationResultDto> DeletePostAsync(Guid commentId, bool isAdmin)
         {
             var existingComment = await _commentRepository.GetByIdAsync(commentId);
 
             if (existingComment is null)
                 throw new NotFoundException($"Comment not found with the id {commentId}");
+
+            if (!isAdmin)
+                throw new UnauthorizedException("You are unauthorized to completely delete this comment");
 
             await _commentRepository.DeleteAsync(existingComment);
 

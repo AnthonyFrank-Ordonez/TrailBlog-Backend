@@ -8,6 +8,6 @@ namespace TrailBlog.Api.Services
         Task<CommentResponseDto> AddCommentAsync(Guid userId, CommentDto comment);
         Task<CommentResponseDto> EditCommentAsync(Guid commentId, Guid userId, UpdateCommentDto comment);
         Task<OperationResultDto> InitialDeleteCommentAsync(Guid commentId, Guid userId, bool isAdmin = false);
-        Task<OperationResultDto> DeletePostAsync(Guid commentId);
+        Task<OperationResultDto> DeletePostAsync(Guid commentId, bool isAdmin = false);
     }
 }
