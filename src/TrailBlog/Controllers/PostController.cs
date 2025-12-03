@@ -36,6 +36,17 @@ namespace TrailBlog.Api.Controllers
             return Ok(posts);
         }
 
+        [HttpGet("explore")]
+        [AllowAnonymous]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetExplorePosts([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? sessionId = null)
+        {
+            var userId = this.GetCurrentUserId();
+            var posts = await _postService.GetExploredPostsPagedAsync(userId, page, pageSize, sessionId);
+
+            return Ok(posts);
+        } 
+
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]

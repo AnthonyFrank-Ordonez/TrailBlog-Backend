@@ -14,6 +14,7 @@ namespace TrailBlog.Api.Services
         IPostRepository postRepository, 
         IUserRepository userRepository, 
         ICommunityRepository communityRepository,
+        IUserCommunityRepository userCommunityRepository,
         IReactionRepository reactionRepository,
         IRecentViewedPostRepository recentViewedPostRepository,
         ISavedPostRepository savedPostRepository,
@@ -24,6 +25,7 @@ namespace TrailBlog.Api.Services
         private readonly IPostRepository _postRepository = postRepository;
         private readonly IUserRepository _userrepository = userRepository;
         private readonly ICommunityRepository _communityRepository = communityRepository;
+        private readonly IUserCommunityRepository _userCommunityRepository = userCommunityRepository;
         private readonly IReactionRepository _reactionRepository = reactionRepository;
         private readonly IRecentViewedPostRepository _recentViewedPostRepository = recentViewedPostRepository;
         private readonly ISavedPostRepository _savedPostRepository = savedPostRepository;
@@ -108,6 +110,72 @@ namespace TrailBlog.Api.Services
                 },
                 orderBy: p => (p.Reactions.Count * 2) + (p.Comments.Count * 3),
                 descending: true);
+
+            return result;
+        }
+
+        public async Task<PagedResultDto<PostResponseDto>> GetExploredPostsPagedAsync(Guid? userId, int page, int pageSize, string? sessionId = null)
+        {
+            IEnumerable<Guid> userCommunityIds = [];
+
+            if (userId.HasValue)
+            {
+                userCommunityIds = await _userCommunityRepository
+                    .GetUserCommunitiesAsync(userId.Value)
+                    .Select(uc => uc.CommunityId)
+                    .ToListAsync();
+
+            }
+
+            var exploredPostQuery = _postRepository.GetPostsDetails()
+                .Where(p => !userCommunityIds.Contains(p.CommunityId));
+
+            var result = await exploredPostQuery.ToRandomPagedAsync(
+                _cache,
+                page,
+                pageSize,
+                sessionId,
+                p => new PostResponseDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Author = p.Author,
+                    Slug = p.Slug,
+                    CreatedAt = p.CreatedAt,
+                    CommunityName = p.Community.Name,
+                    CommunityId = p.CommunityId,
+                    IsOwner = userId.HasValue && p.UserId == userId.Value,
+                    isSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
+                    TotalComment = p.Comments.Count(c => !c.IsDeleted),
+                    TotalReactions = p.Reactions.Count,
+                    Reactions = p.Reactions
+                        .GroupBy(r => r.ReactionId)
+                        .Select(g => new PostReactionSummaryDto
+                        {
+                            ReactionId = g.Key,
+                            Count = g.Count()
+                        })
+                        .ToList(),
+                    UserReactionsIds = p.Reactions
+                        .Where(r => r.UserId == userId)
+                        .Select(r => r.ReactionId)
+                        .ToList()
+                },
+                _httpContextAccessor
+            );
+
+            if (result.TotalCount == 0 && userId.HasValue && userCommunityIds.Any())
+            {
+                // PLAN: If no explored posts are found, fallback to popular posts or non-joined communities
+
+                result.Metadata = new Dictionary<string, object>
+                {
+                    ["message"] = "You've explored all available posts. There is nothing more to show",
+                    ["code"] = "N0_EXPL0RED_POSTS",
+                    ["allCommunitiesJoined"] = true,
+                };
+            }
 
             return result;
         }
