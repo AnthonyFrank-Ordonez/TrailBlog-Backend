@@ -249,6 +249,7 @@ namespace TrailBlog.Api.Services
             {
                 Id = createdCommunity.Id,
                 CommunityName = createdCommunity.Name,
+                Description = createdCommunity.Description ?? null,
                 Owner = user?.Username ?? "Unknown",
                 Posts = createdCommunity.Posts.Select(p => new PostResponseDto
                 {
