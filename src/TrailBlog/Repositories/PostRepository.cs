@@ -12,6 +12,7 @@ namespace TrailBlog.Api.Repositories
         {
 
             var query = _dbSet
+                .Where(p => p.Status == PostStatus.Published)
                 .Include(p => p.Community)
                 .Include(p => p.Reactions)
                 .Include(p => p.SavedPosts)

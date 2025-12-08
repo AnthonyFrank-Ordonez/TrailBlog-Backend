@@ -75,10 +75,15 @@ namespace TrailBlog.Api.Data
                 entity.HasIndex(e => e.UserId);
                 entity.HasIndex(e => e.CreatedAt);
                 entity.HasIndex(e => e.UpdatedAt);
+                entity.HasIndex(e => e.Status);
                 entity.HasIndex(e => new { e.UserId, e.CreatedAt });
                 entity.HasIndex(e => new { e.CommunityId, e.CreatedAt });
+                entity.HasIndex(e => new { e.UserId, e.Status });
+                entity.HasIndex(e => new { e.Status, e.CreatedAt });
+
 
                 entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
+                entity.Property(e => e.Status).HasDefaultValue(PostStatus.Published);
 
                 entity.HasOne(e => e.User)
                     .WithMany(e => e.Posts)

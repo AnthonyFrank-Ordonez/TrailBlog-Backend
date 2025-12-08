@@ -373,7 +373,8 @@ namespace TrailBlog.Api.Services
                 UpdatedAt = DateTime.UtcNow,
                 Slug = post.Title.ToLower().Replace(" ", "-"),
                 UserId = user.Id,
-                CommunityId = community.Id
+                CommunityId = community.Id,
+                Status = PostStatus.Published,
             };
 
             var createdPost = await _postRepository.AddAsync(newPost);

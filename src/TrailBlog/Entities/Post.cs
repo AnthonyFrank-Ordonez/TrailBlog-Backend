@@ -11,6 +11,7 @@ namespace TrailBlog.Api.Entities
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public string Author { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
+        public PostStatus Status { get; set; } = PostStatus.Published;
 
         public Guid UserId { get; set; }
         public User User { get; set; } = null!;
