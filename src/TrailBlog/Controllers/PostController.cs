@@ -123,6 +123,17 @@ namespace TrailBlog.Api.Controllers
             return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
         }
 
+        [HttpPost("drafts")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PostResponseDto>> CreateDraftPost(PostDto post)
+        {
+            var userId = this.GetRequiredUserId();
+            var createdPost = await _postService.CreateDraftAsync(post, userId);
+
+            return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
+        }
+
         [HttpPost("{id}/reaction")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
