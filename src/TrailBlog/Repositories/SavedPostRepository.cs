@@ -19,7 +19,8 @@ namespace TrailBlog.Api.Repositories
                 .Include(sp => sp.Post)
                     .ThenInclude(p => p.Comments)
                         .ThenInclude(c => c.User)
-                .Include(sp => sp.User);
+                .Include(sp => sp.User)
+                .Where(sp => sp.Post.Status == PostStatus.Published);
 
             return readOnly ? query.AsNoTracking() : query;
         }

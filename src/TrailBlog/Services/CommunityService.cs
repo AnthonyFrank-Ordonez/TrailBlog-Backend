@@ -91,7 +91,7 @@ namespace TrailBlog.Api.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     IsOwner = userId.HasValue && p.UserId == userId,
-                    isSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
+                    IsSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
                     CreatedAt = p.CreatedAt,
                     TotalComment = p.Comments.Count(c => !c.IsDeleted),
                     Reactions = p.Reactions

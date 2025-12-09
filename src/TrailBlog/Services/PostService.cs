@@ -53,7 +53,7 @@ namespace TrailBlog.Api.Services
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = userId.HasValue && p.UserId == userId.Value,
-                    isSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
+                    IsSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
                     TotalComment = p.Comments.Count(c => !c.IsDeleted),
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
@@ -92,7 +92,7 @@ namespace TrailBlog.Api.Services
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = userId.HasValue && p.UserId == userId.Value,
-                    isSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
+                    IsSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
                     TotalComment = p.Comments.Count(c => !c.IsDeleted),
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
@@ -146,7 +146,7 @@ namespace TrailBlog.Api.Services
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = userId.HasValue && p.UserId == userId.Value,
-                    isSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
+                    IsSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
                     TotalComment = p.Comments.Count(c => !c.IsDeleted),
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
@@ -225,6 +225,50 @@ namespace TrailBlog.Api.Services
             return result;
         }
 
+        public async Task<PagedResultDto<PostResponseDto>> GetUserDraftsPagedAsync(Guid userId, int page, int pageSize)
+        {
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of {userId}");
+
+            var result = await _postRepository.GetPostUserDrafts(userId)
+                .ToPagedAsync(
+                page,
+                pageSize,
+                selector: p => new PostResponseDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Author = p.Author,
+                    Slug = p.Slug,
+                    CreatedAt = p.CreatedAt,
+                    CommunityName = p.Community.Name,
+                    CommunityId = p.CommunityId,
+                    IsOwner = p.UserId == userId,
+                    TotalComment = 0,
+                    TotalReactions = 0,
+                    Reactions = p.Reactions
+                        .GroupBy(r => r.ReactionId)
+                        .Select(g => new PostReactionSummaryDto
+                        {
+                            ReactionId = g.Key,
+                            Count = g.Count()
+                        })
+                        .ToList(),
+                    UserReactionsIds = p.Reactions
+                        .Where(r => r.UserId == userId)
+                        .Select(r => r.ReactionId)
+                        .ToList()
+                },
+                orderBy: p => p.UpdatedAt,
+                descending: true);
+
+            return result;
+
+        }
+
         public async Task<PostResponseDto?> GetPostAsync(Guid id, Guid userId)
         {
             var post = await _postRepository.GetPostDetailByIdAsync(id);
@@ -292,7 +336,7 @@ namespace TrailBlog.Api.Services
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
                 IsOwner = userId.HasValue && post.UserId == userId.Value,
-                isSaved = userId.HasValue && post.SavedPosts.Any(sp => sp.UserId == userId.Value),
+                IsSaved = userId.HasValue && post.SavedPosts.Any(sp => sp.UserId == userId.Value),
                 TotalComment = post.Comments.Count(c => !c.IsDeleted),
                 TotalReactions = post.Reactions.Count,
                 Reactions = post.Reactions
@@ -391,7 +435,54 @@ namespace TrailBlog.Api.Services
                 CommunityId = createdPost.CommunityId,
                 CommunityName = community.Name,
                 IsOwner = true,
-                isSaved = false,
+                IsSaved = false,
+                TotalComment = 0,
+                TotalReactions = 0,
+                Reactions = new List<PostReactionSummaryDto>(),
+                UserReactionsIds = new List<int>()
+            };
+        }
+
+        public async Task<PostResponseDto> CreateDraftAsync(PostDto post, Guid userId)
+        {
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of {userId}");
+
+            var community = await _communityRepository.GetByIdAsync(post.CommunityId);
+
+            if (community is null)
+                throw new NotFoundException($"Community not found with the id of {post.CommunityId}");
+
+            var newDraft = new Post
+            {
+                Title = post.Title,
+                Content = post.Content,
+                Author = user.Username,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Slug = post.Title.ToLower().Replace(" ", "-"),
+                UserId = user.Id,
+                CommunityId = community.Id,
+                Status = PostStatus.Draft,
+            };
+
+            var createdDraft = await _postRepository.AddAsync(newDraft);
+            await _unitOfWork.SaveChangesAsync();
+
+            return new PostResponseDto
+            {
+                Id = createdDraft.Id,
+                Title = createdDraft.Title,
+                Content = createdDraft.Content,
+                Author = createdDraft.Author,
+                Slug = createdDraft.Slug,
+                CreatedAt = createdDraft.CreatedAt,
+                CommunityId = createdDraft.CommunityId,
+                CommunityName = community.Name,
+                IsOwner = true,
+                IsSaved = false,
                 TotalComment = 0,
                 TotalReactions = 0,
                 Reactions = new List<PostReactionSummaryDto>(),
@@ -453,6 +544,31 @@ namespace TrailBlog.Api.Services
             return OperationResult.Success("Post updated successfully");
         }
 
+        public async Task<PostResponseDto> UpdateDraftAsync(Guid draftId, Guid userId)
+        {
+            var draft = await _postRepository.GetByIdAsync(draftId);
+
+            if (draft is null)
+                throw new NotFoundException($"No drafts found with the id of {draftId}");
+
+            if (draft.UserId != userId)
+                throw new UnauthorizedException("You are not authorized to publish this draft.");
+
+            if (draft.Status != PostStatus.Draft)
+                throw new ApiException("The specified post is not a draft.");
+
+            draft.Status = PostStatus.Published;
+            draft.UpdatedAt = DateTime.UtcNow;
+
+            var publishedPost = await _postRepository.UpdateAsync(draft.Id, draft);
+            await _unitOfWork.SaveChangesAsync();
+
+            if (publishedPost is null)
+                throw new ApiException("An error occurred. Draft failed to publish");
+
+            return CreatePostResponse(publishedPost, userId, showComments: false);
+        }
+
         public async Task<OperationResultDto> DeletePostAsync(Guid id, Guid userId, bool isAdmin)
         {
             var post = await _postRepository.GetByIdAsync(id);
@@ -509,6 +625,22 @@ namespace TrailBlog.Api.Services
             await _unitOfWork.SaveChangesAsync();
 
             return OperationResult.Success($"Successfully deleted, {deletedCount} recent viewed posts");
+        }
+
+        public async Task<OperationResultDto> DeleteDraftAsync(Guid draftId, Guid userId, bool isAdmin)
+        {
+            var draft = await _postRepository.GetByIdAsync(draftId);
+
+            if (draft is null)
+                throw new NotFoundException($"No drafts found with the id of {draftId}");
+
+            if (draft.UserId != userId && !isAdmin) 
+                throw new UnauthorizedException("You are not authorized to delete this draft.");
+
+            await _postRepository.DeleteAsync(draft);
+            await _unitOfWork.SaveChangesAsync();
+
+            return OperationResult.Success("Draft deleted successfully");
         }
 
 
@@ -626,7 +758,7 @@ namespace TrailBlog.Api.Services
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
                 IsOwner = post.UserId == userId,
-                isSaved = isSavedOveride ?? post.SavedPosts.Any(sp => sp.UserId == userId),
+                IsSaved = isSavedOveride ?? post.SavedPosts.Any(sp => sp.UserId == userId),
                 TotalComment = post.Comments.Count(c => !c.IsDeleted),
                 TotalReactions = post.Reactions.Count,
                 Reactions = post.Reactions

@@ -14,7 +14,8 @@ namespace TrailBlog.Api.Repositories
             var query = _dbSet
                 .Include(rvp => rvp.Post)
                     .ThenInclude(p => p.Community)
-                .Include(rvp => rvp.User);
+                .Include(rvp => rvp.User)
+                .Where(rvp => rvp.Post.Status == PostStatus.Published);
 
             return isReadOnly ? query.AsNoTracking() : query;
         }

@@ -8,11 +8,12 @@ namespace TrailBlog.Api.Repositories
     {
         public PostRepository(ApplicationDbContext context) : base(context) { }
 
-        public IQueryable<Post> GetPostsDetails(bool readOnly = true)
+        public IQueryable<Post> GetPostsDetails(bool readOnly = true, PostStatus? statusFilter = null)
         {
+            var status = statusFilter ?? PostStatus.Published;
 
             var query = _dbSet
-                .Where(p => p.Status == PostStatus.Published)
+                .Where(p => p.Status == status)
                 .Include(p => p.Community)
                 .Include(p => p.Reactions)
                 .Include(p => p.SavedPosts)
@@ -20,6 +21,12 @@ namespace TrailBlog.Api.Repositories
                     .ThenInclude(c => c.User);
 
             return readOnly ? query.AsNoTracking() : query;
+        }
+
+        public IQueryable<Post> GetPostUserDrafts(Guid userId, bool isReadOnly = true)
+        {
+            return GetPostsDetails(readOnly: isReadOnly, statusFilter: PostStatus.Draft)
+                .Where(p => p.UserId == userId);
         }
 
         public async Task<Post?> GetPostDetailByIdAsync(Guid id, bool isReadOnly = true)

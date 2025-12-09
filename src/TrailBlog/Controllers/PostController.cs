@@ -45,7 +45,17 @@ namespace TrailBlog.Api.Controllers
             var posts = await _postService.GetExploredPostsPagedAsync(userId, page, pageSize, sessionId);
 
             return Ok(posts);
-        } 
+        }
+
+        [HttpGet("drafts")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetDraftPostsPaged([FromQuery] int page, [FromQuery] int pageSize)
+        {
+            var userId = this.GetRequiredUserId();
+            var posts = await _postService.GetUserDraftsPagedAsync(userId, page, pageSize);
+            return Ok(posts);
+        }
 
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,User")]
@@ -135,6 +145,17 @@ namespace TrailBlog.Api.Controllers
             return Ok(result);
         }
 
+        [HttpPatch("drafts/{id}/publish")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<OperationResultDto>> PublishDraftPost(Guid id)
+        {
+            var userId = this.GetRequiredUserId();
+            var result = await _postService.UpdateDraftAsync(id, userId);
+
+            return Ok(result);
+        }
+
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
@@ -165,6 +186,18 @@ namespace TrailBlog.Api.Controllers
         {
             var userId = this.GetRequiredUserId();
             var result = await _postService.DeleteAllRecentViewedPostAsync(userId);
+
+            return Ok(result);
+        }
+
+        [HttpDelete("drafts/{id}")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<OperationResultDto>> DeleteDraftPost(Guid id)
+        {
+            var userId = this.GetRequiredUserId();
+            var isAdmin = User.IsInRole("Admin");
+            var result = await _postService.DeleteDraftAsync(id, userId, isAdmin);
 
             return Ok(result);
         }
