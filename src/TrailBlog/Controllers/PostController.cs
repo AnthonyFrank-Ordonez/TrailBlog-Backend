@@ -57,6 +57,17 @@ namespace TrailBlog.Api.Controllers
             return Ok(posts);
         }
 
+        [HttpGet("archived")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetArchivedPostsPaged([FromQuery] int page, [FromQuery] int pageSize)
+        {
+            var userId = this.GetRequiredUserId();
+            var posts = await _postService.GetUserArchivePostsAsync(userId, page, pageSize);
+
+            return Ok(posts);
+        }
+
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
@@ -155,6 +166,18 @@ namespace TrailBlog.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpPatch("{id}/archive")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<OperationResultDto>> ArchivePost(Guid id)
+        {
+            var userId = this.GetRequiredUserId();
+            var result = await _postService.ArchivePostAsync(id, userId);
+
+            return Ok(result);
+        }
+
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin,User")]

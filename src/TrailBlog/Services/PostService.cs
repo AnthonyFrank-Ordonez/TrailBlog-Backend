@@ -204,6 +204,7 @@ namespace TrailBlog.Api.Services
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = p.UserId == userId,
+                    IsSaved = true,
                     TotalComment = p.Comments.Count(c => !c.IsDeleted),
                     TotalReactions = p.Reactions.Count,
                     Reactions = p.Reactions
@@ -232,7 +233,7 @@ namespace TrailBlog.Api.Services
             if (user is null)
                 throw new NotFoundException($"User not found with the id of {userId}");
 
-            var result = await _postRepository.GetPostUserDrafts(userId)
+            var result = await _postRepository.GetUserPostDraftsAsync(userId)
                 .ToPagedAsync(
                 page,
                 pageSize,
@@ -267,6 +268,50 @@ namespace TrailBlog.Api.Services
 
             return result;
 
+        }
+
+        public async Task<PagedResultDto<PostResponseDto>> GetUserArchivePostsAsync(Guid userId, int page, int pageSize)
+        {
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of {userId}");
+
+            var result = await _postRepository.GetUserArchivePostsAsync(userId)
+                .ToPagedAsync(
+                page,
+                pageSize,
+                selector: p => new PostResponseDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Author = p.Author,
+                    Slug = p.Slug,
+                    CreatedAt = p.CreatedAt,
+                    CommunityName = p.Community.Name,
+                    CommunityId = p.CommunityId,
+                    IsOwner = p.UserId == userId,
+                    IsSaved = p.SavedPosts.Any(sp => sp.UserId == userId),
+                    TotalComment = p.Comments.Count(c => !c.IsDeleted),
+                    TotalReactions = p.Reactions.Count,
+                    Reactions = p.Reactions
+                        .GroupBy(r => r.ReactionId)
+                        .Select(g => new PostReactionSummaryDto
+                        {
+                            ReactionId = g.Key,
+                            Count = g.Count()
+                        })
+                        .ToList(),
+                    UserReactionsIds = p.Reactions
+                        .Where(r => r.UserId == userId)
+                        .Select(r => r.ReactionId)
+                        .ToList()
+                },
+                orderBy: p => (p.Reactions.Count * 2) + (p.Comments.Count * 3),
+                descending: true);
+
+            return result;
         }
 
         public async Task<PostResponseDto?> GetPostAsync(Guid id, Guid userId)
@@ -569,6 +614,28 @@ namespace TrailBlog.Api.Services
             return CreatePostResponse(publishedPost, userId, showComments: false);
         }
 
+        public async Task<OperationResultDto> ArchivePostAsync(Guid postId, Guid userId)
+        {
+            var post = await _postRepository.GetByIdAsync(postId);
+
+            if (post is null)
+                throw new NotFoundException($"No posts found with the id of {postId}");
+
+            if (post.UserId != userId)
+                throw new UnauthorizedAccessException("You are not authorized to archive this post.");
+
+            post.Status = PostStatus.Archived;
+            post.UpdatedAt = DateTime.UtcNow;
+
+            var acrhivedPost = await _postRepository.UpdateAsync(post.Id, post);
+            await _unitOfWork.SaveChangesAsync();
+
+            if (acrhivedPost is null)
+                throw new ApiException("An error occurred. Post failed to archive");
+
+            return OperationResult.Success("Post archived successfully");
+        }
+
         public async Task<OperationResultDto> DeletePostAsync(Guid id, Guid userId, bool isAdmin)
         {
             var post = await _postRepository.GetByIdAsync(id);
@@ -643,7 +710,6 @@ namespace TrailBlog.Api.Services
             return OperationResult.Success("Draft deleted successfully");
         }
 
-
         public async Task<PostResponseDto> TogglePostReactionAsync(Guid userId, Guid postId, AddReactionDto reaction)
         {
             var post = await _postRepository.GetPostDetailByIdAsync(postId, isReadOnly: false);
@@ -675,6 +741,7 @@ namespace TrailBlog.Api.Services
 
             return CreatePostResponse(post, userId, showComments: true);
         }
+
 
         private async Task TrackPostViewAsync(Guid userId, Guid postId)
         {

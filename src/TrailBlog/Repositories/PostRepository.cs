@@ -23,9 +23,15 @@ namespace TrailBlog.Api.Repositories
             return readOnly ? query.AsNoTracking() : query;
         }
 
-        public IQueryable<Post> GetPostUserDrafts(Guid userId, bool isReadOnly = true)
+        public IQueryable<Post> GetUserPostDraftsAsync(Guid userId, bool isReadOnly = true)
         {
             return GetPostsDetails(readOnly: isReadOnly, statusFilter: PostStatus.Draft)
+                .Where(p => p.UserId == userId);
+        }
+
+        public IQueryable<Post> GetUserArchivePostsAsync(Guid userId, bool isReadOnly = true)
+        {
+            return GetPostsDetails(readOnly: isReadOnly, statusFilter: PostStatus.Archived)
                 .Where(p => p.UserId == userId);
         }
 

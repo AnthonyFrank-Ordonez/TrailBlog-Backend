@@ -9,6 +9,7 @@ namespace TrailBlog.Api.Services
         Task<PagedResultDto<PostResponseDto>> GetExploredPostsPagedAsync(Guid? userId, int page = 1, int pageSize = 10, string? sessionId = null);
         Task<PagedResultDto<PostResponseDto>> GetSavedPostsPagedAsync(Guid userId, int page = 1, int pageSize = 10);
         Task<PagedResultDto<PostResponseDto>> GetUserDraftsPagedAsync(Guid userId, int page = 1, int pageSize = 10);
+        Task<PagedResultDto<PostResponseDto>> GetUserArchivePostsAsync(Guid userId, int page = 1, int pageSize = 10);
         Task<PostResponseDto?> GetPostAsync(Guid id, Guid userId);
         Task<PostResponseDto?> GetPostBySlugAsync(string slug, Guid? userId);
         Task<IEnumerable<RecentViewedPostDto>> GetRecentlyViewedPostAsync(Guid userId, int count = 10);
@@ -18,6 +19,7 @@ namespace TrailBlog.Api.Services
         Task<PostResponseDto> TogglePostReactionAsync(Guid userId, Guid postId, AddReactionDto reaction);
         Task<OperationResultDto> UpdatePostAsync(Guid id, Guid userId, UpdatePostDto post, bool isAdmin = false);
         Task<PostResponseDto> UpdateDraftAsync(Guid draftId, Guid userId);
+        Task<OperationResultDto> ArchivePostAsync(Guid id, Guid userId);
         Task<OperationResultDto> DeletePostAsync(Guid id, Guid userId, bool isAdmin = false);
         Task<OperationResultDto> DeleteSavedPostAsync(Guid userId, Guid postId);
         Task<OperationResultDto> DeleteAllRecentViewedPostAsync(Guid userid);
