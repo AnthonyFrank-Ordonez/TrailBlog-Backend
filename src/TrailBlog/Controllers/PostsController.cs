@@ -10,7 +10,7 @@ namespace TrailBlog.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PostController(IPostService postService) : ControllerBase
+    public class PostsController(IPostService postService) : ControllerBase
     {
 
         private readonly IPostService _postService = postService;

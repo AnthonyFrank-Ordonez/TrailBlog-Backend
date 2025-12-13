@@ -10,12 +10,12 @@ namespace TrailBlog.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CommunityController : ControllerBase
+    public class CommunitysController : ControllerBase
     {
 
         private readonly ICommunityService _communityService;
 
-        public CommunityController(ICommunityService communityService)
+        public CommunitysController(ICommunityService communityService)
         {
             _communityService = communityService;
         }

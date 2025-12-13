@@ -11,7 +11,7 @@ namespace TrailBlog.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CommentController(ICommentService commentService) : ControllerBase
+    public class CommentsController(ICommentService commentService) : ControllerBase
     {
         private readonly ICommentService _commentService = commentService;
 
