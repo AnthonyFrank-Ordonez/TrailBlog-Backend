@@ -144,7 +144,7 @@ namespace TrailBlog.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost("{id}/saved")]
+        [HttpPost("saved/{id}")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<PostResponseDto>> SavedPost(Guid id)
@@ -202,7 +202,7 @@ namespace TrailBlog.Api.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("{id}/saved")]
+        [HttpDelete("saved/{id}")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<OperationResultDto>> DeleteSavedPosts(Guid id)
