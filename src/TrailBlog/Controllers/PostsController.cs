@@ -170,7 +170,7 @@ namespace TrailBlog.Api.Controllers
         [HttpPatch("drafts/{id}/publish")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<OperationResultDto>> PublishDraftPost(Guid id)
+        public async Task<ActionResult<PostResponseDto>> PublishDraftPost(Guid id)
         {
             var userId = this.GetRequiredUserId();
             var result = await _postService.UpdateDraftAsync(id, userId);

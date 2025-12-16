@@ -35,9 +35,9 @@ namespace TrailBlog.Api.Repositories
                 .Where(p => p.UserId == userId);
         }
 
-        public async Task<Post?> GetPostDetailByIdAsync(Guid id, bool isReadOnly = true)
+        public async Task<Post?> GetPostDetailByIdAsync(Guid id, bool isReadOnly = true, PostStatus? filterType = null)
         {
-            return await GetPostsDetails(readOnly: isReadOnly)  
+            return await GetPostsDetails(readOnly: isReadOnly, statusFilter: filterType)  
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 

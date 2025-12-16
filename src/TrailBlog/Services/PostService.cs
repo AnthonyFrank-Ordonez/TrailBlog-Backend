@@ -19,6 +19,7 @@ namespace TrailBlog.Api.Services
         IRecentViewedPostRepository recentViewedPostRepository,
         ISavedPostRepository savedPostRepository,
         IUnitOfWork unitOfWork,
+        ILogger<PostService> logger,
         IMemoryCache cache,
         IHttpContextAccessor httpContextAccessor) : IPostService
     {
@@ -30,6 +31,7 @@ namespace TrailBlog.Api.Services
         private readonly IRecentViewedPostRepository _recentViewedPostRepository = recentViewedPostRepository;
         private readonly ISavedPostRepository _savedPostRepository = savedPostRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly ILogger<PostService> _logger = logger;
         private readonly IMemoryCache _cache = cache;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -590,8 +592,8 @@ namespace TrailBlog.Api.Services
         }
 
         public async Task<PostResponseDto> UpdateDraftAsync(Guid draftId, Guid userId)
-        {
-            var draft = await _postRepository.GetByIdAsync(draftId);
+        {  
+            var draft = await _postRepository.GetPostDetailByIdAsync(draftId, isReadOnly: false, filterType: PostStatus.Draft);
 
             if (draft is null)
                 throw new NotFoundException($"No drafts found with the id of {draftId}");
@@ -611,7 +613,7 @@ namespace TrailBlog.Api.Services
             if (publishedPost is null)
                 throw new ApiException("An error occurred. Draft failed to publish");
 
-            return CreatePostResponse(publishedPost, userId, showComments: false);
+            return CreatePostResponse(draft, userId, showComments: false);
         }
 
         public async Task<OperationResultDto> ArchivePostAsync(Guid postId, Guid userId)
