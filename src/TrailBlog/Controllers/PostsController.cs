@@ -57,7 +57,7 @@ namespace TrailBlog.Api.Controllers
             return Ok(posts);
         }
 
-        [HttpGet("archived")]
+        [HttpGet("archives")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetArchivedPostsPaged([FromQuery] int page, [FromQuery] int pageSize)
