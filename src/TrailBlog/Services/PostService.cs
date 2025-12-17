@@ -320,7 +320,7 @@ namespace TrailBlog.Api.Services
         {
             var post = await _postRepository.GetPostDetailByIdAsync(id);
 
-            if (post is null)
+            if (post is null || post.Status == PostStatus.Archived || post.Status == PostStatus.Draft)
                 throw new NotFoundException($"No posts found with the id of {id}");
 
             return new PostResponseDto
@@ -364,7 +364,7 @@ namespace TrailBlog.Api.Services
         {
             var post = await _postRepository.GetPostDetailBySlugAsync(slug);
 
-            if (post is null)
+            if (post is null || post.Status == PostStatus.Archived || post.Status == PostStatus.Draft)
                 throw new NotFoundException($"No posts found with the slug of {slug}");
 
             if (userId.HasValue)
