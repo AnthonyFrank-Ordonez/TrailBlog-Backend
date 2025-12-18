@@ -13,6 +13,7 @@ namespace TrailBlog.Api.Services
         Task<PostResponseDto?> GetPostAsync(Guid id, Guid userId);
         Task<PostResponseDto?> GetPostBySlugAsync(string slug, Guid? userId);
         Task<IEnumerable<RecentViewedPostDto>> GetRecentlyViewedPostAsync(Guid userId, int count = 10);
+        Task<IEnumerable<PostSearchResultDto>> SearchPostsAsync(string query);
         Task<PostResponseDto> CreatePostAsync(PostDto post, Guid userId);
         Task<PostResponseDto> CreateDraftAsync(PostDto post, Guid userId);
         Task<PostResponseDto> SavedPostAsync(Guid userId, Guid postId);

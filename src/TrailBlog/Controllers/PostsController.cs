@@ -10,10 +10,11 @@ namespace TrailBlog.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PostsController(IPostService postService) : ControllerBase
+    public class PostsController(IPostService postService, ISearchService searchService) : ControllerBase
     {
 
         private readonly IPostService _postService = postService;
+        public readonly ISearchService _searchService = searchService;
 
         [HttpGet]
         [AllowAnonymous]
@@ -110,6 +111,15 @@ namespace TrailBlog.Api.Controllers
             var savedPosts = await _postService.GetSavedPostsPagedAsync(userId, page, pageSize);
 
             return Ok(savedPosts);
+        }
+
+        [HttpGet("search")]
+        [AllowAnonymous]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<UnifiedSearchResultDto>> UnifiedSearch([FromQuery] string query)
+        {
+            var results = await _searchService.UnifiedSearchAsync(query);
+            return Ok(results);
         }
 
         [HttpPost]

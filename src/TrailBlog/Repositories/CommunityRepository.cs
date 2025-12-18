@@ -23,6 +23,21 @@ namespace TrailBlog.Api.Repositories
                 .OrderByDescending(cy => cy.CreatedAt);
         }
 
+        public IQueryable<Community> SearchCommunity(string searchQuery)
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery))
+                return Enumerable.Empty<Community>().AsQueryable();
+
+            searchQuery = searchQuery.Replace("[", "[[]")
+                         .Replace("%", "[%]")
+                         .Replace("_", "[_]");
+
+
+            return GetCommunityDetails()
+                .Where(cy => EF.Functions.ILike(cy.Name, $"%{searchQuery}%") ||
+                        (cy.Description != null && EF.Functions.ILike(cy.Description, $"%{searchQuery}%")));
+        }
+
         public async Task<Community?> GetCommunityDetailsAsync(Guid communityId)
         {
             return await GetCommunityDetails()

@@ -375,7 +375,7 @@ namespace TrailBlog.Api.Services
             return new PostResponseDto
             {
                 Id = post.Id,
-                Title = post.Title,
+                Title = post.Title, 
                 Content = post.Content,
                 Author = post.Author,
                 Slug = post.Slug,
@@ -440,6 +440,21 @@ namespace TrailBlog.Api.Services
                 .ToListAsync();
 
             return recentViewedPosts;
+        }
+
+        public async Task<IEnumerable<PostSearchResultDto>> SearchPostsAsync(string query)
+        {
+            var postResult = await _postRepository.SearchPosts(query)
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => new PostSearchResultDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Author = p.Author,
+                })
+                .ToListAsync();
+
+            return postResult;
         }
 
         public async Task<PostResponseDto> CreatePostAsync(PostDto post, Guid userId)

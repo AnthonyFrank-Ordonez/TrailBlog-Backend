@@ -6,7 +6,8 @@ namespace TrailBlog.Api.Repositories
     {
         IQueryable<Community> GetCommunityDetails(bool readOnly = true);
         IQueryable<Community> GetRecentCommunities();
-        Task<Community?> GetCommunityDetailsAsync(Guid communityId);
+        IQueryable<Community> SearchCommunity(string searchQuery);
         IQueryable<Community> SearchCommunities(string SearchQuery);
+        Task<Community?> GetCommunityDetailsAsync(Guid communityId);
     }
 }   

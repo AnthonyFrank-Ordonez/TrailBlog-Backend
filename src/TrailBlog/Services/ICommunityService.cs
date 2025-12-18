@@ -8,6 +8,7 @@ namespace TrailBlog.Api.Services
         Task<PagedResultDto<PostResponseDto>> GetCommunityPostsPagedAsync(Guid id, Guid? userId, int page = 1, int pageSize = 10);
         Task<IEnumerable<CommunityResponseDto>> GetUserCommunitiesAsync(Guid userId);
         Task<IEnumerable<UserResponseDto>> GetCommunityMembersAsync(Guid communityId);
+        Task<IEnumerable<CommunitySearchResultDto>> SearchCommunitysAsync(string query);
         Task<CommunityResponseDto> FavoriteCommunityAsync(Guid commuityId, Guid userId);
         Task<CommunityResponseDto> UnfavoriteCommunityAsync(Guid communityId, Guid userId);
         Task<CommunityResponseDto> CreateCommunityAsync(CommunityDto community, Guid userId);

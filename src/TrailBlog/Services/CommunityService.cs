@@ -158,6 +158,22 @@ namespace TrailBlog.Api.Services
 
         }
 
+        public async Task<IEnumerable<CommunitySearchResultDto>> SearchCommunitysAsync(string query)
+        {
+            var communitiesResult = await _communityRepository.SearchCommunity(query)
+                .OrderByDescending(c => c.CreatedAt)
+                .Select(cr => new CommunitySearchResultDto
+                {
+                    Id = cr.Id,
+                    CommunityName = cr.Name,
+                    Description = cr.Description ?? null,
+                })
+                .ToListAsync();
+
+
+            return communitiesResult;
+        }
+
         public async Task<CommunityResponseDto> FavoriteCommunityAsync(Guid communityId, Guid userId)
         {
             var userCommunity = await _userCommunityRepository.GetUserCommunityAsync(uc => uc.UserId == userId &&  uc.CommunityId == communityId, isReadOnly: false);

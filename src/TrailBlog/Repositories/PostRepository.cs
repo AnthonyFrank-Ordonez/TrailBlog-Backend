@@ -35,6 +35,21 @@ namespace TrailBlog.Api.Repositories
                 .Where(p => p.UserId == userId);
         }
 
+        public IQueryable<Post> SearchPosts(string searchQuery, bool isReadOnly = true)
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery))
+                return Enumerable.Empty<Post>().AsQueryable();
+
+            searchQuery = searchQuery.Replace("[", "[[]")
+                         .Replace("%", "[%]")
+                         .Replace("_", "[_]");
+
+
+            return GetPostsDetails(readOnly: isReadOnly, statusFilter: PostStatus.Published)
+                .Where(p => EF.Functions.ILike(p.Title, $"%{searchQuery}%") ||
+                            EF.Functions.ILike(p.Content, $"%{searchQuery}%"));
+        }
+
         public async Task<Post?> GetPostDetailByIdAsync(Guid id, bool isReadOnly = true, PostStatus? filterType = null)
         {
             return await GetPostsDetails(readOnly: isReadOnly, statusFilter: filterType)  
