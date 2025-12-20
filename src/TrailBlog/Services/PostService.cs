@@ -451,6 +451,7 @@ namespace TrailBlog.Api.Services
                     Id = p.Id,
                     Title = p.Title,
                     Author = p.Author,
+                    Type = "Post"
                 })
                 .ToListAsync();
 

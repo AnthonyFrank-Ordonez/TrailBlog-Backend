@@ -167,6 +167,7 @@ namespace TrailBlog.Api.Services
                     Id = cr.Id,
                     CommunityName = cr.Name,
                     Description = cr.Description ?? null,
+                    Type = "Community"
                 })
                 .ToListAsync();
 
