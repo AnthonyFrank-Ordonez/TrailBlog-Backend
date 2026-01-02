@@ -109,7 +109,7 @@ namespace TrailBlog.Api.Services
             var user = await ValidateRefreshTokenAsync(request.Id, request.RefreshToken);
 
             if (user is null)
-                throw new UnauthorizedException("Invalid or expired refresh token.");
+                throw new ApiException("Invalid refresh token or user does not exist.");
             
 
             var userWithRoles = await _userRepository.GetUserByIdWithRolesAsync(user.Id);
