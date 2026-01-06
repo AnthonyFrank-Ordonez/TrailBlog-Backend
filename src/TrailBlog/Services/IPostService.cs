@@ -7,6 +7,7 @@ namespace TrailBlog.Api.Services
         Task<PagedResultDto<PostResponseDto>> GetPostsPagedAsync(Guid? userId, int page = 1, int pageSize = 10, string? sessionId = null);
         Task<PagedResultDto<PostResponseDto>> GetPopularPostsPagedAsync(Guid? userId, int page = 1, int pageSize = 10);
         Task<PagedResultDto<PostResponseDto>> GetExploredPostsPagedAsync(Guid? userId, int page = 1, int pageSize = 10, string? sessionId = null);
+        Task<PagedResultDto<PostResponseDto>> GetUserPublishedPostsPagedAsync(Guid userId, int page = 1, int pageSize = 10);
         Task<PagedResultDto<PostResponseDto>> GetSavedPostsPagedAsync(Guid userId, int page = 1, int pageSize = 10);
         Task<PagedResultDto<PostResponseDto>> GetUserDraftsPagedAsync(Guid userId, int page = 1, int pageSize = 10);
         Task<PagedResultDto<PostResponseDto>> GetUserArchivePostsAsync(Guid userId, int page = 1, int pageSize = 10);

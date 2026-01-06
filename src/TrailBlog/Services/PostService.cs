@@ -228,6 +228,48 @@ namespace TrailBlog.Api.Services
             return result;
         }
 
+        public async Task<PagedResultDto<PostResponseDto>> GetUserPublishedPostsPagedAsync(Guid userId, int page, int pageSize)
+        {
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of {userId}");
+
+            var result = await _postRepository.GetUserPublishedPostsAsync(userId).ToPagedAsync(
+                page,
+                pageSize,
+                selector: p => new PostResponseDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Author = p.Author,
+                    Slug = p.Slug,
+                    CreatedAt = p.CreatedAt,
+                    CommunityName = p.Community.Name,
+                    CommunityId = p.CommunityId,
+                    IsOwner = true,
+                    TotalComment = p.Comments.Count(c => !c.IsDeleted),
+                    TotalReactions = p.Reactions.Count,
+                    Reactions = p.Reactions
+                        .GroupBy(r => r.ReactionId)
+                        .Select(g => new PostReactionSummaryDto
+                        {
+                            ReactionId = g.Key,
+                            Count = g.Count()
+                        })
+                        .ToList(),
+                    UserReactionsIds = p.Reactions
+                        .Where(r => r.UserId == userId)
+                        .Select(r => r.ReactionId)
+                        .ToList()
+                },
+                orderBy: p => p.UpdatedAt,
+                descending: true);
+
+            return result;
+        }
+
         public async Task<PagedResultDto<PostResponseDto>> GetUserDraftsPagedAsync(Guid userId, int page, int pageSize)
         {
             var user = await _userrepository.GetByIdAsync(userId);
