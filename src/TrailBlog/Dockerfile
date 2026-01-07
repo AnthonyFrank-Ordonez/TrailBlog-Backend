@@ -14,11 +14,9 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/TrailBlog/TrailBlog.Api.csproj", "src/TrailBlog/"]
 # RUN dotnet restore "./src/TrailBlog/TrailBlog.Api.csproj"
-RUN dotnet nuget locals all --clear && \
-    dotnet restore "src/TrailBlog/TrailBlog.Api.csproj" \
+RUN dotnet restore "src/TrailBlog/TrailBlog.Api.csproj" \
     --disable-parallel \
-    --runtime linux-x64 \
-    || dotnet restore "src/TrailBlog/TrailBlog.Api.csproj" --disable-parallel
+    --runtime linux-x64
 
 COPY . .
 WORKDIR "/src/src/TrailBlog"
