@@ -13,11 +13,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/TrailBlog/TrailBlog.Api.csproj", "src/TrailBlog/"]
-# RUN dotnet restore "./src/TrailBlog/TrailBlog.Api.csproj"
-RUN dotnet restore "src/TrailBlog/TrailBlog.Api.csproj" \
-    --disable-parallel \
-    --runtime linux-x64
-
+RUN dotnet restore "./src/TrailBlog/TrailBlog.Api.csproj"
 COPY . .
 WORKDIR "/src/src/TrailBlog"
 RUN dotnet build "./TrailBlog.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
