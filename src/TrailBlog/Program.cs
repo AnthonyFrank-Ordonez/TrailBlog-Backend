@@ -21,7 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 const string CorsPolicyName = "DefaultCorsPolicy";
 
-// Cors
+// Corss
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
     .Get<string[]>() ?? Array.Empty<string>();
