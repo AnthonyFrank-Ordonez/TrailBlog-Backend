@@ -1,11 +1,11 @@
-using HealthChecks.UI.Client;
+//using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+//using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+//using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Security.Claims;
@@ -153,16 +153,16 @@ builder.Services.AddRateLimiter(options =>
 });
 
 // Add HealthChecks
-builder.Services.AddHealthChecks()
-    .AddCheck("self", () => HealthCheckResult.Healthy("API is running"),
-        tags: new[] { "api", "live" })
-    .AddNpgSql(
-        connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
-        name: "postgresql-database",
-        failureStatus: HealthStatus.Unhealthy,
-        tags: new[] { "database", "ready" },
-        timeout: TimeSpan.FromSeconds(5)
-    );
+//builder.Services.AddHealthChecks()
+//    .AddCheck("self", () => HealthCheckResult.Healthy("API is running"),
+//        tags: new[] { "api", "live" })
+//    .AddNpgSql(
+//        connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
+//        name: "postgresql-database",
+//        failureStatus: HealthStatus.Unhealthy,
+//        tags: new[] { "database", "ready" },
+//        timeout: TimeSpan.FromSeconds(5)
+//    );
 
 
 builder.Services.AddAuthorization();
@@ -217,22 +217,22 @@ app.UseCors(CorsPolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHealthChecks("/health", new HealthCheckOptions
-{
-    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-});
+//app.MapHealthChecks("/health", new HealthCheckOptions
+//{
+//    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+//});
 
-app.MapHealthChecks("/health/ready", new HealthCheckOptions
-{
-    Predicate = check => check.Tags.Contains("ready"),
-    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-});
+//app.MapHealthChecks("/health/ready", new HealthCheckOptions
+//{
+//    Predicate = check => check.Tags.Contains("ready"),
+//    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+//});
 
-app.MapHealthChecks("/health/live", new HealthCheckOptions
-{
-    Predicate = check => check.Tags.Contains("live"),
-    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-});
+//app.MapHealthChecks("/health/live", new HealthCheckOptions
+//{
+//    Predicate = check => check.Tags.Contains("live"),
+//    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+//});
 
 app.UseRateLimiter();
 
