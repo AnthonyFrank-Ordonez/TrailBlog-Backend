@@ -48,7 +48,7 @@ namespace TrailBlog.Api.Controllers
             return Ok(posts);
         }
 
-        [HttpGet("user/published")]
+        [HttpGet("published")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetUserPublishedPosts([FromQuery] int page, [FromQuery] int pageSize)
