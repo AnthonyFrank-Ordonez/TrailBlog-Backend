@@ -21,7 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 const string CorsPolicyName = "DefaultCorsPolicy";
 
-// Corss
+// Cors
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
     .Get<string[]>() ?? Array.Empty<string>();
@@ -152,7 +152,7 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
-//Add HealthChecks
+//Add HealthCheck
 builder.Services.AddHealthChecks()
     .AddCheck("self", () => HealthCheckResult.Healthy("API is running"),
        tags: new[] { "api", "live" })
