@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
 using TrailBlog.Api.Entities;
@@ -314,7 +315,7 @@ namespace TrailBlog.Api.Services
 
         }
 
-        public async Task<PagedResultDto<PostResponseDto>> GetUserArchivePostsAsync(Guid userId, int page, int pageSize)
+        public async Task<PagedResultDto<PostResponseDto>> GetUserArchivePostsPagedAsync(Guid userId, int page, int pageSize)
         {
             var user = await _userrepository.GetByIdAsync(userId);
 
@@ -353,6 +354,53 @@ namespace TrailBlog.Api.Services
                         .ToList()
                 },
                 orderBy: p => (p.Reactions.Count * 2) + (p.Comments.Count * 3),
+                descending: true);
+
+            return result;
+        }
+
+        public async Task<PagedResultDto<PostResponseDto>> GetUserViewHistoryPagedAsync(Guid userId, int page, int pageSize)
+        {
+
+            var user = await _userrepository.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new NotFoundException($"User not found with the id of {userId}");
+
+            var result = await _recentViewedPostRepository.GetRecentViewedPosts(rvp => rvp.UserId == userId)
+                .OrderByDescending(rvp => rvp.ViewedAt)
+                .Select(rvp => rvp.Post)
+                .ToPagedAsync(
+                page,
+                pageSize,
+                selector: p => new PostResponseDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Author = p.Author,
+                    Slug = p.Slug,
+                    CreatedAt = p.CreatedAt,
+                    CommunityName = p.Community.Name,
+                    CommunityId = p.CommunityId,
+                    IsOwner = p.UserId == userId,
+                    IsSaved = p.SavedPosts.Any(sp => sp.UserId == userId),
+                    TotalComment = p.Comments.Count(c => !c.IsDeleted),
+                    TotalReactions = p.Reactions.Count,
+                    Reactions = p.Reactions
+                        .GroupBy(r => r.ReactionId)
+                        .Select(g => new PostReactionSummaryDto
+                        {
+                            ReactionId = g.Key,
+                            Count = g.Count()
+                        })
+                        .ToList(),
+                    UserReactionsIds = p.Reactions
+                        .Where(r => r.UserId == userId)
+                        .Select(r => r.ReactionId)
+                        .ToList()
+                },
+                orderBy: p => 0,
                 descending: true);
 
             return result;

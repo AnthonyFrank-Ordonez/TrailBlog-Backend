@@ -75,7 +75,18 @@ namespace TrailBlog.Api.Controllers
         public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetArchivedPostsPaged([FromQuery] int page, [FromQuery] int pageSize)
         {
             var userId = this.GetRequiredUserId();
-            var posts = await _postService.GetUserArchivePostsAsync(userId, page, pageSize);
+            var posts = await _postService.GetUserArchivePostsPagedAsync(userId, page, pageSize);
+
+            return Ok(posts);
+        }
+
+        [HttpGet("history")]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PagedResultDto<PostResponseDto>>> GetPostHistoryPaged([FromQuery] int page, [FromQuery] int pageSize)
+        {
+            var userId = this.GetRequiredUserId();
+            var posts = await _postService.GetUserViewHistoryPagedAsync(userId, page, pageSize);
 
             return Ok(posts);
         }

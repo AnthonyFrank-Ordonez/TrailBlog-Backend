@@ -91,10 +91,16 @@ namespace TrailBlog.Api.Extensions
             if (pageSize < 1) pageSize = 10;
             if (pageSize > 100) pageSize = 100;
 
+            var orderedQuery = query;
 
-            var orderedQuery = descending 
-                ? query.OrderByDescending(orderBy) 
-                : query.OrderBy(orderBy);
+            var isConstantOrder = orderBy.Body is ConstantExpression;
+
+            if (!isConstantOrder)
+            {
+                orderedQuery = descending
+                    ? orderedQuery.OrderByDescending(orderBy)
+                    : orderedQuery.OrderBy(orderBy);
+            }
 
             var pagedQuery = orderedQuery
                 .Skip((page - 1) * pageSize)
