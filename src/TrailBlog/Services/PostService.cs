@@ -673,7 +673,7 @@ namespace TrailBlog.Api.Services
                 await _unitOfWork.SaveChangesAsync();
             }
 
-            return CreatePostResponse(post, userId, isSavedOveride: true);
+            return CreatePostResponse(post, userId, isSavedOveride: true, showComments: true);
         }
 
         public async Task<OperationResultDto> UpdatePostAsync(Guid id, Guid userId, UpdatePostDto post, bool isAdmin)
