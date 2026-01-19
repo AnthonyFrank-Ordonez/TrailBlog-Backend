@@ -445,6 +445,8 @@ namespace TrailBlog.Api.Services
                     CommentedAt = c.CommentedAt,
                     LastUpdatedAt = c.LastUpdatedAt,
                     IsDeleted = c.IsDeleted,
+                    IsOwner = c.UserId == userId,
+                    PostSlug = post.Slug,
                 })
                 .ToList()
             };
@@ -499,6 +501,7 @@ namespace TrailBlog.Api.Services
                         LastUpdatedAt = c.LastUpdatedAt,
                         IsDeleted = c.IsDeleted,
                         IsOwner = userId.HasValue && c.UserId == userId.Value,
+                        PostSlug = post.Slug,
                     })
                .ToList()
             };
@@ -959,6 +962,7 @@ namespace TrailBlog.Api.Services
                         LastUpdatedAt = c.LastUpdatedAt,
                         IsDeleted = c.IsDeleted,
                         IsOwner = c.UserId == userId,
+                        PostSlug = post.Slug,
                     })
                    .ToList() : null
             };

@@ -15,13 +15,24 @@ namespace TrailBlog.Api.Controllers
     {
         private readonly ICommentService _commentService = commentService;
 
+        [HttpGet]
+        [Authorize(Roles = "Admin,User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PagedResultDto<CommentResponseDto>>> GetUserComments([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var userId = this.GetRequiredUserId();
+            var userComments = await _commentService.GetUserCommentsAsync(userId, page, pageSize);
+
+            return Ok(userComments);
+        }
+
 
         [HttpGet("deleted")]
         [Authorize(Roles = "Admin")]
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<IEnumerable<CommentResponseDto>>> GetDeletedComments()
         {
-            var deletedComments = await _commentService.GetDeletedComments();
+            var deletedComments = await _commentService.GetDeletedCommentsAsync();
 
             return Ok(deletedComments);
         }

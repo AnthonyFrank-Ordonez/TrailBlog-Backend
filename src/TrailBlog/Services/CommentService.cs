@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TrailBlog.Api.Entities;
 using TrailBlog.Api.Exceptions;
+using TrailBlog.Api.Extensions;
 using TrailBlog.Api.Helpers;
 using TrailBlog.Api.Models;
 using TrailBlog.Api.Repositories;
@@ -18,15 +19,37 @@ namespace TrailBlog.Api.Services
         private readonly IUserRepository _userRepository = userRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<IEnumerable<CommentResponseDto>> GetDeletedComments()
+        public async Task<PagedResultDto<CommentResponseDto>> GetUserCommentsAsync(Guid userId, int page, int pageSize)
+        {
+            var result = await _commentRepository
+                .GetCommentsAsync(c => c.UserId == userId)
+                .ToPagedAsync(
+                page,
+                pageSize,
+                selector: c => new CommentResponseDto
+                {
+                    Id = c.Id,
+                    Content = c.Content,    
+                    Username = c.User.Username,
+                    LastUpdatedAt = c.LastUpdatedAt,
+                    CommentedAt = c.CommentedAt,
+                    IsDeleted = c.IsDeleted,
+                    PostSlug = c.Post.Slug,
+                },
+                orderBy: c => c.CommentedAt,
+                descending: true);
+
+            return result;
+
+        }
+
+        public async Task<IEnumerable<CommentResponseDto>> GetDeletedCommentsAsync()
         {
             var deletedComments = await _commentRepository
-                .GetDeletedComments()
+                .GetDeletedCommentsAsync()
                 .Select(dc => new CommentResponseDto
                 {
                     Id = dc.Id,
-                    UserId = dc.User.Id,
-                    PostId = dc.Post.Id,
                     Content = dc.Content,
                     Username = dc.User.Username,
                     LastUpdatedAt = dc.LastUpdatedAt,
@@ -64,21 +87,21 @@ namespace TrailBlog.Api.Services
             return new CommentResponseDto
             {
                 Id = newComment.Id,
-                UserId = user.Id,
-                PostId = post.Id,
                 Username = user.Username,
                 Content = newComment.Content,
                 CommentedAt = newComment.CommentedAt,
                 LastUpdatedAt = newComment.LastUpdatedAt,
+                PostId = post.Id,
                 IsDeleted = newComment.IsDeleted,
                 IsOwner = true,
+                PostSlug = post.Slug,
             };
 
         }
 
         public async Task<CommentResponseDto> EditCommentAsync(Guid commentId, Guid userId, UpdateCommentDto comment)
         {
-            var existingComment = await _commentRepository.GetByIdAsync(commentId);
+            var existingComment = await _commentRepository.GetExistingCommentAsync(commentId, userId);
             var user = await _userRepository.GetByIdAsync(userId);  
 
             if (user is null)
@@ -101,12 +124,14 @@ namespace TrailBlog.Api.Services
             return new CommentResponseDto
             {
                 Id = updatedComment.Id,
-                UserId = user.Id,
                 Content = updatedComment.Content,
                 Username = updatedComment.User.Username,
                 CommentedAt = updatedComment.CommentedAt,
                 LastUpdatedAt = updatedComment.LastUpdatedAt,
                 IsDeleted = updatedComment.IsDeleted,
+                PostId = updatedComment.PostId,
+                IsOwner = true,
+                PostSlug = existingComment.Post.Slug,
             };
 
         }

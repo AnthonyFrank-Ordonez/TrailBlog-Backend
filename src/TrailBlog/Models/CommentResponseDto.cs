@@ -16,6 +16,10 @@ namespace TrailBlog.Api.Models
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public Guid PostId { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public string PostSlug { get; set; } = string.Empty;
+
         public bool IsOwner { get; set; }
     }   
 }
