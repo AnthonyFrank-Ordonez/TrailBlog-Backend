@@ -21,6 +21,7 @@ namespace TrailBlog.Api.Repositories
         public IQueryable<Comment> GetCommentsAsync(Expression<Func<Comment, bool>> predicate, bool readOnly = true)
         {
             var query = GetCommentsDetailsAsync(readOnly)
+                .Where(c => !c.IsDeleted)
                 .Where(predicate);
             
             return query;
