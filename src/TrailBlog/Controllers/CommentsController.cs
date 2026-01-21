@@ -15,7 +15,7 @@ namespace TrailBlog.Api.Controllers
     {
         private readonly ICommentService _commentService = commentService;
 
-        [HttpGet]
+        [HttpGet("user")]
         [Authorize(Roles = "Admin,User")]
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<PagedResultDto<CommentResponseDto>>> GetUserComments([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
