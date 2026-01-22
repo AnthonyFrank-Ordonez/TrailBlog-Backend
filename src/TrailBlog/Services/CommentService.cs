@@ -34,6 +34,7 @@ namespace TrailBlog.Api.Services
                     LastUpdatedAt = c.LastUpdatedAt,
                     CommentedAt = c.CommentedAt,
                     IsDeleted = c.IsDeleted,
+                    IsOwner = c.UserId == userId,
                     PostSlug = c.Post.Slug,
                 },
                 orderBy: c => c.CommentedAt,
