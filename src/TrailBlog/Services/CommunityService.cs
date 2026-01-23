@@ -329,8 +329,6 @@ namespace TrailBlog.Api.Services
 
         public async Task<IEnumerable<CommunityResponseDto>> SearchCommunitiesAsync(string query)
         {
-            if (string.IsNullOrWhiteSpace(query))
-                throw new ApplicationException("An error occured. search query cannot be empty");
 
             var communitiesResult = await _communityRepository.SearchCommunities(query)
                 .OrderByDescending(c => c.CreatedAt)
