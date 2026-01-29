@@ -454,7 +454,8 @@ namespace TrailBlog.Api.Services
 
         public async Task<PostResponseDto?> GetPostBySlugAsync(string slug, Guid? userId)
         {
-            var post = await _postRepository.GetPostDetailBySlugAsync(slug);
+            var decodedSlug = Uri.UnescapeDataString(slug);
+            var post = await _postRepository.GetPostDetailBySlugAsync(decodedSlug);
 
             if (post is null || post.Status == PostStatus.Archived || post.Status == PostStatus.Draft)
                 throw new NotFoundException($"No posts found with the slug of {slug}");

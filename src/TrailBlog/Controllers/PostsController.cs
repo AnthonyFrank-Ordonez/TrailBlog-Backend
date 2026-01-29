@@ -107,8 +107,7 @@ namespace TrailBlog.Api.Controllers
         public async Task<ActionResult<PostResponseDto>> GetPostBySlug(string slug)
         {
             var userId = this.GetCurrentUserId();
-            var decodedSlug = Uri.UnescapeDataString(slug);
-            var post = await _postService.GetPostBySlugAsync(decodedSlug, userId);
+            var post = await _postService.GetPostBySlugAsync(slug, userId);
 
             return Ok(post);
 
