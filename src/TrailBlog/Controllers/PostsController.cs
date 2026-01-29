@@ -101,13 +101,14 @@ namespace TrailBlog.Api.Controllers
             return Ok(post);
         }
 
-        [HttpGet("slug/{slug}")]
+        [HttpGet("slug/{*slug}")]
         [AllowAnonymous]
         [EnableRateLimiting("per-user")]
         public async Task<ActionResult<PostResponseDto>> GetPostBySlug(string slug)
         {
             var userId = this.GetCurrentUserId();
-            var post = await _postService.GetPostBySlugAsync(slug, userId);
+            var decodedSlug = Uri.UnescapeDataString(slug);
+            var post = await _postService.GetPostBySlugAsync(decodedSlug, userId);
 
             return Ok(post);
 
