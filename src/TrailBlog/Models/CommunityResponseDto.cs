@@ -13,6 +13,8 @@ namespace TrailBlog.Api.Models
 
         public string Owner { get; set; } = string.Empty;
 
+        public string CommunitySlug { get; set; } = string.Empty;
+
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<PostResponseDto>? Posts { get; set; }
 

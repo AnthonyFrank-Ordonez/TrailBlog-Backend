@@ -42,6 +42,8 @@ namespace TrailBlog.Api.Services
                     CommunityName = c.Name,
                     Owner = c.User.Username,
                     TotalPosts = c.Posts.Count,
+                    TotalMembers = c.UserCommunities.Count,
+                    CommunitySlug = c.CommunitySlug ?? c.Name.Replace(" ", "-").ToLower(),
                 })
                 .ToListAsync();
 
@@ -133,7 +135,9 @@ namespace TrailBlog.Api.Services
                     CommunityName = uc.Community.Name,
                     Description = uc.Community.Description ?? null,
                     Owner = uc.Community.User.Username,
+                    CommunitySlug = uc.Community.CommunitySlug ?? uc.Community.Name.Replace(" ", "-").ToLower(),
                     IsFavorite = uc.IsFavorite
+
                 })
                 .ToListAsync();
 
@@ -235,6 +239,7 @@ namespace TrailBlog.Api.Services
                 Name = community.Name,
                 Description = community.Description ?? "",
                 UserId = user.Id,
+                CommunitySlug = community.Name.Replace(" ", "-").ToLower(),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             };
@@ -268,6 +273,7 @@ namespace TrailBlog.Api.Services
                 CommunityName = createdCommunity.Name,
                 Description = createdCommunity.Description ?? null,
                 Owner = user?.Username ?? "Unknown",
+                CommunitySlug = createdCommunity.CommunitySlug,
                 Posts = createdCommunity.Posts.Select(p => new PostResponseDto
                 {
                     Id = p.Id,
@@ -379,6 +385,7 @@ namespace TrailBlog.Api.Services
                 CommunityName = community.Name,
                 Description = community.Description ?? null,
                 Owner = community.User.Username,
+                CommunitySlug = community.CommunitySlug,
             };
         }
 

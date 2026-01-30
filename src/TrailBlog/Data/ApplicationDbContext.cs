@@ -97,6 +97,7 @@ namespace TrailBlog.Api.Data
                 entity.HasIndex(e => e.Name).IsUnique();
                 entity.HasIndex(e => e.CreatedAt);
                 entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.CommunitySlug);
                 entity.HasIndex(e => new { e.UserId, e.CreatedAt });
                 entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
                 entity.Property(e => e.Description).HasMaxLength(500);
