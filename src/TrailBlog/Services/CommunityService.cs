@@ -57,14 +57,14 @@ namespace TrailBlog.Api.Services
             };
         }
 
-        public async Task<PagedResultDto<PostResponseDto>> GetCommunityPostsPagedAsync(Guid id, Guid? userId, int page, int pageSize)
+        public async Task<PagedResultDto<PostResponseDto>> GetCommunityPostsPagedAsync(string slug, Guid userId, int page, int pageSize)
         {
             if (page <= 0) page = 1;
             if (pageSize <= 0) pageSize = 10;
             if (pageSize > 100) pageSize = 100;
 
             var community = await _communityRepository.GetCommunityDetails()
-                .Where(c => c.Id == id)
+                .Where(c => c.CommunitySlug == slug)
                 .Select(c => new CommunityResponseDto
                 {
                     Id = c.Id,
@@ -74,10 +74,10 @@ namespace TrailBlog.Api.Services
                 .FirstOrDefaultAsync();
 
             if (community is null)
-                throw new NotFoundException($"No community found with the id of {id}");
+                throw new NotFoundException($"No community found with the slug of {slug}");
 
             var query = _postRepository.GetPostsDetails()
-                .Where(p => p.CommunityId == id);
+                .Where(p => p.CommunityId == community.Id);
 
             var totalCount = await query.CountAsync();
 
@@ -92,8 +92,8 @@ namespace TrailBlog.Api.Services
                     Content = p.Content,
                     Author = p.Author,
                     Slug = p.Slug,
-                    IsOwner = userId.HasValue && p.UserId == userId,
-                    IsSaved = userId.HasValue && p.SavedPosts.Any(sp => sp.UserId == userId.Value),
+                    IsOwner = p.UserId == userId,
+                    IsSaved = p.SavedPosts.Any(sp => sp.UserId == userId),
                     CreatedAt = p.CreatedAt,
                     TotalComment = p.Comments.Count(c => !c.IsDeleted),
                     Reactions = p.Reactions

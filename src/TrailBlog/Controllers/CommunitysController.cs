@@ -30,13 +30,13 @@ namespace TrailBlog.Api.Controllers
             return Ok(communities);
         }
 
-        [HttpGet("{id}")]
-        [AllowAnonymous]
+        [HttpGet("{slug}")]
+        [Authorize(Roles = "Admin, User")]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<PagedResultDto<PostResponseDto>?>> GetCommunity(Guid id, [FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<ActionResult<PagedResultDto<PostResponseDto>?>> GetCommunity(string slug, [FromQuery] int page, [FromQuery] int pageSize)
         {
-            var userId = this.GetCurrentUserId();
-            var community = await _communityService.GetCommunityPostsPagedAsync(id, userId, page, pageSize);
+            var userId = this.GetRequiredUserId();
+            var community = await _communityService.GetCommunityPostsPagedAsync(slug, userId, page, pageSize);
 
             return Ok(community);
         }

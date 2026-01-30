@@ -5,7 +5,7 @@ namespace TrailBlog.Api.Services
     public interface ICommunityService
     {
         Task<PagedResultDto<CommunityResponseDto>> GetCommunitiesPagedAsync(int page = 1, int pageSize = 10);
-        Task<PagedResultDto<PostResponseDto>> GetCommunityPostsPagedAsync(Guid id, Guid? userId, int page = 1, int pageSize = 10);
+        Task<PagedResultDto<PostResponseDto>> GetCommunityPostsPagedAsync(string slug, Guid userId, int page = 1, int pageSize = 10);
         Task<IEnumerable<CommunityResponseDto>> GetUserCommunitiesAsync(Guid userId);
         Task<IEnumerable<UserResponseDto>> GetCommunityMembersAsync(Guid communityId);
         Task<IEnumerable<CommunitySearchResultDto>> SearchCommunitysAsync(string query);
