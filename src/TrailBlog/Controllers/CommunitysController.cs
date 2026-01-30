@@ -33,7 +33,7 @@ namespace TrailBlog.Api.Controllers
         [HttpGet("{id}")]
         [AllowAnonymous]
         [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<CommunityResponseDto?>> GetCommunity(Guid id, [FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<ActionResult<PagedResultDto<PostResponseDto>?>> GetCommunity(Guid id, [FromQuery] int page, [FromQuery] int pageSize)
         {
             var userId = this.GetCurrentUserId();
             var community = await _communityService.GetCommunityPostsPagedAsync(id, userId, page, pageSize);
