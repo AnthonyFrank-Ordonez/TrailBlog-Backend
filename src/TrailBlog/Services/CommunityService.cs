@@ -43,7 +43,7 @@ namespace TrailBlog.Api.Services
                     Owner = c.User.Username,
                     TotalPosts = c.Posts.Count,
                     TotalMembers = c.UserCommunities.Count,
-                    CommunitySlug = c.CommunitySlug ?? c.Name.Replace(" ", "-").ToLower(),
+                    CommunitySlug = GenerateSlugIfEmpty(c.CommunitySlug, c.Name),
                 })
                 .ToListAsync();
 
@@ -135,7 +135,7 @@ namespace TrailBlog.Api.Services
                     CommunityName = uc.Community.Name,
                     Description = uc.Community.Description ?? null,
                     Owner = uc.Community.User.Username,
-                    CommunitySlug = uc.Community.CommunitySlug ?? uc.Community.Name.Replace(" ", "-").ToLower(),
+                    CommunitySlug = GenerateSlugIfEmpty(uc.Community.CommunitySlug, uc.Community.Name),
                     IsFavorite = uc.IsFavorite
 
                 })
@@ -197,6 +197,7 @@ namespace TrailBlog.Api.Services
                 CommunityName = userCommunity.Community.Name,
                 Description = userCommunity.Community.Description,
                 Owner = userCommunity.User.Username,
+                CommunitySlug = GenerateSlugIfEmpty(userCommunity.Community.CommunitySlug, userCommunity.Community.Name),
                 IsFavorite = userCommunity.IsFavorite,
             };
         }
@@ -219,6 +220,7 @@ namespace TrailBlog.Api.Services
                 CommunityName = userCommunity.Community.Name,
                 Description = userCommunity.Community.Description,
                 Owner = userCommunity.User.Username,
+                CommunitySlug = GenerateSlugIfEmpty(userCommunity.Community.CommunitySlug, userCommunity.Community.Name),
                 IsFavorite = userCommunity.IsFavorite,
             };
         }
@@ -385,7 +387,7 @@ namespace TrailBlog.Api.Services
                 CommunityName = community.Name,
                 Description = community.Description ?? null,
                 Owner = community.User.Username,
-                CommunitySlug = community.CommunitySlug,
+                CommunitySlug = GenerateSlugIfEmpty(community.CommunitySlug, community.Name),
             };
         }
 
@@ -430,5 +432,10 @@ namespace TrailBlog.Api.Services
             }
 
         }
+
+        private static string GenerateSlugIfEmpty(string slug, string name) 
+            => string.IsNullOrWhiteSpace(slug) 
+                ? name.Replace(" ", "-").ToLower() 
+                : slug;
     }
 }
