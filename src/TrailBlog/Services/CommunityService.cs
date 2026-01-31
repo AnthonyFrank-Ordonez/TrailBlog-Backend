@@ -142,26 +142,29 @@ namespace TrailBlog.Api.Services
 
         public async Task<CommunityResponseDto> GetCommunityBySlugAsync(string slug, Guid userId)
         {
-            
+
             var community = await _communityRepository.GetCommunityDetails()
                 .Where(c => c.CommunitySlug == slug)
-                .Select(c => new CommunityResponseDto
-                {
-                    Id = c.Id,
-                    CommunityName = c.Name,
-                    Description = c.Description ?? null,
-                    Owner = c.User.Username,
-                    CommunitySlug = GenerateSlugIfEmpty(c.CommunitySlug, c.Name),
-                    TotalPosts = c.Posts.Count,
-                    TotalMembers = c.UserCommunities.Count,
-                    IsUserJoined = c.UserCommunities.Any(uc => uc.UserId == userId)
-                })
                 .FirstOrDefaultAsync();
 
             if (community is null)
                 throw new NotFoundException($"No community found with the slug of {slug}");
 
-            return community;
+            var isUserJoined = await _userCommunityRepository.ExistingMemberAsync(community.Id, userId) is not null;
+
+            var communityResponse = new CommunityResponseDto
+            {
+                Id = community.Id,
+                CommunityName = community.Name,
+                Description = community.Description ?? null,
+                Owner = community.User.Username,
+                CommunitySlug = GenerateSlugIfEmpty(community.CommunitySlug, community.Name),
+                TotalPosts = community.Posts.Count,
+                TotalMembers = community.UserCommunities.Count,
+                IsUserJoined = isUserJoined
+            };
+ 
+            return communityResponse;
         }
 
         public async Task<IEnumerable<UserResponseDto>> GetCommunityMembersAsync(Guid communityId)
