@@ -16,16 +16,22 @@ namespace TrailBlog.Api.Models
 
         public DateTime CreatedAt { get; set; }
 
+
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Username { get; set; }
 
-        public string CommunityName { get; set; } = string.Empty;
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public string? CommunityName { get; set; }
+
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public Guid CommunityId { get; set; }   
 
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<CommentResponseDto>? Comments { get; set; }
+
 
         public List<PostReactionSummaryDto> Reactions { get; set; } = new List<PostReactionSummaryDto>();
 
