@@ -76,8 +76,9 @@ namespace TrailBlog.Api.Services
             if (community is null)
                 throw new NotFoundException($"No community found with the slug of {slug}");
 
-            var query = _postRepository.GetPostsDetails()
-                .Where(p => p.CommunityId == community.Id);
+            var isUserJoined = await _userCommunityRepository.ExistingMemberAsync(community.Id, userId) is not null;
+
+            var query = _postRepository.GetPostsDetails();
 
             var totalCount = await query.CountAsync();
 
@@ -120,8 +121,8 @@ namespace TrailBlog.Api.Services
                 TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
                 Metadata = new Dictionary<string, object>
                 {
-                    ["communityId"] = community.Id,
-                    ["communityName"] = community.CommunityName
+                    ["communityName"] = community.CommunityName,
+                    ["isUserJoined"] = isUserJoined
                 }
             };
         }
