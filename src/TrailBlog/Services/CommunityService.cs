@@ -132,8 +132,8 @@ namespace TrailBlog.Api.Services
                     Description = uc.Community.Description ?? null,
                     Owner = uc.Community.User.Username,
                     CommunitySlug = GenerateSlugIfEmpty(uc.Community.CommunitySlug, uc.Community.Name),
-                    IsFavorite = uc.IsFavorite
-
+                    IsFavorite = uc.IsFavorite,
+                    IsUserJoined = true,
                 })
                 .ToListAsync();
 
@@ -296,6 +296,7 @@ namespace TrailBlog.Api.Services
                 Description = createdCommunity.Description ?? null,
                 Owner = user?.Username ?? "Unknown",
                 CommunitySlug = createdCommunity.CommunitySlug,
+                IsUserJoined = true,
                 Posts = createdCommunity.Posts.Select(p => new PostResponseDto
                 {
                     Id = p.Id,
@@ -408,6 +409,7 @@ namespace TrailBlog.Api.Services
                 Description = community.Description ?? null,
                 Owner = community.User.Username,
                 CommunitySlug = GenerateSlugIfEmpty(community.CommunitySlug, community.Name),
+                IsUserJoined = true,
             };
         }
 

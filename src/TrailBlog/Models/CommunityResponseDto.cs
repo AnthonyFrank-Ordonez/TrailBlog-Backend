@@ -20,7 +20,7 @@ namespace TrailBlog.Api.Models
 
         public bool IsFavorite { get; set; }
 
-        public bool? IsUserJoined { get; set; }
+        public bool IsUserJoined { get; set; }
 
         public int TotalPosts { get; set; }
 
