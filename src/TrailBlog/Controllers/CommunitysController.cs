@@ -30,17 +30,6 @@ namespace TrailBlog.Api.Controllers
             return Ok(communities);
         }
 
-        [HttpGet("{slug}")]
-        [Authorize(Roles = "Admin, User")]
-        [EnableRateLimiting("per-user")]
-        public async Task<ActionResult<PagedResultDto<PostResponseDto>?>> GetCommunity(string slug, [FromQuery] int page, [FromQuery] int pageSize)
-        {
-            var userId = this.GetRequiredUserId();
-            var community = await _communityService.GetCommunityPostsPagedAsync(slug, userId, page, pageSize);
-
-            return Ok(community);
-        }
-
         [HttpGet("user")]
         [Authorize(Roles = "Admin, User")]
         [EnableRateLimiting("per-user")]
@@ -50,6 +39,27 @@ namespace TrailBlog.Api.Controllers
             var userCommunities = await _communityService.GetUserCommunitiesAsync(userId);
 
             return Ok(userCommunities);
+        }
+
+        [HttpGet("{slug}/posts")]
+        [Authorize(Roles = "Admin, User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<PagedResultDto<PostResponseDto>?>> GetCommunityPosts(string slug, [FromQuery] int page, [FromQuery] int pageSize)
+        {
+            var userId = this.GetRequiredUserId();
+            var community = await _communityService.GetCommunityPostsPagedAsync(slug, userId, page, pageSize);
+
+            return Ok(community);
+        }
+
+        [HttpGet("{slug}/details")]
+        [Authorize(Roles = "Admin, User")]
+        [EnableRateLimiting("per-user")]
+        public async Task<ActionResult<CommunityResponseDto>> GetCommunityDetails(string slug)
+        {
+            var userId = this.GetRequiredUserId();
+            var community = await _communityService.GetCommunityBySlugAsync(slug, userId);
+            return Ok(community);
         }
 
         [HttpGet("{id}/members")]
@@ -80,7 +90,7 @@ namespace TrailBlog.Api.Controllers
             var userId = this.GetRequiredUserId();
             var createdCommunity = await _communityService.CreateCommunityAsync(community, userId);
 
-            return CreatedAtAction(nameof(GetCommunity), new { id = createdCommunity.Id }, createdCommunity);
+            return CreatedAtAction(nameof(GetCommunityDetails), new { slug = createdCommunity.CommunitySlug }, createdCommunity);
         }
 
         [HttpPost("{id}/favorite")]

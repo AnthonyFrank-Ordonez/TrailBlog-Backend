@@ -76,7 +76,7 @@ namespace TrailBlog.Api.Services
             if (community is null)
                 throw new NotFoundException($"No community found with the slug of {slug}");
 
-            var isUserJoined = await _userCommunityRepository.ExistingMemberAsync(community.Id, userId) is not null;
+            //var isUserJoined = await _userCommunityRepository.ExistingMemberAsync(community.Id, userId) is not null;
 
             var query = _postRepository.GetPostsDetails();
 
@@ -118,12 +118,7 @@ namespace TrailBlog.Api.Services
                 Page = page,
                 PageSize = pageSize,
                 TotalCount = totalCount,
-                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
-                Metadata = new Dictionary<string, object>
-                {
-                    ["communityName"] = community.CommunityName,
-                    ["isUserJoined"] = isUserJoined
-                }
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
             };
         }
 
@@ -143,6 +138,30 @@ namespace TrailBlog.Api.Services
                 .ToListAsync();
 
             return userCommunities;
+        }
+
+        public async Task<CommunityResponseDto> GetCommunityBySlugAsync(string slug, Guid userId)
+        {
+            
+            var community = await _communityRepository.GetCommunityDetails()
+                .Where(c => c.CommunitySlug == slug)
+                .Select(c => new CommunityResponseDto
+                {
+                    Id = c.Id,
+                    CommunityName = c.Name,
+                    Description = c.Description ?? null,
+                    Owner = c.User.Username,
+                    CommunitySlug = GenerateSlugIfEmpty(c.CommunitySlug, c.Name),
+                    TotalPosts = c.Posts.Count,
+                    TotalMembers = c.UserCommunities.Count,
+                    IsUserJoined = c.UserCommunities.Any(uc => uc.UserId == userId)
+                })
+                .FirstOrDefaultAsync();
+
+            if (community is null)
+                throw new NotFoundException($"No community found with the slug of {slug}");
+
+            return community;
         }
 
         public async Task<IEnumerable<UserResponseDto>> GetCommunityMembersAsync(Guid communityId)

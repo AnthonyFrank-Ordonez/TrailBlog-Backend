@@ -12,7 +12,9 @@ namespace TrailBlog.Api.Repositories
         {
             var query = _dbSet
                 .Include(cy => cy.User)
-                .Include(cy => cy.Posts);
+                .Include(cy => cy.Posts)
+                .Include(cy => cy.UserCommunities)
+                    .ThenInclude(uc => uc.User);
 
             return readOnly ? query.AsNoTracking() : query;
         }
