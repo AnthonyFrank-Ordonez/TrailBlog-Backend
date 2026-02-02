@@ -16,6 +16,8 @@ namespace TrailBlog.Api.Models
 
         public DateTime CreatedAt { get; set; }
 
+        public CommunityResponseDto Community { get; set; } = new CommunityResponseDto();
+
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Username { get; set; }
@@ -38,6 +40,7 @@ namespace TrailBlog.Api.Models
         public List<int> UserReactionsIds { get; set; } = new List<int>();
 
         public bool IsOwner { get; set; }
+
         public bool IsSaved { get; set; }
 
         public int TotalComment { get; set; }

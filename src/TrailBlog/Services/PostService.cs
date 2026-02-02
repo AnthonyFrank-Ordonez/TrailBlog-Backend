@@ -53,6 +53,17 @@ namespace TrailBlog.Api.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
+                    Community = new CommunityResponseDto
+                    {
+                        Id = p.Community.Id,
+                        CommunityName = p.Community.Name,
+                        Description = p.Community.Description,
+                        Owner = p.Community.User.Username,
+                        CommunitySlug = p.Community.CommunitySlug,
+                        TotalMembers = p.Community.UserCommunities.Count,
+                        TotalPosts = p.Community.Posts.Count,
+                        IsUserJoined = userId.HasValue && p.Community.UserCommunities.Any(uc => uc.UserId == userId.Value),
+                    },
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = userId.HasValue && p.UserId == userId.Value,
@@ -92,6 +103,17 @@ namespace TrailBlog.Api.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
+                    Community = new CommunityResponseDto
+                    {
+                        Id = p.Community.Id,
+                        CommunityName = p.Community.Name,
+                        Description = p.Community.Description,
+                        Owner = p.Community.User.Username,
+                        CommunitySlug = p.Community.CommunitySlug,
+                        TotalMembers = p.Community.UserCommunities.Count,
+                        TotalPosts = p.Community.Posts.Count,
+                        IsUserJoined = userId.HasValue && p.Community.UserCommunities.Any(uc => uc.UserId == userId.Value),
+                    },
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = userId.HasValue && p.UserId == userId.Value,
@@ -146,6 +168,17 @@ namespace TrailBlog.Api.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
+                    Community = new CommunityResponseDto
+                    {
+                        Id = p.Community.Id,
+                        CommunityName = p.Community.Name,
+                        Description = p.Community.Description,
+                        Owner = p.Community.User.Username,
+                        CommunitySlug = p.Community.CommunitySlug,
+                        TotalMembers = p.Community.UserCommunities.Count,
+                        TotalPosts = p.Community.Posts.Count,
+                        IsUserJoined = userId.HasValue && p.Community.UserCommunities.Any(uc => uc.UserId == userId.Value),
+                    },
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = userId.HasValue && p.UserId == userId.Value,
@@ -204,6 +237,17 @@ namespace TrailBlog.Api.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
+                    Community = new CommunityResponseDto
+                    {
+                        Id = p.Community.Id,
+                        CommunityName = p.Community.Name,
+                        Description = p.Community.Description,
+                        Owner = p.Community.User.Username,
+                        CommunitySlug = p.Community.CommunitySlug,
+                        TotalMembers = p.Community.UserCommunities.Count,
+                        TotalPosts = p.Community.Posts.Count,
+                        IsUserJoined = p.Community.UserCommunities.Any(uc => uc.UserId == userId)
+                    },
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = p.UserId == userId,
@@ -247,6 +291,17 @@ namespace TrailBlog.Api.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
+                    Community = new CommunityResponseDto
+                    {
+                        Id = p.Community.Id,
+                        CommunityName = p.Community.Name,
+                        Description = p.Community.Description,
+                        Owner = p.Community.User.Username,
+                        CommunitySlug = p.Community.CommunitySlug,
+                        TotalMembers = p.Community.UserCommunities.Count,
+                        TotalPosts = p.Community.Posts.Count,
+                        IsUserJoined = p.Community.UserCommunities.Any(uc => uc.UserId == userId),
+                    },
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = true,
@@ -290,6 +345,18 @@ namespace TrailBlog.Api.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
+                    Community = new CommunityResponseDto
+                    {
+                        Id = p.Community.Id,
+                        CommunityName = p.Community.Name,
+                        Description = p.Community.Description,
+                        Owner = p.Community.User.Username,
+                        CommunitySlug = p.Community.CommunitySlug,
+                        TotalMembers = p.Community.UserCommunities.Count,
+                        TotalPosts = p.Community.Posts.Count,
+                        IsUserJoined = p.Community.UserCommunities.Any(uc => uc.UserId == userId)
+
+                    },
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = p.UserId == userId,
@@ -334,6 +401,17 @@ namespace TrailBlog.Api.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
+                    Community = new CommunityResponseDto
+                    {
+                        Id = p.Community.Id,
+                        CommunityName = p.Community.Name,
+                        Description = p.Community.Description,
+                        Owner = p.Community.User.Username,
+                        CommunitySlug = p.Community.CommunitySlug,
+                        TotalMembers = p.Community.UserCommunities.Count,
+                        TotalPosts = p.Community.Posts.Count,
+                        IsUserJoined = p.Community.UserCommunities.Any(uc => uc.UserId == userId),
+                    },
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = p.UserId == userId,
@@ -381,6 +459,17 @@ namespace TrailBlog.Api.Services
                     Author = p.Author,
                     Slug = p.Slug,
                     CreatedAt = p.CreatedAt,
+                    Community = new CommunityResponseDto
+                    {
+                        Id = p.Community.Id,
+                        CommunityName = p.Community.Name,
+                        Description = p.Community.Description,
+                        Owner = p.Community.User.Username,
+                        CommunitySlug = p.Community.CommunitySlug,
+                        TotalMembers = p.Community.UserCommunities.Count,
+                        TotalPosts = p.Community.Posts.Count,
+                        IsUserJoined = p.Community.UserCommunities.Any(uc => uc.UserId == userId),
+                    },
                     CommunityName = p.Community.Name,
                     CommunityId = p.CommunityId,
                     IsOwner = p.UserId == userId,
@@ -421,6 +510,17 @@ namespace TrailBlog.Api.Services
                 Author = post.Author,
                 Slug = post.Slug,
                 CreatedAt = post.CreatedAt,
+                Community = new CommunityResponseDto
+                {
+                    Id = post.Community.Id,
+                    CommunityName = post.Community.Name,
+                    Description = post.Community.Description,
+                    Owner = post.Community.User.Username,
+                    CommunitySlug = post.Community.CommunitySlug,
+                    TotalMembers = post.Community.UserCommunities.Count,
+                    TotalPosts = post.Community.Posts.Count,
+                    IsUserJoined = post.Community.UserCommunities.Any(uc => uc.UserId == userId),
+                },
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
                 IsOwner = post.UserId == userId,
@@ -473,6 +573,18 @@ namespace TrailBlog.Api.Services
                 Author = post.Author,
                 Slug = post.Slug,
                 CreatedAt = post.CreatedAt,
+                Community = new CommunityResponseDto
+                {
+                    Id = post.Community.Id,
+                    CommunityName = post.Community.Name,
+                    Description = post.Community.Description,
+                    Owner = post.Community.User.Username,
+                    CommunitySlug = post.Community.CommunitySlug,
+                    TotalMembers = post.Community.UserCommunities.Count,
+                    TotalPosts = post.Community.Posts.Count,
+                    IsUserJoined = userId.HasValue && post.Community.UserCommunities.Any(uc => uc.UserId == userId.Value),
+
+                },
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
                 IsOwner = userId.HasValue && post.UserId == userId.Value,
@@ -561,7 +673,7 @@ namespace TrailBlog.Api.Services
             if (user is null)
                 throw new NotFoundException($"User not found with the id of {userId}");
 
-            var community = await _communityRepository.GetByIdAsync(post.CommunityId);
+            var community = await _communityRepository.GetCommunityDetailsAsync(post.CommunityId);
 
             if (community is null)
                 throw new NotFoundException($"Community not found with the id of {post.CommunityId}");
@@ -582,6 +694,8 @@ namespace TrailBlog.Api.Services
             var createdPost = await _postRepository.AddAsync(newPost);
             await _unitOfWork.SaveChangesAsync();
 
+            var isUserJoined = await _userCommunityRepository.ExistingMemberAsync(userId, community.Id) is not null;
+
             return new PostResponseDto
             {
                 Id = createdPost.Id,
@@ -590,6 +704,17 @@ namespace TrailBlog.Api.Services
                 Author = createdPost.Author,
                 Slug = createdPost.Slug,
                 CreatedAt = createdPost.CreatedAt,
+                Community = new CommunityResponseDto
+                {
+                    Id = community.Id,
+                    CommunityName = community.Name,
+                    Description = community.Description,
+                    Owner = community.User.Username,
+                    CommunitySlug = community.CommunitySlug,
+                    TotalMembers = community.UserCommunities.Count,
+                    TotalPosts = community.Posts.Count,
+                    IsUserJoined = isUserJoined,
+                },
                 CommunityId = createdPost.CommunityId,
                 CommunityName = community.Name,
                 IsOwner = true,
@@ -629,6 +754,8 @@ namespace TrailBlog.Api.Services
             var createdDraft = await _postRepository.AddAsync(newDraft);
             await _unitOfWork.SaveChangesAsync();
 
+            var isUserJoined = await _userCommunityRepository.ExistingMemberAsync(userId, community.Id) is not null;
+
             return new PostResponseDto
             {
                 Id = createdDraft.Id,
@@ -637,6 +764,17 @@ namespace TrailBlog.Api.Services
                 Author = createdDraft.Author,
                 Slug = createdDraft.Slug,
                 CreatedAt = createdDraft.CreatedAt,
+                Community = new CommunityResponseDto
+                {
+                    Id = community.Id,
+                    CommunityName = community.Name,
+                    Description = community.Description,
+                    Owner = community.User.Username,
+                    CommunitySlug = community.CommunitySlug,
+                    TotalMembers = community.UserCommunities.Count,
+                    TotalPosts = community.Posts.Count,
+                    IsUserJoined = isUserJoined,
+                },
                 CommunityId = createdDraft.CommunityId,
                 CommunityName = community.Name,
                 IsOwner = true,
@@ -935,6 +1073,17 @@ namespace TrailBlog.Api.Services
                 Author = post.Author,
                 Slug = post.Slug,
                 CreatedAt = post.CreatedAt,
+                Community = new CommunityResponseDto
+                {
+                    Id = post.Community.Id,
+                    CommunityName = post.Community.Name,
+                    Description = post.Community.Description,
+                    Owner = post.Community.User.Username,
+                    CommunitySlug = post.Community.CommunitySlug,
+                    TotalMembers = post.Community.UserCommunities.Count,
+                    TotalPosts = post.Community.Posts.Count,
+                    IsUserJoined = post.Community.UserCommunities.Any(uc => uc.UserId == userId),
+                },
                 CommunityName = post.Community.Name,
                 CommunityId = post.CommunityId,
                 IsOwner = post.UserId == userId,

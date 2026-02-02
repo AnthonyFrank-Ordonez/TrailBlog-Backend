@@ -15,6 +15,9 @@ namespace TrailBlog.Api.Repositories
             var query = _dbSet
                 .Where(p => p.Status == status)
                 .Include(p => p.Community)
+                    .ThenInclude(c => c.UserCommunities)
+                .Include(p => p.Community)
+                    .ThenInclude(c => c.User)
                 .Include(p => p.Reactions)
                 .Include(p => p.SavedPosts)
                 .Include(p => p.Comments)

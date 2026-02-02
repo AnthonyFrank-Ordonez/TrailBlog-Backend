@@ -81,6 +81,8 @@ namespace TrailBlog.Api.Services
 
             var totalCount = await query.CountAsync();
 
+            var isUserJoined = await _userCommunityRepository.ExistingMemberAsync(community.Id, userId) is not null;
+
             var communityPosts = await query
                 .OrderByDescending(c => c.CreatedAt)
                 .Skip((page - 1) * pageSize)
@@ -95,6 +97,17 @@ namespace TrailBlog.Api.Services
                     IsOwner = p.UserId == userId,
                     IsSaved = p.SavedPosts.Any(sp => sp.UserId == userId),
                     CreatedAt = p.CreatedAt,
+                    Community = new CommunityResponseDto
+                    {
+                        Id = p.Community.Id,
+                        CommunityName = p.Community.Name,
+                        Description = p.Community.Description,
+                        Owner = p.Community.User.Username,
+                        CommunitySlug = p.Community.CommunitySlug,
+                        TotalMembers = p.Community.UserCommunities.Count,
+                        TotalPosts = p.Community.Posts.Count,
+                        IsUserJoined = isUserJoined,
+                    },
                     TotalComment = p.Comments.Count(c => !c.IsDeleted),
                     Reactions = p.Reactions
                         .GroupBy(r => r.ReactionId)
